@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://roznex-studio.rozhanbehrouzi79.chatgpt.site/sitemap.xml
