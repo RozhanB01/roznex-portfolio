@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://roznex-studio.rozhanbehrouzi79.chatgpt.site/sitemap.xml
+Sitemap: https://rozhanb01.github.io/roznex-portfolio/sitemap.xml
