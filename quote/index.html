@@ -33,8 +33,25 @@
     .shell{max-width:1240px;margin:auto;padding:0 var(--pad) 4rem}
     .topbar{height:5rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);margin-bottom:2.2rem}
     .brand{display:flex;align-items:center;gap:.9rem;text-decoration:none}
-    .brand strong{font:600 1.05rem Manrope;letter-spacing:.16em}
-    .brand-mark{display:grid;place-items:center;width:2.25rem;height:2.25rem;border-radius:.8rem;background:var(--ink);color:#fff;font:700 1rem Manrope}
+    .brand-logo{display:block;width:clamp(10.5rem,18vw,14rem);height:auto}
+    .invoice .brand-logo{width:12.5rem}
+    .pay-line{display:flex;align-items:center;gap:.45rem}
+    .pay-help{border:1px solid var(--line);background:#f7efe5;color:#6f5a42;border-radius:999px;padding:.32rem .62rem;font-size:.59rem;white-space:nowrap}
+    .pay-help:hover{border-color:var(--gold);color:var(--ink)}
+    .date-note{font-size:.57rem;color:#8a8177;margin-top:.1rem}
+    .payment-model{font-size:.65rem;color:#776d63;margin:.25rem 0 .85rem}
+    dialog.payment-dialog{width:min(42rem,calc(100% - 2rem));border:1px solid var(--line);border-radius:1.4rem;background:var(--paper);color:var(--ink);padding:0;box-shadow:0 30px 100px rgba(52,39,25,.22)}
+    dialog.payment-dialog::backdrop{background:rgba(24,22,19,.45);backdrop-filter:blur(5px)}
+    .payment-dialog-inner{padding:1.5rem}
+    .dialog-top{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;padding-bottom:1rem;border-bottom:1px solid var(--line)}
+    .dialog-top h2{margin:.25rem 0 0;font-size:1.45rem}
+    .dialog-close{width:2.2rem;height:2.2rem;border-radius:50%;border:1px solid var(--line);background:transparent;font-size:1.1rem}
+    .payment-options{display:grid;gap:.7rem;margin-top:1rem}
+    .payment-option{border:1px solid var(--line);border-radius:1rem;padding:1rem;background:#faf6f0}
+    .payment-option h3{margin:0 0 .45rem;font-size:.84rem}
+    .payment-option p{margin:0;color:#6d655d;font-size:.7rem;line-height:1.9}
+    .payment-option strong{color:var(--gold)}
+    .dialog-foot{font-size:.61rem;color:#81786f;line-height:1.9;margin:1rem 0 0}
     .back{display:flex;align-items:center;gap:.55rem;text-decoration:none;font-size:.72rem;color:#5f5a54}
     .back:hover{color:var(--ink)}
     .intro{display:grid;grid-template-columns:1.25fr .75fr;gap:2rem;align-items:end;margin:2rem 0 2.4rem}
@@ -131,7 +148,7 @@
   <div class="noise" aria-hidden="true"></div>
   <main class="shell">
     <header class="topbar">
-      <a class="brand" href="/"><span class="brand-mark">R</span><strong>ROZNEX</strong></a>
+      <a class="brand" href="/" aria-label="ROZNEX"><img class="brand-logo" src="../assets/roznex-logo.svg" alt="ROZNEX"></a>
       <a class="back" href="/">بازگشت به سایت <span>←</span></a>
     </header>
 
@@ -156,8 +173,8 @@
             <label class="field"><span>شماره موبایل *</span><input id="mobile" inputmode="tel" autocomplete="tel"></label>
             <label class="field"><span>ایمیل</span><input id="email" inputmode="email" autocomplete="email"></label>
             <label class="field"><span>عنوان پروژه *</span><input id="project"></label>
-            <label class="field"><span>تاریخ شروع پیشنهادی *</span><input id="date" type="date"></label>
-            <label class="field"><span>روش پرداخت</span>
+            <label class="field"><span>تاریخ شروع پیشنهادی *</span><input id="date" type="date"><small class="date-note">تاریخ در پیش‌فاکتور به‌صورت شمسی نمایش داده می‌شود.</small></label>
+            <label class="field"><span class="pay-line"><span>روش پرداخت</span><button class="pay-help" id="paymentHelpBtn" type="button">راهنمای پرداخت</button></span>
               <select id="pay"><option value="4">۴۰ / ۳۰ / ۲۰ / ۱۰</option><option value="2">۵۰ / ۵۰</option><option value="1">پرداخت کامل</option></select>
             </label>
             <label class="field"><span>بودجه تقریبی</span><input id="budget" inputmode="numeric"></label>
@@ -184,7 +201,7 @@
         <section class="card invoice hidden" id="invoice">
           <div class="invoice-header">
             <div>
-              <a class="brand" href="/"><span class="brand-mark">R</span><strong>ROZNEX</strong></a>
+              <a class="brand" href="/" aria-label="ROZNEX"><img class="brand-logo" src="../assets/roznex-logo.svg" alt="ROZNEX"></a>
               <h2>پیش‌فاکتور خدمات</h2>
               <p id="meta"></p>
             </div>
@@ -205,6 +222,7 @@
           <div class="invoice-total"><span>جمع کل</span><strong id="invTotal"></strong></div>
 
           <h3>برنامه پرداخت</h3>
+          <p class="payment-model" id="paymentModelLabel"></p>
           <div class="table-wrap">
             <table><thead><tr><th>مرحله</th><th>درصد</th><th>مبلغ</th><th>تاریخ</th></tr></thead><tbody id="payments"></tbody></table>
           </div>
@@ -226,6 +244,33 @@
     </div>
   </main>
 
+  <dialog class="payment-dialog" id="paymentHelp">
+    <div class="payment-dialog-inner">
+      <div class="dialog-top">
+        <div>
+          <span class="eyebrow">PAYMENT GUIDE</span>
+          <h2>توضیح مدل‌های پرداخت</h2>
+        </div>
+        <button class="dialog-close" id="paymentHelpClose" type="button" aria-label="بستن">×</button>
+      </div>
+      <div class="payment-options">
+        <article class="payment-option">
+          <h3>مدل ۴۰ / ۳۰ / ۲۰ / ۱۰</h3>
+          <p><strong>۴۰٪</strong> هنگام شروع پروژه، <strong>۳۰٪</strong> پس از تأیید طراحی UI/UX، <strong>۲۰٪</strong> هنگام تحویل نسخه آزمایشی و <strong>۱۰٪</strong> در زمان لانچ و تحویل نهایی پرداخت می‌شود. این مدل برای پروژه‌های چندمرحله‌ای طراحی شده است.</p>
+        </article>
+        <article class="payment-option">
+          <h3>مدل ۵۰ / ۵۰</h3>
+          <p><strong>۵۰٪</strong> هنگام شروع پروژه و <strong>۵۰٪</strong> هنگام تحویل نهایی پرداخت می‌شود. این مدل ساده‌تر است و برای پروژه‌هایی با Scope روشن و مراحل اجرایی کمتر کاربرد دارد.</p>
+        </article>
+        <article class="payment-option">
+          <h3>پرداخت کامل</h3>
+          <p><strong>۱۰۰٪ مبلغ</strong> پیش از شروع پروژه پرداخت می‌شود و برنامه اقساطی ندارد. زمان شروع و Scope نهایی همچنان پس از تأیید Roznex قطعی می‌شود.</p>
+        </article>
+      </div>
+      <p class="dialog-foot">برنامه زمانی اقساط داخل پیش‌فاکتور بر اساس تاریخ شروع پیشنهادی محاسبه می‌شود و همه تاریخ‌ها به تقویم شمسی نمایش داده می‌شوند.</p>
+    </div>
+  </dialog>
+
 <script>
 const S=[
   ['strategy','استراتژی و شناخت پروژه','Discovery، معماری پروژه و تعیین Scope',30000000],
@@ -245,7 +290,7 @@ const S=[
 const $=id=>document.getElementById(id);
 const fmt=n=>new Intl.NumberFormat('fa-IR').format(Math.round(n));
 const today=()=>new Date().toISOString().slice(0,10);
-const fd=s=>s?new Intl.DateTimeFormat('fa-IR').format(new Date(s+'T12:00:00')):'تعیین نشده';
+const fd=s=>s?new Intl.DateTimeFormat('fa-IR-u-ca-persian-nu-arabext',{year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(s+'T12:00:00')):'تعیین نشده';
 const add=(s,n)=>{if(!s)return'';const d=new Date(s+'T12:00:00');d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
 let sel=new Set();
 
@@ -323,7 +368,7 @@ function renderInvoice(data,save){
   const chosen=S.filter(x=>data.selected.includes(x[0]));
   const originalSel=sel;sel=new Set(data.selected);
   $('pay').value=data.pay;$('date').value=data.date;
-  $('meta').textContent='شماره '+data.id+' | تاریخ '+fd(data.created);
+  $('meta').textContent='شماره '+data.id+' | تاریخ صدور '+fd(data.created);
   $('invName').textContent=data.name;
   $('invCompany').textContent=data.company||'شخصی';
   $('invProject').textContent=data.project;
@@ -331,6 +376,8 @@ function renderInvoice(data,save){
   const rows=$('rows');rows.replaceChildren();
   chosen.forEach((x,i)=>{const tr=document.createElement('tr');[i+1,x[1],fmt(x[3])+' تومان'].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.append(td)});rows.append(tr)});
   $('invTotal').textContent=fmt(sum())+' تومان';
+  const modelText = data.pay==='1' ? 'مدل انتخابی: پرداخت کامل' : data.pay==='2' ? 'مدل انتخابی: ۵۰ / ۵۰' : 'مدل انتخابی: ۴۰ / ۳۰ / ۲۰ / ۱۰';
+  $('paymentModelLabel').textContent=modelText+' · تاریخ‌ها بر اساس تقویم هجری شمسی هستند.';
   const payments=$('payments');payments.replaceChildren();
   plan().forEach(p=>{const tr=document.createElement('tr');[p[0],p[1]+'٪',fmt(p[2])+' تومان',fd(p[3])].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.append(td)});payments.append(tr)});
   $('invoice').classList.remove('hidden');
@@ -354,6 +401,10 @@ $('date').addEventListener('change',update);
 $('issue').addEventListener('click',issue);
 $('reset').addEventListener('click',reset);
 $('printBtn').addEventListener('click',()=>window.print());
+const paymentHelp=$('paymentHelp');
+$('paymentHelpBtn').addEventListener('click',()=>paymentHelp.showModal());
+$('paymentHelpClose').addEventListener('click',()=>paymentHelp.close());
+paymentHelp.addEventListener('click',e=>{if(e.target===paymentHelp)paymentHelp.close()});
 renderServices();renderRecent();
 </script>
 </body>
