@@ -15,8 +15,13 @@ document.getElementById('year').textContent=new Date().getFullYear();
 let ticking=false;
 const updateScroll=()=>{
   header.classList.toggle('scrolled',scrollY>24);
+  const maxScroll=Math.max(document.documentElement.scrollHeight-innerHeight,1);
+  const scrollProgress=Math.min(Math.max(scrollY/maxScroll,0),1);
+  const heroProgress=Math.min(Math.max(scrollY/(innerHeight*.9),0),1);
+  body.style.setProperty('--scroll-progress',scrollProgress.toFixed(4));
+  body.style.setProperty('--hero-progress',heroProgress.toFixed(4));
   if(!reduceMotion&&innerWidth>760&&scrollY<innerHeight*1.2){
-    heroMedia.style.transform=`translate3d(0,${Math.min(scrollY*.075,70)}px,0) scale(1.015)`;
+    heroMedia.style.transform=`translate3d(0,${Math.min(scrollY*.09,78)}px,0) scale(${1.018+heroProgress*.032})`;
   }
   ticking=false;
 };
@@ -35,16 +40,18 @@ mobileNav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{
 
 lang.addEventListener('click',()=>{
   const fa=html.lang!=='fa';
+  body.classList.add('language-switching');
   html.lang=fa?'fa':'en';
   html.dir=fa?'rtl':'ltr';
   body.classList.toggle('fa',fa);
   document.querySelectorAll('[data-en]').forEach(el=>el.textContent=fa?el.dataset.fa:el.dataset.en);
   lang.innerHTML=fa?'<span class="selected">FA</span><i></i><span>EN</span>':'<span>FA</span><i></i><span class="selected">EN</span>';
+  setTimeout(()=>body.classList.remove('language-switching'),260);
 });
 
 const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{
   if(entry.isIntersecting){entry.target.classList.add('visible');observer.unobserve(entry.target)}
-}),{threshold:.1});
+}),{threshold:.12,rootMargin:'0px 0px -7%'});
 document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
 
 if(!reduceMotion&&finePointer){
