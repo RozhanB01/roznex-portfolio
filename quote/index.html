@@ -424,17 +424,42 @@
 
 <script>
 const ACCESS_HASH='2a412b952cd39aeeec3e9366c3be27ef9cb7f89e423947aeb4260f819493e916';
+const INVITE_PUBLIC_KEY={kty:'EC',crv:'P-256',x:'hbn-CqwF7e29Wh66s1e-8QD4NnjA5txguShZKXCPC4Q',y:'Uc12_ZofYzimA7PpoZu0fy7sTYzCDr5M0kjX0wx4Dgs',ext:true};
+const b64uToBytes=s=>Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')+'='.repeat((4-s.length%4)%4)),c=>c.charCodeAt(0));
+const b64uToText=s=>new TextDecoder().decode(b64uToBytes(s));
 async function sha256(v){
   const data=new TextEncoder().encode(v);
   const digest=await crypto.subtle.digest('SHA-256',data);
   return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('');
 }
-function unlockQuote(){
+function unlockQuote(invite=null){
   document.body.classList.remove('quote-locked');
   document.getElementById('accessGate')?.remove();
   sessionStorage.setItem('roznex_quote_access','1');
+  if(invite)window.__roznexInvite=invite;
 }
-if(sessionStorage.getItem('roznex_quote_access')==='1')unlockQuote();
+async function verifyInvite(token){
+  try{
+    const [payload64,sig64]=String(token||'').split('.');
+    if(!payload64||!sig64)return null;
+    const key=await crypto.subtle.importKey('jwk',INVITE_PUBLIC_KEY,{name:'ECDSA',namedCurve:'P-256'},false,['verify']);
+    const ok=await crypto.subtle.verify({name:'ECDSA',hash:'SHA-256'},key,b64uToBytes(sig64),new TextEncoder().encode(payload64));
+    if(!ok)return null;
+    const payload=JSON.parse(b64uToText(payload64));
+    if(!payload.exp||Date.now()>payload.exp)return null;
+    return payload;
+  }catch(e){return null}
+}
+(async()=>{
+  const token=new URLSearchParams(location.search).get('invite');
+  if(token){
+    const invite=await verifyInvite(token);
+    if(invite){unlockQuote(invite);return}
+    const error=document.getElementById('accessError');
+    if(error)error.textContent='این دعوت‌نامه معتبر نیست یا تاریخ آن منقضی شده است.';
+  }
+  if(sessionStorage.getItem('roznex_quote_access')==='1')unlockQuote();
+})();
 document.getElementById('accessForm')?.addEventListener('submit',async e=>{
   e.preventDefault();
   const code=document.getElementById('accessCode').value.trim().toUpperCase();
@@ -805,6 +830,22 @@ $('paymentHelpBtn').addEventListener('click',()=>paymentHelp.showModal());
 $('paymentHelpClose').addEventListener('click',()=>paymentHelp.close());
 paymentHelp.addEventListener('click',e=>{if(e.target===paymentHelp)paymentHelp.close()});
 renderRecent();
+setTimeout(()=>{
+  const inv=window.__roznexInvite;
+  if(!inv)return;
+  if(inv.type&&CATALOG[inv.type]){
+    projectType=inv.type;
+    const cfg=CATALOG[projectType];
+    tierId=cfg.tiers[1]?.id||cfg.tiers[0].id;
+    renderTypes();renderPackages();rebuildServices(false);
+  }
+  if(inv.client)$('name').value=inv.client;
+  if(inv.company)$('company').value=inv.company;
+  if(inv.project)$('project').value=inv.project;
+  if(inv.email)$('email').value=inv.email;
+  if(inv.mobile)$('mobile').value=inv.mobile;
+  update();
+},120);
 </script>
 </body>
 </html>
