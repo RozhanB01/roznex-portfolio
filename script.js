@@ -38,16 +38,19 @@ mobileNav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{
   menu.setAttribute('aria-expanded','false');
 }));
 
-lang.addEventListener('click',()=>{
-  const fa=html.lang!=='fa';
-  body.classList.add('language-switching');
+const setLanguage=(fa,animate=false)=>{
+  if(animate) body.classList.add('language-switching');
   html.lang=fa?'fa':'en';
   html.dir=fa?'rtl':'ltr';
   body.classList.toggle('fa',fa);
   document.querySelectorAll('[data-en]').forEach(el=>el.textContent=fa?el.dataset.fa:el.dataset.en);
   lang.innerHTML=fa?'<span class="selected">FA</span><i></i><span>EN</span>':'<span>FA</span><i></i><span class="selected">EN</span>';
-  setTimeout(()=>body.classList.remove('language-switching'),260);
-});
+  lang.setAttribute('aria-label',fa?'Switch language to English':'تغییر زبان به فارسی');
+  localStorage.setItem('roznex-language',fa?'fa':'en');
+  if(animate) setTimeout(()=>body.classList.remove('language-switching'),260);
+};
+setLanguage(localStorage.getItem('roznex-language')==='fa');
+lang.addEventListener('click',()=>setLanguage(html.lang!=='fa',true));
 
 const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{
   if(entry.isIntersecting){entry.target.classList.add('visible');observer.unobserve(entry.target)}
@@ -74,7 +77,11 @@ const navLinks=[...document.querySelectorAll('.main-nav a[href^="#"]')];
 const sections=navLinks.map(link=>document.querySelector(link.getAttribute('href'))).filter(Boolean);
 const spy=new IntersectionObserver(entries=>entries.forEach(entry=>{
   if(entry.isIntersecting){
-    navLinks.forEach(link=>link.classList.toggle('active',link.getAttribute('href')===`#${entry.target.id}`));
+    navLinks.forEach(link=>{
+      const active=link.getAttribute('href')===`#${entry.target.id}`;
+      link.classList.toggle('active',active);
+      if(active) link.setAttribute('aria-current','location'); else link.removeAttribute('aria-current');
+    });
   }
 }),{rootMargin:'-35% 0px -60%',threshold:0});
 sections.forEach(section=>spy.observe(section));
