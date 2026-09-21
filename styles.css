@@ -12,3 +12,6 @@ dialog{width:min(42rem,calc(100% - 2rem));border:1px solid var(--line);border-ra
 @media(max-width:760px){.hero-media,.glass-card{will-change:auto}.glass-card{transform:none!important}.glass-panels.reveal .glass-card{filter:none}}
 @media(prefers-reduced-motion:reduce){.hero-media,.glass-card{will-change:auto}.glass-panels.reveal .glass-card{opacity:1;filter:none}.project-image:after{display:none}}
 @media(min-width:761px){.glass-card{width:clamp(12.5rem,15.5vw,15rem);min-height:8.25rem;background:linear-gradient(135deg,rgba(255,255,255,.3),rgba(255,255,255,.09));backdrop-filter:blur(5px)}.card-ai{top:13%;right:1.8%}.card-web{top:32%;right:1.8%}.card-3d{top:51%;right:1.8%}.card-seo{top:70%;right:1.8%;bottom:auto}}
+.hero-media{inset:0}.hero-media img{width:100%;height:100%;display:block;object-fit:cover;object-position:center}
+@media(min-width:761px){.glass-panels{display:none}}
+@media(max-width:760px){.hero-media{inset:auto}.hero-media img{object-fit:cover;object-position:center}}
