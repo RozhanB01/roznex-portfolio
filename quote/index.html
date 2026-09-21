@@ -308,7 +308,15 @@ function gregorianToJalali(gy,gm,gd){
   const jd=1+(days<186?days%31:(days-186)%30);
   return [jy,jm,jd];
 }
+const JMONTHS=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
 const fd=s=>{
+  if(!s)return'تعیین نشده';
+  const parts=String(s).split('-').map(Number);
+  if(parts.length!==3||parts.some(Number.isNaN))return'تعیین نشده';
+  const [jy,jm,jd]=gregorianToJalali(parts[0],parts[1],parts[2]);
+  return faDigits(jd)+' '+JMONTHS[jm-1]+' '+faDigits(jy);
+};
+const fdNumeric=s=>{
   if(!s)return'تعیین نشده';
   const parts=String(s).split('-').map(Number);
   if(parts.length!==3||parts.some(Number.isNaN))return'تعیین نشده';
@@ -323,7 +331,8 @@ const add=(s,n)=>{
   return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
 };
 function updateJalaliPreview(){
-  $('startJalaliPreview').textContent='تاریخ شمسی: '+fd($('date').value);
+  const v=$('date').value;
+  $('startJalaliPreview').textContent=v ? 'تاریخ شمسی: '+fd(v)+' ('+fdNumeric(v)+')' : 'تاریخ شمسی: تعیین نشده';
 }
 let sel=new Set();
 
@@ -401,7 +410,7 @@ function renderInvoice(data,save){
   const chosen=S.filter(x=>data.selected.includes(x[0]));
   const originalSel=sel;sel=new Set(data.selected);
   $('pay').value=data.pay;$('date').value=data.date;
-  $('meta').textContent='شماره '+data.id+' | تاریخ صدور '+fd(data.created);
+  $('meta').textContent='شماره '+data.id+' | تاریخ صدور: '+fd(data.created);
   $('invName').textContent=data.name;
   $('invCompany').textContent=data.company||'شخصی';
   $('invProject').textContent=data.project;
@@ -410,7 +419,7 @@ function renderInvoice(data,save){
   chosen.forEach((x,i)=>{const tr=document.createElement('tr');[i+1,x[1],fmt(x[3])+' تومان'].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.append(td)});rows.append(tr)});
   $('invTotal').textContent=fmt(sum())+' تومان';
   const modelText = data.pay==='1' ? 'مدل انتخابی: پرداخت کامل' : data.pay==='2' ? 'مدل انتخابی: ۵۰ / ۵۰' : 'مدل انتخابی: ۴۰ / ۳۰ / ۲۰ / ۱۰';
-  $('paymentModelLabel').textContent=modelText+' · تاریخ‌ها بر اساس تقویم هجری شمسی هستند.';
+  $('paymentModelLabel').textContent=modelText+' · تمام تاریخ‌های این جدول هجری شمسی هستند.';
   const payments=$('payments');payments.replaceChildren();
   plan().forEach(p=>{const tr=document.createElement('tr');[p[0],p[1]+'٪',fmt(p[2])+' تومان',fd(p[3])].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.append(td)});payments.append(tr)});
   $('invoice').classList.remove('hidden');
