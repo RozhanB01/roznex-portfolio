@@ -85,23 +85,3 @@ const spy=new IntersectionObserver(entries=>entries.forEach(entry=>{
   }
 }),{rootMargin:'-35% 0px -60%',threshold:0});
 sections.forEach(section=>spy.observe(section));
-
-const dialog=document.getElementById('brief-dialog');
-document.getElementById('brief-button').addEventListener('click',()=>{window.location.href='/start/'});
-dialog.querySelector('.dialog-close').addEventListener('click',()=>dialog.close());
-dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
-const result=dialog.querySelector('.brief-result');
-const textarea=result.querySelector('textarea');
-dialog.querySelectorAll('[data-type]').forEach(button=>button.addEventListener('click',()=>{
-  textarea.value=`ROZNEX Project Brief\n\nProject type: ${button.dataset.type}\nBusiness / brand: \nMain goal: \nTarget audience: \nEssential features: \nPreferred launch date: \nVisual references: \nAdditional notes: `;
-  result.hidden=false;
-  textarea.focus();
-  textarea.select();
-}));
-document.getElementById('copy-brief').addEventListener('click',async event=>{
-  await navigator.clipboard.writeText(textarea.value);
-  const span=event.currentTarget.querySelector('span');
-  const old=span.textContent;
-  span.textContent=html.lang==='fa'?'کپی شد':'Copied';
-  setTimeout(()=>span.textContent=old,1400);
-});
