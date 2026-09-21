@@ -42,7 +42,7 @@ body.fa .scroll-progress i{transform-origin:right center}
 /* Persian composition: copy stays in the calm left zone, typography remains RTL. */
 body.fa .hero{direction:ltr}
 body.fa .hero:after{background:linear-gradient(90deg,rgba(239,232,223,.995) 0,rgba(239,232,223,.95) 30%,rgba(239,232,223,.2) 53%,transparent 73%)}
-body.fa .hero-copy{direction:rtl;text-align:right;width:min(34rem,40vw);padding:clamp(2rem,4vh,4rem) clamp(1rem,2vw,2rem) 1.5rem 0}
+body.fa .hero-copy{direction:rtl;text-align:right;width:min(30rem,36vw);padding:clamp(2rem,4vh,4rem) clamp(.5rem,1vw,1rem) 1.5rem 0}
 body.fa .hero-copy:before{content:"";position:absolute;z-index:-1;inset:1rem -2rem 0 -2rem;border-radius:2rem;background:linear-gradient(110deg,rgba(246,240,232,.72),rgba(246,240,232,.18));backdrop-filter:blur(2px);mask-image:linear-gradient(90deg,#000 0,rgba(0,0,0,.88) 68%,transparent 100%)}
 body.fa .micro-label,body.fa .hero-buttons{justify-content:flex-start}
 body.fa .hero h1{align-items:flex-start;font-size:clamp(3rem,5vw,6rem);line-height:1.02;letter-spacing:-.045em}
