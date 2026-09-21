@@ -1,7 +1,6 @@
 const crypto = require('crypto');
 
-const ADMIN_USER = 'rozhan';
-const ADMIN_PASSWORD_HASH = 'b32cfc57d1313d4930d3738447cbb47de48202b3885908c74f53d12460fbdad2';
+const ADMIN_PASSWORD_HASH = '8b8d561d46967e6b21503d701f1ab077c4f2db779024fef84022e7a0b075b001';
 
 function safeEqual(left, right) {
   const a = Buffer.from(left);
@@ -9,33 +8,34 @@ function safeEqual(left, right) {
   return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
-function isAuthorized(req) {
-  const header = req.headers.authorization || '';
-  if (!header.startsWith('Basic ')) return false;
-  try {
-    const decoded = Buffer.from(header.slice(6), 'base64').toString('utf8');
-    const separator = decoded.indexOf(':');
-    const username = decoded.slice(0, separator);
-    const password = decoded.slice(separator + 1);
-    const passwordHash = crypto.createHash('sha256').update(password).digest('hex');
-    return safeEqual(username, ADMIN_USER) && safeEqual(passwordHash, ADMIN_PASSWORD_HASH);
-  } catch {
-    return false;
-  }
+async function readBody(req) {
+  if (typeof req.body === 'string') return req.body;
+  if (req.body && typeof req.body === 'object') return new URLSearchParams(req.body).toString();
+  const chunks = [];
+  for await (const chunk of req) chunks.push(Buffer.from(chunk));
+  return Buffer.concat(chunks).toString('utf8');
 }
 
-module.exports = function handler(req, res) {
-  if (!isAuthorized(req)) {
-    res.setHeader('WWW-Authenticate', 'Basic realm="ROZNEX Control", charset="UTF-8"');
-    res.statusCode = 401;
-    return res.end('Authentication required');
-  }
-
+module.exports = async function handler(req, res) {
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.setHeader('Cache-Control', 'private, no-store, max-age=0');
   res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
-  return res.end(DASHBOARD_HTML);
+
+  if (req.method === 'POST') {
+    const body = await readBody(req);
+    const password = new URLSearchParams(body).get('password') || '';
+    const passwordHash = crypto.createHash('sha256').update(password).digest('hex');
+    if (safeEqual(passwordHash, ADMIN_PASSWORD_HASH)) return res.end(DASHBOARD_HTML);
+    res.statusCode = 401;
+    return res.end(loginHTML(true));
+  }
+
+  return res.end(loginHTML(false));
 };
+
+function loginHTML(hasError) {
+  return String.raw`<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><title>ورود به ROZNEX Control</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700&family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet"><style>*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:1.25rem;background:#efe8df;color:#11141b;font-family:Vazirmatn,Manrope,sans-serif}.login{width:min(27rem,100%);background:rgba(255,251,246,.88);border:1px solid #d8cdbf;border-radius:28px;padding:2rem;box-shadow:0 30px 90px rgba(50,38,24,.14);position:relative;overflow:hidden}.login:before{content:"";position:absolute;width:15rem;height:15rem;border:1px solid rgba(184,139,85,.25);border-radius:50%;top:-8rem;left:-6rem;box-shadow:0 0 0 3rem rgba(184,139,85,.05)}.brand{font:700 1rem Manrope;letter-spacing:.2em;position:relative}.kicker{font:600 .65rem Manrope;letter-spacing:.15em;color:#9b7b55;margin-top:3.5rem}.login h1{font-size:2.2rem;letter-spacing:-.05em;margin:.7rem 0 .5rem}.login p{font-size:.8rem;color:#716a62;line-height:1.8;margin:0 0 1.4rem}label{display:block;font-size:.75rem;margin-bottom:.45rem}input{width:100%;border:1px solid #d8cdbf;background:white;border-radius:13px;padding:.85rem 1rem;font:500 1rem Manrope;outline:none;direction:ltr}input:focus{border-color:#b88b55;box-shadow:0 0 0 3px rgba(184,139,85,.12)}button{width:100%;border:0;border-radius:13px;padding:.9rem;margin-top:.8rem;background:#11141b;color:white;font:600 .9rem Vazirmatn;cursor:pointer}.error{background:#f9e3df;color:#923d35;padding:.7rem .8rem;border-radius:11px;font-size:.74rem;margin-bottom:1rem}.back{display:block;text-align:center;color:#746d65;text-decoration:none;font-size:.72rem;margin-top:1.2rem}</style></head><body><main class="login"><div class="brand">ROZNEX</div><div class="kicker">PRIVATE CONTROL DESK</div><h1>ورود به مدیریت</h1><p>برای ورود به داشبورد خصوصی، فقط رمز مدیریت را وارد کن.</p>${hasError?'<div class="error">رمز واردشده درست نیست. دوباره تلاش کن.</div>':''}<form method="post" action="/admin" autocomplete="off"><label for="password">رمز مدیریت</label><input id="password" name="password" type="password" required autofocus autocomplete="current-password"><button type="submit">ورود به داشبورد</button></form><a class="back" href="/">بازگشت به سایت</a></main></body></html>`;
+}
 
 const DASHBOARD_HTML = String.raw`<!doctype html>
 <html lang="fa" dir="rtl">
