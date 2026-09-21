@@ -80,7 +80,7 @@ const spy=new IntersectionObserver(entries=>entries.forEach(entry=>{
 sections.forEach(section=>spy.observe(section));
 
 const dialog=document.getElementById('brief-dialog');
-document.getElementById('brief-button').addEventListener('click',()=>dialog.showModal());
+document.getElementById('brief-button').addEventListener('click',()=>{window.location.href='/start/'});
 dialog.querySelector('.dialog-close').addEventListener('click',()=>dialog.close());
 dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
 const result=dialog.querySelector('.brief-result');
