@@ -67,6 +67,24 @@
     .card-head h2{font-size:1.15rem;margin:0}
     .card-head p{font-size:.72rem;color:var(--muted);line-height:1.8;margin:.35rem 0 0}
     .section-index{font:500 .62rem Manrope;letter-spacing:.12em;color:var(--gold)}
+    .choice-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem}
+    .choice-card{position:relative;text-align:right;border:1px solid var(--line);background:#faf6f0;border-radius:1rem;padding:1rem;min-height:8.2rem;transition:.2s ease;color:var(--ink)}
+    .choice-card:hover{transform:translateY(-2px);border-color:#b99a73}
+    .choice-card.active{background:#17181a;color:#f5f0e9;border-color:#17181a}
+    .choice-icon{display:grid;place-items:center;width:2.15rem;height:2.15rem;border:1px solid currentColor;border-radius:.7rem;margin-bottom:.8rem;font:600 .7rem Manrope;opacity:.75}
+    .choice-card strong{display:block;font-size:.82rem;margin-bottom:.28rem}
+    .choice-card small{display:block;font-size:.61rem;line-height:1.75;opacity:.68}
+    .package-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem}
+    .package-card{position:relative;text-align:right;border:1px solid var(--line);background:#faf6f0;border-radius:1rem;padding:1rem;min-height:10rem;color:var(--ink)}
+    .package-card.active{border:2px solid #17181a;background:#fffaf4}
+    .package-card .tag{display:inline-block;font-size:.55rem;color:#7d5b35;background:#f3e2ca;border-radius:999px;padding:.25rem .5rem;margin-bottom:.65rem}
+    .package-card strong{display:block;font-size:.9rem}
+    .package-price{font:600 1.15rem Manrope;margin:.45rem 0}
+    .package-card small{font-size:.61rem;line-height:1.8;color:#776f67}
+    .package-card ul{padding:0 1rem 0 0;margin:.6rem 0 0;color:#776f67;font-size:.58rem;line-height:1.8}
+    .selected-path{display:flex;gap:.45rem;flex-wrap:wrap;margin-top:.75rem}
+    .path-pill{font-size:.58rem;padding:.3rem .55rem;border:1px solid var(--line);border-radius:999px;background:#fffaf4}
+    .budget-hint{margin-top:.7rem;padding:.7rem .85rem;border-radius:.8rem;background:#f3e9dc;color:#705e4b;font-size:.62rem;line-height:1.8}
     .fields{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
     .field{display:flex;flex-direction:column;gap:.4rem}
     .field.full{grid-column:1/-1}
@@ -143,6 +161,7 @@
     .hidden{display:none!important}
     @media(max-width:900px){
       .intro,.layout,.fields{grid-template-columns:1fr}
+      .choice-grid,.package-grid{grid-template-columns:1fr 1fr}
       .summary{position:static}
       .client-grid{grid-template-columns:1fr 1fr}
     }
@@ -153,6 +172,7 @@
       .service{grid-template-columns:1.3rem minmax(0,1fr)}
       .price{grid-column:2}
       .client-grid{grid-template-columns:1fr}
+      .choice-grid,.package-grid{grid-template-columns:1fr}
       .invoice-header{flex-direction:column}
     }
     @page{size:A4;margin:10mm}
@@ -211,15 +231,33 @@
         <span class="eyebrow">ROZNEX / SMARTQUOTE</span>
         <h1>پیش‌فاکتور هوشمند</h1>
       </div>
-      <p>خدمات موردنیازتان را انتخاب کنید، مبلغ و برنامه پرداخت را همان لحظه ببینید و پیش‌فاکتور قابل چاپ دریافت کنید.</p>
+      <p>نوع سایت و سطح پروژه را انتخاب کنید؛ SmartQuote فقط امکانات مرتبط را نمایش می‌دهد و قیمت، برنامه پرداخت و پیش‌فاکتور حرفه‌ای را همان لحظه می‌سازد.</p>
     </section>
 
     <div class="layout">
       <section>
         <section class="card config">
           <div class="card-head">
-            <div><h2>اطلاعات پروژه</h2><p>اطلاعات اصلی را وارد کنید تا پیش‌فاکتور ساخته شود.</p></div>
+            <div><h2>چه نوع سایتی نیاز دارید؟</h2><p>نوع پروژه را انتخاب کنید تا پکیج‌ها و امکانات مناسب همان پروژه نمایش داده شوند.</p></div>
             <span class="section-index">01</span>
+          </div>
+          <div id="projectTypes" class="choice-grid"></div>
+          <div class="selected-path" id="selectedPath"></div>
+        </section>
+
+        <section class="card config">
+          <div class="card-head">
+            <div><h2>سطح پروژه را انتخاب کنید</h2><p>هر پکیج یک Scope پایه دارد؛ بعد می‌توانید امکانات تکمیلی را جداگانه اضافه کنید.</p></div>
+            <span class="section-index">02</span>
+          </div>
+          <div id="packages" class="package-grid"></div>
+          <div class="budget-hint" id="packageHint">ابتدا نوع سایت را انتخاب کنید.</div>
+        </section>
+
+        <section class="card config">
+          <div class="card-head">
+            <div><h2>اطلاعات پروژه</h2><p>اطلاعات اصلی را وارد کنید تا پیش‌فاکتور ساخته شود.</p></div>
+            <span class="section-index">03</span>
           </div>
           <div class="fields">
             <label class="field"><span>نام و نام خانوادگی *</span><input id="name" autocomplete="name"></label>
@@ -246,8 +284,8 @@
 
         <section class="card config">
           <div class="card-head">
-            <div><h2>خدمات موردنظر</h2><p>هر آیتمی که نیاز دارید انتخاب کنید.</p></div>
-            <span class="section-index">02</span>
+            <div><h2>امکانات تکمیلی</h2><p>این گزینه‌ها بر اساس نوع سایت انتخابی شما تغییر می‌کنند.</p></div>
+            <span class="section-index">04</span>
           </div>
           <div id="services" class="services"></div>
         </section>
@@ -255,7 +293,7 @@
         <section class="card recent-card config">
           <div class="card-head">
             <div><h2>فاکتورهای اخیر</h2><p>فاکتورهای ساخته‌شده روی همین دستگاه.</p></div>
-            <span class="section-index">03</span>
+            <span class="section-index">05</span>
           </div>
           <div id="recent" class="recent-list"></div>
         </section>
@@ -277,6 +315,8 @@
               <div><span>مشتری</span><strong id="invName"></strong></div>
               <div><span>شرکت</span><strong id="invCompany"></strong></div>
               <div><span>پروژه</span><strong id="invProject"></strong></div>
+              <div><span>نوع وب‌سایت</span><strong id="invType"></strong></div>
+              <div><span>پکیج انتخابی</span><strong id="invTier"></strong></div>
               <div><span>شماره تماس</span><strong id="invMobile"></strong></div>
               <div><span>ایمیل</span><strong id="invEmail"></strong></div>
               <div><span>شروع پیشنهادی</span><strong id="invStartDate"></strong></div>
@@ -352,20 +392,90 @@
   </dialog>
 
 <script>
-const S=[
-  ['strategy','استراتژی و شناخت پروژه','Discovery، معماری پروژه و تعیین Scope',30000000],
-  ['uiux','طراحی UX/UI اختصاصی','طراحی تجربه کاربری و رابط اختصاصی',45000000],
-  ['frontend','توسعه Frontend','پیاده‌سازی رابط سریع و Responsive',90000000],
-  ['backend','Backend + CMS','منطق سرور و پنل مدیریت محتوا',85000000],
-  ['bilingual','نسخه فارسی + انگلیسی','ساختار دو زبانه و آماده توسعه زبان‌ها',30000000],
-  ['3d','3D Experience + Motion','بخش‌های سه‌بعدی و موشن هدفمند',60000000],
-  ['seo','Technical SEO','زیرساخت فنی سئو و ساختار SEO-first',35000000],
-  ['analytics','Analytics & Dashboard','اتصال ابزارهای اندازه‌گیری و داشبورد',10000000],
-  ['agent','SEO Agent MVP','پایش، تحلیل و پیشنهادهای خودکار سئو',65000000],
-  ['qa','QA / Security / Launch','تست، بهینه‌سازی و انتشار نهایی',30000000],
-  ['support','پشتیبانی ۳ ماهه','پشتیبانی فنی پس از تحویل',25000000],
-  ['content','بسته محتوای صنعتی','ساختاردهی و آماده‌سازی محتوای اولیه',40000000]
-];
+const CATALOG={
+  personal:{
+    label:'سایت شخصی / رزومه',icon:'CV',desc:'برای متخصصان، مدیران، فریلنسرها و برند شخصی',
+    tiers:[
+      {id:'starter',name:'Starter',price:35000000,tag:'شروع حرفه‌ای',desc:'حضور آنلاین تمیز و سریع',features:['۱ تا ۳ صفحه','طراحی Responsive','فرم تماس','SEO پایه']},
+      {id:'pro',name:'Professional',price:55000000,tag:'پیشنهادی',desc:'برای برند شخصی جدی‌تر',features:['تا ۶ صفحه','نمونه‌کار / بلاگ','CMS سبک','SEO ساختاری']},
+      {id:'signature',name:'Signature',price:85000000,tag:'اختصاصی',desc:'برند شخصی سطح بالا',features:['UI اختصاصی','موشن حرفه‌ای','Analytics','ساختار توسعه‌پذیر']}
+    ],
+    addons:[
+      ['bilingual','نسخه فارسی + انگلیسی','دو زبانه‌سازی کامل',15000000],['blog','بلاگ + CMS','مدیریت مقالات و نوشته‌ها',15000000],['booking','رزرو جلسه','فرم رزرو و زمان‌بندی',15000000],['copy','کپی‌رایتینگ صفحات','بازنویسی حرفه‌ای متن صفحات',12000000],['motion','موشن پیشرفته','تعاملات و انیمیشن‌های حرفه‌ای',20000000],['seo','SEO حرفه‌ای','تحقیق ساختار و بهینه‌سازی فنی',15000000]
+    ]
+  },
+  corporate:{
+    label:'سایت شرکتی',icon:'CO',desc:'معرفی شرکت، خدمات، پروژه‌ها و جذب سرنخ B2B',
+    tiers:[
+      {id:'starter',name:'Corporate Start',price:65000000,tag:'اقتصادی',desc:'سایت شرکتی استاندارد',features:['تا ۶ صفحه','معرفی خدمات','فرم تماس','Responsive']},
+      {id:'pro',name:'Corporate Pro',price:110000000,tag:'پیشنهادی',desc:'برای شرکت‌های در حال رشد',features:['UI اختصاصی','CMS','پروژه‌ها / مقالات','SEO پایه']},
+      {id:'premium',name:'Corporate Premium',price:165000000,tag:'پریمیوم',desc:'هویت دیجیتال حرفه‌ای',features:['UX/UI اختصاصی','موشن','Analytics','ساختار چندزبانه']}
+    ],
+    addons:[
+      ['bilingual','نسخه فارسی + انگلیسی','ساختار کامل دو زبانه',20000000],['cms','CMS پیشرفته','مدیریت خدمات، پروژه‌ها و محتوا',20000000],['seo','Technical SEO','سئوی فنی و ساختاری',25000000],['cases','Case Study حرفه‌ای','ساختار نمایش پروژه‌ها و نتایج',15000000],['motion','Motion Experience','موشن و تعاملات حرفه‌ای',25000000],['3d','3D Hero','تجربه سه‌بعدی سبک و بهینه',50000000],['content','بسته محتوای اولیه','ساختاردهی محتوای صفحات اصلی',25000000]
+    ]
+  },
+  ecommerce:{
+    label:'سایت فروشگاهی',icon:'EC',desc:'فروش محصول، پرداخت آنلاین و مدیریت سفارش',
+    tiers:[
+      {id:'starter',name:'Shop Start',price:95000000,tag:'شروع فروش',desc:'فروشگاه سبک برای کاتالوگ محدود',features:['محصول و دسته‌بندی','سبد خرید','Checkout','پنل سفارش']},
+      {id:'pro',name:'Shop Pro',price:155000000,tag:'پیشنهادی',desc:'فروشگاه کامل و توسعه‌پذیر',features:['CMS محصولات','کد تخفیف','فیلتر و جستجو','Analytics']},
+      {id:'advanced',name:'Commerce Advanced',price:240000000,tag:'پیشرفته',desc:'برای عملیات فروش جدی',features:['UX اختصاصی','اتوماسیون سفارش','گزارش‌ها','زیرساخت مقیاس‌پذیر']}
+    ],
+    addons:[
+      ['gateway','درگاه پرداخت','اتصال و تنظیم جریان پرداخت',15000000],['sms','پیامک سفارش','اطلاع‌رسانی وضعیت سفارش',12000000],['filter','فیلتر و جستجوی پیشرفته','فیلتر چندمعیاره و جستجوی سریع',18000000],['inventory','انبار و موجودی','مدیریت موجودی و هشدارها',25000000],['multivendor','چندفروشندگی','پنل و منطق چند فروشنده',60000000],['seo','SEO فروشگاهی','ساختار دسته و محصول + Technical SEO',30000000],['analytics','داشبورد فروش','تحلیل فروش و رفتار مشتری',15000000],['bilingual','فروشگاه دو زبانه','نسخه فارسی + انگلیسی',25000000]
+    ]
+  },
+  industrial:{
+    label:'سایت صنعتی',icon:'IN',desc:'برای کارخانه‌ها، تولیدکنندگان و شرکت‌های B2B صنعتی',
+    tiers:[
+      {id:'foundation',name:'Corporate Foundation',price:285000000,tag:'پایه صنعتی',desc:'زیرساخت حرفه‌ای شرکتی',features:['UX/UI اختصاصی','Frontend + CMS','SEO فنی','Analytics']},
+      {id:'3dpro',name:'Industrial 3D Pro',price:420000000,tag:'پیشنهادی',desc:'تجربه صنعتی پریمیوم',features:['FA + EN','3D Hero + Motion','CMS پیشرفته','Case Studies']},
+      {id:'ai',name:'AI Growth Suite',price:480000000,tag:'AI + Growth',desc:'وب‌سایت + موتور رشد',features:['همه امکانات 3D Pro','SEO Agent MVP','داشبورد و Alerts','AI-ready Architecture']}
+    ],
+    addons:[
+      ['content','بسته محتوای صنعتی','ساختاردهی محتوای فنی اولیه',40000000],['support','پشتیبانی ۳ ماهه','پشتیبانی فنی پس از لانچ',25000000],['catalog','کاتالوگ دیجیتال','معرفی تعاملی محصولات و تجهیزات',30000000],['portal','پرتال مشتریان','ورود مشتری و دسترسی به اسناد/درخواست‌ها',65000000],['extra3d','مدل‌سازی 3D تکمیلی','صحنه یا محصول سه‌بعدی اضافه',45000000]
+    ]
+  },
+  landing:{
+    label:'لندینگ‌پیج',icon:'LP',desc:'برای کمپین، معرفی محصول، ثبت‌نام یا جذب لید',
+    tiers:[
+      {id:'basic',name:'Landing Basic',price:25000000,tag:'سریع',desc:'یک صفحه حرفه‌ای و سبک',features:['طراحی Responsive','CTA','فرم لید','SEO پایه']},
+      {id:'growth',name:'Landing Growth',price:40000000,tag:'پیشنهادی',desc:'برای کمپین جدی‌تر',features:['UI اختصاصی','Analytics','A/B-ready','موشن سبک']},
+      {id:'premium',name:'Landing Premium',price:65000000,tag:'پریمیوم',desc:'لانچ سطح بالا',features:['Art Direction','موشن پیشرفته','اتصال CRM/API','بهینه‌سازی Conversion']}
+    ],
+    addons:[
+      ['copy','کپی‌رایتینگ','متن فروش و CTA حرفه‌ای',10000000],['motion','موشن پیشرفته','انیمیشن و تعاملات ویژه',15000000],['form','فرم هوشمند','فرم چندمرحله‌ای و منطق شرطی',12000000],['analytics','Tracking پیشرفته','Event tracking و Conversion',8000000],['bilingual','نسخه دوم زبان','دو زبانه‌سازی لندینگ',10000000]
+    ]
+  },
+  custom:{
+    label:'سایت اختصاصی / پریمیوم',icon:'PX',desc:'برای برندهایی که تجربه متفاوت و کاملاً اختصاصی می‌خواهند',
+    tiers:[
+      {id:'custom',name:'Custom Experience',price:180000000,tag:'اختصاصی',desc:'طراحی و توسعه از صفر',features:['Discovery','UX/UI اختصاصی','Frontend اختصاصی','CMS']},
+      {id:'immersive',name:'Immersive',price:300000000,tag:'Experience',desc:'تجربه بصری و تعاملی پیشرفته',features:['Motion System','3D / WebGL','Art Direction','Performance']},
+      {id:'flagship',name:'Flagship Digital',price:480000000,tag:'Flagship',desc:'محصول دیجیتال شاخص برند',features:['Strategy','3D + Motion','Backend اختصاصی','SEO + Analytics']}
+    ],
+    addons:[
+      ['bilingual','چندزبانه','زبان دوم و معماری توسعه زبان',30000000],['agent','AI Agent','ایجنت هوشمند متناسب با کسب‌وکار',65000000],['portal','پرتال اختصاصی','ورود کاربران و پنل اختصاصی',65000000],['seo','SEO Growth','زیرساخت و استراتژی رشد ارگانیک',35000000],['support','پشتیبانی ۳ ماهه','پشتیبانی پس از لانچ',25000000]
+    ]
+  },
+  webapp:{
+    label:'پلتفرم / پنل تحت وب',icon:'APP',desc:'داشبورد، SaaS، اتوماسیون و نرم‌افزار تحت وب',
+    tiers:[
+      {id:'mvp',name:'MVP',price:180000000,tag:'شروع محصول',desc:'نسخه اولیه قابل استفاده',features:['UX/UI','Auth','Dashboard','Database']},
+      {id:'product',name:'Product Pro',price:320000000,tag:'پیشنهادی',desc:'محصول کامل‌تر برای کاربران واقعی',features:['Role Management','Advanced Dashboard','API','QA']},
+      {id:'scale',name:'Scale / AI',price:550000000,tag:'Scale',desc:'معماری توسعه‌پذیر و AI-ready',features:['Automation','AI Integration','Advanced Security','Observability']}
+    ],
+    addons:[
+      ['payments','پرداخت و اشتراک','پرداخت، پلن و صورتحساب',35000000],['roles','سطوح دسترسی پیشرفته','نقش‌ها و Permission سفارشی',25000000],['reports','گزارش‌ساز','گزارش و خروجی‌های مدیریتی',30000000],['ai','AI Assistant / Agent','قابلیت هوشمند داخل محصول',75000000],['mobile','PWA / Mobile-ready','تجربه نصب‌پذیر و موبایل‌محور',30000000],['support','پشتیبانی ۳ ماهه','پشتیبانی فنی پس از تحویل',30000000]
+    ]
+  }
+};
+
+let projectType='corporate';
+let tierId='pro';
+let S=[];
+let sel=new Set();
 
 const $=id=>document.getElementById(id);
 const fmt=n=>new Intl.NumberFormat('fa-IR').format(Math.round(n));
@@ -470,8 +580,50 @@ function updateJalaliPreview(){
   const jy=+$('jYear').value,jm=+$('jMonth').value,jd=+$('jDay').value;
   $('startJalaliPreview').textContent=(jy&&jm&&jd)?'تاریخ انتخاب‌شده: '+faDigits(jd)+' '+JMONTHS[jm-1]+' '+faDigits(jy):'تاریخ شمسی: تعیین نشده';
 }
-let sel=new Set();
-
+function currentConfig(){return CATALOG[projectType]}
+function currentTier(){return currentConfig().tiers.find(t=>t.id===tierId)||currentConfig().tiers[0]}
+function rebuildServices(preserve=false){
+  const tier=currentTier();
+  const previous=preserve?new Set(sel):new Set();
+  S=[[`base_${projectType}_${tier.id}`,currentConfig().label+' — '+tier.name,tier.desc,tier.price],...currentConfig().addons];
+  sel=new Set([S[0][0]]);
+  if(preserve)S.slice(1).forEach(x=>{if(previous.has(x[0]))sel.add(x[0])});
+  renderServices();
+  renderPath();
+}
+function renderTypes(){
+  const root=$('projectTypes');root.replaceChildren();
+  Object.entries(CATALOG).forEach(([key,cfg])=>{
+    const b=document.createElement('button');b.type='button';b.className='choice-card'+(key===projectType?' active':'');
+    const icon=document.createElement('span');icon.className='choice-icon';icon.textContent=cfg.icon;
+    const title=document.createElement('strong');title.textContent=cfg.label;
+    const desc=document.createElement('small');desc.textContent=cfg.desc;
+    b.append(icon,title,desc);
+    b.addEventListener('click',()=>{projectType=key;tierId=cfg.tiers[1]?.id||cfg.tiers[0].id;renderTypes();renderPackages();rebuildServices(false)});
+    root.append(b);
+  });
+}
+function renderPackages(){
+  const root=$('packages');root.replaceChildren();
+  const cfg=currentConfig();
+  cfg.tiers.forEach(t=>{
+    const b=document.createElement('button');b.type='button';b.className='package-card'+(t.id===tierId?' active':'');
+    const tag=document.createElement('span');tag.className='tag';tag.textContent=t.tag;
+    const title=document.createElement('strong');title.textContent=t.name;
+    const price=document.createElement('div');price.className='package-price';price.textContent=fmt(t.price)+' تومان';
+    const desc=document.createElement('small');desc.textContent=t.desc;
+    const ul=document.createElement('ul');
+    t.features.forEach(f=>{const li=document.createElement('li');li.textContent=f;ul.append(li)});
+    b.append(tag,title,price,desc,ul);
+    b.addEventListener('click',()=>{tierId=t.id;renderPackages();rebuildServices(true)});
+    root.append(b);
+  });
+  $('packageHint').textContent='قیمت پکیج پایه است؛ امکانات تکمیلی پایین صفحه به‌صورت اختیاری به آن اضافه می‌شوند.';
+}
+function renderPath(){
+  const root=$('selectedPath');root.replaceChildren();
+  [currentConfig().label,currentTier().name].forEach(v=>{const s=document.createElement('span');s.className='path-pill';s.textContent=v;root.append(s)});
+}
 function sum(){return S.filter(x=>sel.has(x[0])).reduce((a,x)=>a+x[3],0)}
 function plan(){
   const t=sum(),d=$('date').value;
@@ -481,12 +633,12 @@ function plan(){
 }
 function renderServices(){
   const root=$('services');root.replaceChildren();
-  S.forEach(x=>{
+  S.forEach((x,index)=>{
     const label=document.createElement('label');label.className='service';
-    const c=document.createElement('input');c.type='checkbox';c.checked=sel.has(x[0]);
+    const c=document.createElement('input');c.type='checkbox';c.checked=sel.has(x[0]);c.disabled=index===0;
     c.addEventListener('change',()=>{c.checked?sel.add(x[0]):sel.delete(x[0]);update();});
     const copy=document.createElement('span');copy.className='service-copy';
-    const title=document.createElement('strong');title.textContent=x[1];
+    const title=document.createElement('strong');title.textContent=x[1]+(index===0?' · پکیج پایه':'');
     const desc=document.createElement('small');desc.textContent=x[2];
     copy.append(title,desc);
     const price=document.createElement('span');price.className='price';price.textContent=fmt(x[3])+' تومان';
@@ -511,7 +663,7 @@ function snapshot(){
     created:today(),
     name:$('name').value.trim(),company:$('company').value.trim(),mobile:$('mobile').value.trim(),
     email:$('email').value.trim(),project:$('project').value.trim(),date:$('date').value,budget:$('budget').value.trim(),
-    notes:$('notes').value.trim(),pay:$('pay').value,selected:[...sel]
+    notes:$('notes').value.trim(),pay:$('pay').value,projectType,tierId,selected:[...sel]
   };
 }
 function saveRecent(data){
@@ -538,18 +690,28 @@ function renderRecent(){
   });
 }
 function loadQuote(item){
+  projectType=CATALOG[item.projectType]?item.projectType:'corporate';
+  const cfg=CATALOG[projectType];
+  tierId=cfg.tiers.some(t=>t.id===item.tierId)?item.tierId:(cfg.tiers[1]?.id||cfg.tiers[0].id);
+  renderTypes();renderPackages();rebuildServices(false);
   $('name').value=item.name||'';$('company').value=item.company||'';$('mobile').value=item.mobile||'';$('email').value=item.email||'';
   $('project').value=item.project||'';setJalaliFromGregorian(item.date||today());$('budget').value=item.budget||'';$('notes').value=item.notes||'';
-  $('pay').value=item.pay||'4';sel=new Set(item.selected||[]);renderServices();renderInvoice(item,false);
+  $('pay').value=item.pay||'4';sel=new Set(item.selected||[S[0][0]]);if(!sel.has(S[0][0]))sel.add(S[0][0]);renderServices();renderInvoice(item,false);
 }
 function renderInvoice(data,save){
-  const chosen=S.filter(x=>data.selected.includes(x[0]));
-  const originalSel=sel;sel=new Set(data.selected);
+  const cfg=CATALOG[data.projectType]||currentConfig();
+  const tier=cfg.tiers.find(t=>t.id===data.tierId)||currentTier();
+  const invoiceServices=[[`base_${data.projectType||projectType}_${tier.id}`,cfg.label+' — '+tier.name,tier.desc,tier.price],...cfg.addons];
+  const chosen=invoiceServices.filter(x=>data.selected.includes(x[0])||x[0].startsWith('base_'));
+  const originalS=S,originalSel=sel;
+  S=invoiceServices;sel=new Set(chosen.map(x=>x[0]));
   $('pay').value=data.pay;$('date').value=data.date;
   $('meta').textContent='شماره '+data.id+' | تاریخ صدور: '+fd(data.created);
   $('invName').textContent=data.name;
   $('invCompany').textContent=data.company||'شخصی';
   $('invProject').textContent=data.project;
+  $('invType').textContent=cfg.label;
+  $('invTier').textContent=tier.name;
   $('invMobile').textContent=data.mobile;
   $('invEmail').textContent=data.email||'—';
   $('invStartDate').textContent=fd(data.date);
@@ -564,7 +726,7 @@ function renderInvoice(data,save){
   plan().forEach(p=>{const tr=document.createElement('tr');[p[0],p[1]+'٪',fmt(p[2])+' تومان',fd(p[3])].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.append(td)});payments.append(tr)});
   $('invoice').classList.remove('hidden');
   if(save)saveRecent(data);
-  sel=originalSel;
+  S=originalS;sel=originalSel;
   setTimeout(()=>$('invoice').scrollIntoView({behavior:'smooth'}),20);
 }
 function issue(){
@@ -575,8 +737,11 @@ function issue(){
 }
 function reset(){
   ['name','company','mobile','email','project','budget','notes'].forEach(id=>$(id).value='');
-  initJalaliPicker(today());$('pay').value='4';sel.clear();$('invoice').classList.add('hidden');renderServices();
+  projectType='corporate';tierId='pro';renderTypes();renderPackages();rebuildServices(false);initJalaliPicker(today());$('pay').value='4';$('invoice').classList.add('hidden');
 }
+renderTypes();
+renderPackages();
+rebuildServices(false);
 initJalaliPicker(today());
 $('pay').addEventListener('change',update);
 $('jYear').addEventListener('change',()=>{refreshJDays();syncGregorianFromJalali()});
@@ -589,7 +754,7 @@ const paymentHelp=$('paymentHelp');
 $('paymentHelpBtn').addEventListener('click',()=>paymentHelp.showModal());
 $('paymentHelpClose').addEventListener('click',()=>paymentHelp.close());
 paymentHelp.addEventListener('click',e=>{if(e.target===paymentHelp)paymentHelp.close()});
-renderServices();renderRecent();
+renderRecent();
 </script>
 </body>
 </html>
