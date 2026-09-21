@@ -31,6 +31,20 @@
     a{color:inherit}
     .noise{position:fixed;inset:0;pointer-events:none;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitchTiles'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
     .shell{max-width:1240px;margin:auto;padding:0 var(--pad) 4rem}
+    body.quote-locked .shell{display:none}
+    .access-gate{min-height:100dvh;display:grid;place-items:center;padding:1.25rem}
+    .access-panel{width:min(38rem,100%);background:rgba(245,240,233,.96);border:1px solid var(--line);border-radius:1.6rem;padding:clamp(1.3rem,4vw,2.5rem);box-shadow:0 30px 100px rgba(52,39,25,.12)}
+    .access-panel .brand-logo{width:11.5rem;margin-bottom:2.2rem}
+    .access-panel h1{font-size:clamp(2rem,7vw,3.8rem);line-height:1.05;margin:.55rem 0 1rem}
+    .access-panel p{font-size:.78rem;line-height:2;color:#6f6860;margin:0 0 1.2rem}
+    .access-form{display:flex;gap:.55rem;margin-top:1rem}
+    .access-form input{direction:ltr;text-align:left;text-transform:uppercase}
+    .access-form button{border:0;border-radius:.8rem;background:#17181a;color:#fff;padding:.78rem 1.1rem;white-space:nowrap;font-weight:700}
+    .access-error{min-height:1.3rem;color:#9b3f36;font-size:.62rem;margin-top:.45rem!important}
+    .access-actions{display:flex;align-items:center;justify-content:space-between;gap:.8rem;margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--line)}
+    .access-actions a{text-decoration:none;font-size:.68rem}
+    .access-actions .start-link{background:#f1e4d3;border:1px solid #dcc5a8;border-radius:999px;padding:.6rem .9rem;font-weight:600}
+    @media(max-width:520px){.access-form{flex-direction:column}.access-form button{width:100%}.access-actions{align-items:flex-start;flex-direction:column}}
     .topbar{height:5rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);margin-bottom:2.2rem}
     .brand{display:flex;align-items:center;gap:.9rem;text-decoration:none}
     .brand-logo{display:block;width:clamp(10.5rem,18vw,14rem);height:auto}
@@ -218,7 +232,24 @@
     }
   </style>
 </head>
-<body>
+<body class="quote-locked">
+  <section class="access-gate" id="accessGate">
+    <div class="access-panel">
+      <a class="brand" href="/" aria-label="ROZNEX"><img class="brand-logo" src="../assets/roznex-logo.svg" alt="ROZNEX"></a>
+      <span class="eyebrow">PRIVATE CLIENT AREA</span>
+      <h1>پیش‌فاکتور فقط با تأیید Roznex</h1>
+      <p>قیمت‌ها و پکیج‌های Roznex عمومی نیستند. ابتدا درخواست پروژه را ثبت کنید؛ پس از بررسی پروژه، کد دسترسی این بخش برای شما ارسال می‌شود.</p>
+      <form class="access-form" id="accessForm">
+        <input id="accessCode" autocomplete="one-time-code" placeholder="RZN-XXXXXXXXXXXX" aria-label="کد دسترسی">
+        <button type="submit">ورود به SmartQuote</button>
+      </form>
+      <p class="access-error" id="accessError"></p>
+      <div class="access-actions">
+        <a class="start-link" href="/start/">ثبت درخواست پروژه ←</a>
+        <a href="/">بازگشت به سایت</a>
+      </div>
+    </div>
+  </section>
   <div class="noise" aria-hidden="true"></div>
   <main class="shell">
     <header class="topbar">
@@ -392,6 +423,25 @@
   </dialog>
 
 <script>
+const ACCESS_HASH='2a412b952cd39aeeec3e9366c3be27ef9cb7f89e423947aeb4260f819493e916';
+async function sha256(v){
+  const data=new TextEncoder().encode(v);
+  const digest=await crypto.subtle.digest('SHA-256',data);
+  return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+function unlockQuote(){
+  document.body.classList.remove('quote-locked');
+  document.getElementById('accessGate')?.remove();
+  sessionStorage.setItem('roznex_quote_access','1');
+}
+if(sessionStorage.getItem('roznex_quote_access')==='1')unlockQuote();
+document.getElementById('accessForm')?.addEventListener('submit',async e=>{
+  e.preventDefault();
+  const code=document.getElementById('accessCode').value.trim().toUpperCase();
+  const ok=await sha256(code)===ACCESS_HASH;
+  if(ok){unlockQuote();return}
+  document.getElementById('accessError').textContent='کد دسترسی معتبر نیست. برای دریافت دسترسی ابتدا پروژه را ثبت کنید.';
+});
 const CATALOG={
   personal:{
     label:'سایت شخصی / رزومه',icon:'CV',desc:'برای متخصصان، مدیران، فریلنسرها و برند شخصی',
