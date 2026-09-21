@@ -173,7 +173,7 @@
             <label class="field"><span>شماره موبایل *</span><input id="mobile" inputmode="tel" autocomplete="tel"></label>
             <label class="field"><span>ایمیل</span><input id="email" inputmode="email" autocomplete="email"></label>
             <label class="field"><span>عنوان پروژه *</span><input id="project"></label>
-            <label class="field"><span>تاریخ شروع پیشنهادی *</span><input id="date" type="date"><small class="date-note">تاریخ در پیش‌فاکتور به‌صورت شمسی نمایش داده می‌شود.</small></label>
+            <label class="field"><span>تاریخ شروع پیشنهادی *</span><input id="date" type="date"><small class="date-note" id="startJalaliPreview">تاریخ شمسی: تعیین نشده</small></label>
             <label class="field"><span class="pay-line"><span>روش پرداخت</span><button class="pay-help" id="paymentHelpBtn" type="button">راهنمای پرداخت</button></span>
               <select id="pay"><option value="4">۴۰ / ۳۰ / ۲۰ / ۱۰</option><option value="2">۵۰ / ۵۰</option><option value="1">پرداخت کامل</option></select>
             </label>
@@ -289,9 +289,42 @@ const S=[
 
 const $=id=>document.getElementById(id);
 const fmt=n=>new Intl.NumberFormat('fa-IR').format(Math.round(n));
-const today=()=>new Date().toISOString().slice(0,10);
-const fd=s=>s?new Intl.DateTimeFormat('fa-IR-u-ca-persian-nu-arabext',{year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(s+'T12:00:00')):'تعیین نشده';
-const add=(s,n)=>{if(!s)return'';const d=new Date(s+'T12:00:00');d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
+const faDigits=s=>String(s).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
+const pad2=n=>String(n).padStart(2,'0');
+const today=()=>{
+  const d=new Date();
+  return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
+};
+function gregorianToJalali(gy,gm,gd){
+  const gdm=[0,31,59,90,120,151,181,212,243,273,304,334];
+  let jy;
+  if(gy>1600){jy=979;gy-=1600}else{jy=0;gy-=621}
+  const gy2=gm>2?gy+1:gy;
+  let days=365*gy+Math.floor((gy2+3)/4)-Math.floor((gy2+99)/100)+Math.floor((gy2+399)/400)-80+gd+gdm[gm-1];
+  jy+=33*Math.floor(days/12053);days%=12053;
+  jy+=4*Math.floor(days/1461);days%=1461;
+  if(days>365){jy+=Math.floor((days-1)/365);days=(days-1)%365}
+  const jm=days<186?1+Math.floor(days/31):7+Math.floor((days-186)/30);
+  const jd=1+(days<186?days%31:(days-186)%30);
+  return [jy,jm,jd];
+}
+const fd=s=>{
+  if(!s)return'تعیین نشده';
+  const parts=String(s).split('-').map(Number);
+  if(parts.length!==3||parts.some(Number.isNaN))return'تعیین نشده';
+  const [jy,jm,jd]=gregorianToJalali(parts[0],parts[1],parts[2]);
+  return faDigits(jy+'/'+pad2(jm)+'/'+pad2(jd));
+};
+const add=(s,n)=>{
+  if(!s)return'';
+  const p=s.split('-').map(Number);
+  const d=new Date(p[0],p[1]-1,p[2],12,0,0);
+  d.setDate(d.getDate()+n);
+  return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
+};
+function updateJalaliPreview(){
+  $('startJalaliPreview').textContent='تاریخ شمسی: '+fd($('date').value);
+}
 let sel=new Set();
 
 function sum(){return S.filter(x=>sel.has(x[0])).reduce((a,x)=>a+x[3],0)}
@@ -361,7 +394,7 @@ function renderRecent(){
 }
 function loadQuote(item){
   $('name').value=item.name||'';$('company').value=item.company||'';$('mobile').value=item.mobile||'';$('email').value=item.email||'';
-  $('project').value=item.project||'';$('date').value=item.date||today();$('budget').value=item.budget||'';$('notes').value=item.notes||'';
+  $('project').value=item.project||'';$('date').value=item.date||today();updateJalaliPreview();$('budget').value=item.budget||'';$('notes').value=item.notes||'';
   $('pay').value=item.pay||'4';sel=new Set(item.selected||[]);renderServices();renderInvoice(item,false);
 }
 function renderInvoice(data,save){
@@ -393,11 +426,12 @@ function issue(){
 }
 function reset(){
   ['name','company','mobile','email','project','budget','notes'].forEach(id=>$(id).value='');
-  $('date').value=today();$('pay').value='4';sel.clear();$('invoice').classList.add('hidden');renderServices();
+  $('date').value=today();updateJalaliPreview();$('pay').value='4';sel.clear();$('invoice').classList.add('hidden');renderServices();
 }
 $('date').value=today();
+updateJalaliPreview();
 $('pay').addEventListener('change',update);
-$('date').addEventListener('change',update);
+$('date').addEventListener('change',()=>{update();updateJalaliPreview()});
 $('issue').addEventListener('click',issue);
 $('reset').addEventListener('click',reset);
 $('printBtn').addEventListener('click',()=>window.print());
