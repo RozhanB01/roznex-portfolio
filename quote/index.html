@@ -101,25 +101,45 @@
     .recent-copy span{font-size:.62rem;color:var(--muted)}
     .recent-open{border:1px solid var(--line);background:transparent;border-radius:999px;padding:.45rem .7rem;font-size:.62rem}
     .empty{color:var(--muted);font-size:.7rem;margin:0}
-    .invoice{background:#fffaf4}
-    .invoice-header{display:flex;justify-content:space-between;gap:1rem;align-items:flex-start;padding-bottom:1.25rem;border-bottom:1px solid var(--ink)}
-    .invoice-header h2{font-size:2rem;letter-spacing:-.04em;margin:1rem 0 .2rem}
+    .invoice{position:relative;overflow:hidden;background:#fffaf4;border-color:#d9c7af}
+    .invoice:before{content:"";position:absolute;inset:0 0 auto;height:5px;background:linear-gradient(90deg,#11141b 0 72%,#a77a45 72% 100%)}
+    .invoice-header{display:flex;justify-content:space-between;gap:1.5rem;align-items:flex-start;padding:1.1rem 0 1.35rem;border-bottom:1px solid #d9c7af}
+    .invoice-title-wrap{display:flex;flex-direction:column;gap:.15rem}
+    .invoice-kicker{font:600 .58rem Manrope;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+    .invoice-header h2{font-size:2rem;letter-spacing:-.04em;margin:.65rem 0 .15rem}
     .invoice-header p{margin:0;color:var(--muted);font-size:.68rem}
-    .approval{font-size:.62rem;padding:.55rem .75rem;border:1px solid rgba(167,122,69,.4);border-radius:999px;color:#7d5b35;background:#f8ecd9}
-    .client-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem;padding:1.1rem 0}
-    .client-grid div{border-right:2px solid #e5d8c9;padding-right:.65rem}
-    .client-grid span{display:block;font-size:.58rem;color:#81786f;margin-bottom:.25rem}
-    .client-grid strong{font-size:.72rem}
-    .table-wrap{overflow-x:auto}
+    .approval{font-size:.62rem;padding:.55rem .75rem;border:1px solid rgba(167,122,69,.4);border-radius:999px;color:#7d5b35;background:#f8ecd9;white-space:nowrap}
+    .invoice-section{margin-top:1.35rem}
+    .invoice-section-title{display:flex;align-items:center;gap:.65rem;margin:0 0 .75rem;font-size:.78rem}
+    .invoice-section-title:after{content:"";height:1px;background:#e2d6c8;flex:1}
+    .client-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid #e2d6c8;border-radius:1rem;overflow:hidden;background:#fffdf9}
+    .client-grid div{padding:.78rem .85rem;border-left:1px solid #e9dfd4;border-bottom:1px solid #e9dfd4;min-height:4.1rem}
+    .client-grid div:nth-child(3n){border-left:0}
+    .client-grid div:nth-last-child(-n+3){border-bottom:0}
+    .client-grid span{display:block;font-size:.57rem;color:#8b8176;margin-bottom:.28rem}
+    .client-grid strong{font-size:.72rem;font-weight:600;overflow-wrap:anywhere}
+    .table-wrap{overflow-x:auto;border:1px solid #e2d6c8;border-radius:1rem}
     table{width:100%;border-collapse:collapse;min-width:560px}
-    th,td{text-align:right;padding:.72rem .6rem;border-bottom:1px solid #e6ddd3;font-size:.68rem}
-    th{font-weight:600;color:#6a625a;background:#f6eee5}
-    .invoice-total{display:flex;justify-content:space-between;gap:1rem;align-items:center;margin:1.2rem 0 1.6rem auto;max-width:360px;border-top:1px solid var(--ink);padding-top:.9rem}
-    .invoice-total span{font-size:.72rem;color:var(--muted)}
-    .invoice-total strong{font:600 1.25rem Manrope}
+    th,td{text-align:right;padding:.78rem .72rem;border-bottom:1px solid #e9dfd4;font-size:.68rem}
+    tbody tr:last-child td{border-bottom:0}
+    th{font-weight:600;color:#5f574f;background:#f4eadf}
+    th:first-child,td:first-child{width:3rem;text-align:center}
+    th:last-child,td:last-child{white-space:nowrap}
+    .invoice-total{display:flex;justify-content:space-between;gap:1rem;align-items:center;margin:1rem 0 1.5rem 0;border:1px solid #d8c4aa;background:#f6ecdf;border-radius:1rem;padding:1rem 1.15rem}
+    .invoice-total span{font-size:.72rem;color:#6f655b}
+    .invoice-total strong{font:600 1.35rem Manrope;color:#11141b}
     .invoice h3{font-size:.9rem}
-    .legal{font-size:.6rem;color:#7c746b;line-height:2;margin:1.25rem 0}
-    .print-btn{width:100%;border:0;border-radius:999px;background:var(--ink);color:white;padding:.88rem 1rem;font-weight:700}
+    .invoice-notes{margin-top:1rem;padding:1rem 1.1rem;border:1px solid #e2d6c8;border-radius:1rem;background:#fffdf9}
+    .invoice-notes span{display:block;font-size:.58rem;color:#8b8176;margin-bottom:.35rem}
+    .invoice-notes p{margin:0;font-size:.68rem;line-height:1.9;white-space:pre-wrap}
+    .signature-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.25rem 0}
+    .signature-box{min-height:5.5rem;border:1px dashed #cbb9a2;border-radius:1rem;padding:.8rem;background:#fffdf9}
+    .signature-box strong{display:block;font-size:.66rem;margin-bottom:.25rem}
+    .signature-box span{font-size:.56rem;color:#8b8176}
+    .legal{font-size:.58rem;color:#7c746b;line-height:2;margin:1.1rem 0;padding-top:1rem;border-top:1px solid #e2d6c8}
+    .invoice-footer{display:flex;justify-content:space-between;gap:1rem;align-items:center;margin-top:1rem;padding-top:.8rem;border-top:1px solid #e2d6c8;color:#8b8176;font:500 .52rem Manrope}
+    .invoice-footer b{color:#11141b;letter-spacing:.12em}
+    .print-btn{width:100%;border:0;border-radius:999px;background:var(--ink);color:white;padding:.88rem 1rem;font-weight:700;margin-top:.75rem}
     .hidden{display:none!important}
     @media(max-width:900px){
       .intro,.layout,.fields{grid-template-columns:1fr}
@@ -135,15 +155,46 @@
       .client-grid{grid-template-columns:1fr}
       .invoice-header{flex-direction:column}
     }
+    @page{size:A4;margin:10mm}
     @media print{
-      body{background:white}
-      .shell{max-width:none;padding:0}
-      .topbar,.intro,.config,.summary,.recent-card{display:none!important}
-      .invoice{display:block!important;border:0;background:white;padding:0}
-      .client-grid{grid-template-columns:repeat(4,1fr)}
-      .table-wrap{overflow:visible}
-      table{min-width:0}
-      .print-btn{display:none}
+      *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+      html,body{background:#fff!important}
+      body{margin:0;font-size:10pt}
+      .noise,.topbar,.intro,.config,.summary,.recent-card,.print-btn{display:none!important}
+      .shell{max-width:none!important;width:100%!important;padding:0!important;margin:0!important}
+      .layout{display:block!important}
+      .layout>section{width:100%!important}
+      .invoice{display:block!important;width:100%!important;margin:0!important;padding:8mm 9mm 7mm!important;border:1px solid #d9c7af!important;border-radius:4mm!important;background:#fffaf4!important;box-shadow:none!important;overflow:visible!important}
+      .invoice:before{height:3px!important}
+      .invoice-header{padding-top:4mm!important;padding-bottom:4mm!important;break-inside:avoid}
+      .invoice .brand-logo{width:42mm!important}
+      .invoice-kicker{font-size:6pt!important}
+      .invoice-header h2{font-size:20pt!important;margin:3mm 0 1mm!important}
+      .invoice-header p,.approval{font-size:7pt!important}
+      .approval{padding:2mm 3mm!important}
+      .invoice-section{margin-top:4mm!important;break-inside:avoid}
+      .invoice-section-title{font-size:8pt!important;margin-bottom:2.5mm!important}
+      .client-grid{grid-template-columns:repeat(3,1fr)!important;border-radius:3mm!important}
+      .client-grid div{min-height:13mm!important;padding:3mm!important}
+      .client-grid span{font-size:6pt!important}
+      .client-grid strong{font-size:7.5pt!important}
+      .table-wrap{overflow:visible!important;border-radius:3mm!important}
+      table{min-width:0!important;width:100%!important}
+      thead{display:table-header-group}
+      tr{break-inside:avoid;page-break-inside:avoid}
+      th,td{font-size:7pt!important;padding:2.5mm 2.2mm!important}
+      .invoice-total{margin:3mm 0 4mm!important;padding:3mm 4mm!important;border-radius:3mm!important;break-inside:avoid}
+      .invoice-total span{font-size:7pt!important}
+      .invoice-total strong{font-size:12pt!important}
+      .payment-model{font-size:6.5pt!important;margin:0 0 2.5mm!important}
+      .invoice-notes{padding:3mm 4mm!important;margin-top:4mm!important;border-radius:3mm!important;break-inside:avoid}
+      .invoice-notes span{font-size:6pt!important}
+      .invoice-notes p{font-size:7pt!important;line-height:1.7!important}
+      .signature-grid{gap:4mm!important;margin:4mm 0!important;break-inside:avoid}
+      .signature-box{min-height:18mm!important;padding:3mm!important;border-radius:3mm!important}
+      .signature-box strong{font-size:7pt!important}.signature-box span{font-size:6pt!important}
+      .legal{font-size:6pt!important;line-height:1.75!important;margin:3mm 0!important;padding-top:3mm!important;break-inside:avoid}
+      .invoice-footer{font-size:5.5pt!important;margin-top:2mm!important;padding-top:2mm!important;break-inside:avoid}
     }
   </style>
 </head>
@@ -211,34 +262,52 @@
 
         <section class="card invoice hidden" id="invoice">
           <div class="invoice-header">
-            <div>
+            <div class="invoice-title-wrap">
               <a class="brand" href="/" aria-label="ROZNEX"><img class="brand-logo" src="../assets/roznex-logo.svg" alt="ROZNEX"></a>
+              <span class="invoice-kicker">SMARTQUOTE / PROFORMA</span>
               <h2>پیش‌فاکتور خدمات</h2>
               <p id="meta"></p>
             </div>
             <span class="approval">نیازمند تأیید نهایی Roznex</span>
           </div>
 
-          <div class="client-grid">
-            <div><span>مشتری</span><strong id="invName"></strong></div>
-            <div><span>شرکت</span><strong id="invCompany"></strong></div>
-            <div><span>پروژه</span><strong id="invProject"></strong></div>
-            <div><span>موبایل</span><strong id="invMobile"></strong></div>
+          <section class="invoice-section">
+            <h3 class="invoice-section-title">مشخصات پروژه</h3>
+            <div class="client-grid">
+              <div><span>مشتری</span><strong id="invName"></strong></div>
+              <div><span>شرکت</span><strong id="invCompany"></strong></div>
+              <div><span>پروژه</span><strong id="invProject"></strong></div>
+              <div><span>شماره تماس</span><strong id="invMobile"></strong></div>
+              <div><span>ایمیل</span><strong id="invEmail"></strong></div>
+              <div><span>شروع پیشنهادی</span><strong id="invStartDate"></strong></div>
+            </div>
+          </section>
+
+          <section class="invoice-section">
+            <h3 class="invoice-section-title">شرح خدمات</h3>
+            <div class="table-wrap">
+              <table><thead><tr><th>ردیف</th><th>شرح خدمت</th><th>مبلغ</th></tr></thead><tbody id="rows"></tbody></table>
+            </div>
+            <div class="invoice-total"><span>جمع کل سرمایه‌گذاری پروژه</span><strong id="invTotal"></strong></div>
+          </section>
+
+          <section class="invoice-section">
+            <h3 class="invoice-section-title">برنامه پرداخت</h3>
+            <p class="payment-model" id="paymentModelLabel"></p>
+            <div class="table-wrap">
+              <table><thead><tr><th>مرحله</th><th>درصد</th><th>مبلغ</th><th>تاریخ شمسی</th></tr></thead><tbody id="payments"></tbody></table>
+            </div>
+          </section>
+
+          <div class="invoice-notes hidden" id="invoiceNotes"><span>توضیحات پروژه</span><p id="invNotes"></p></div>
+
+          <div class="signature-grid">
+            <div class="signature-box"><strong>تأیید Roznex</strong><span>نام، امضا و تاریخ</span></div>
+            <div class="signature-box"><strong>تأیید مشتری</strong><span>نام، امضا و تاریخ</span></div>
           </div>
 
-          <div class="table-wrap">
-            <table><thead><tr><th>#</th><th>شرح خدمت</th><th>مبلغ</th></tr></thead><tbody id="rows"></tbody></table>
-          </div>
-
-          <div class="invoice-total"><span>جمع کل</span><strong id="invTotal"></strong></div>
-
-          <h3>برنامه پرداخت</h3>
-          <p class="payment-model" id="paymentModelLabel"></p>
-          <div class="table-wrap">
-            <table><thead><tr><th>مرحله</th><th>درصد</th><th>مبلغ</th><th>تاریخ</th></tr></thead><tbody id="payments"></tbody></table>
-          </div>
-
-          <p class="legal">این سند به‌صورت خودکار ساخته شده است. مبلغ نهایی، زمان‌بندی قطعی و Scope پس از بررسی و تأیید Roznex معتبر خواهد بود. دامنه، هاست، سرویس‌های پولی و درخواست‌های خارج از Scope جداگانه محاسبه می‌شوند.</p>
+          <p class="legal">این سند پیش‌فاکتور است و پس از بررسی Scope، زمان‌بندی و تأیید نهایی Roznex معتبر خواهد بود. هزینه دامنه، هاست، سرویس‌های پولی، تولید محتوای تخصصی و درخواست‌های خارج از Scope، مگر آنکه صراحتاً در خدمات انتخاب‌شده ذکر شده باشند، جداگانه محاسبه می‌شوند.</p>
+          <footer class="invoice-footer"><b>ROZNEX</b><span>DIGITAL INTELLIGENCE STUDIO</span><span>SmartQuote · 2026</span></footer>
           <button class="print-btn" type="button" id="printBtn">چاپ / ذخیره PDF</button>
         </section>
       </section>
@@ -482,6 +551,10 @@ function renderInvoice(data,save){
   $('invCompany').textContent=data.company||'شخصی';
   $('invProject').textContent=data.project;
   $('invMobile').textContent=data.mobile;
+  $('invEmail').textContent=data.email||'—';
+  $('invStartDate').textContent=fd(data.date);
+  $('invNotes').textContent=data.notes||'';
+  $('invoiceNotes').classList.toggle('hidden',!data.notes);
   const rows=$('rows');rows.replaceChildren();
   chosen.forEach((x,i)=>{const tr=document.createElement('tr');[i+1,x[1],fmt(x[3])+' تومان'].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.append(td)});rows.append(tr)});
   $('invTotal').textContent=fmt(sum())+' تومان';
