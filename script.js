@@ -85,3 +85,31 @@ const spy=new IntersectionObserver(entries=>entries.forEach(entry=>{
   }
 }),{rootMargin:'-35% 0px -60%',threshold:0});
 sections.forEach(section=>spy.observe(section));
+
+
+// Service visuals: subtle pointer parallax + mobile active state
+const serviceCards=[...document.querySelectorAll('.service-card')];
+if(!reduceMotion&&finePointer){
+  serviceCards.forEach(card=>{
+    const visual=card.querySelector('.service-visual');
+    card.addEventListener('pointermove',event=>{
+      const r=card.getBoundingClientRect();
+      const x=(event.clientX-r.left)/r.width;
+      const y=(event.clientY-r.top)/r.height;
+      card.style.setProperty('--sx',`${(x*100).toFixed(1)}%`);
+      card.style.setProperty('--sy',`${(y*100).toFixed(1)}%`);
+      if(visual){
+        visual.style.setProperty('--vx',`${((x-.5)*-8).toFixed(1)}px`);
+        visual.style.setProperty('--vy',`${((y-.5)*-8).toFixed(1)}px`);
+      }
+    },{passive:true});
+    card.addEventListener('pointerleave',()=>{
+      card.style.removeProperty('--sx');card.style.removeProperty('--sy');
+      if(visual){visual.style.setProperty('--vx','0px');visual.style.setProperty('--vy','0px')}
+    });
+  });
+}
+const serviceSpy=new IntersectionObserver(entries=>entries.forEach(entry=>{
+  entry.target.classList.toggle('is-active',entry.isIntersecting&&entry.intersectionRatio>.55);
+}),{threshold:[.2,.55,.8]});
+serviceCards.forEach(card=>serviceSpy.observe(card));
