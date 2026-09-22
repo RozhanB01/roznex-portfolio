@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 680" role="img" aria-label="ROZNEX web design visual">
+<defs>
+ <linearGradient id="bg" x1="0" x2="1" y2="1"><stop stop-color="#0a0b0c"/><stop offset=".55" stop-color="#211c17"/><stop offset="1" stop-color="#0d0d0e"/></linearGradient>
+ <linearGradient id="glass" x1="0" x2="1"><stop stop-color="#f4eadc" stop-opacity=".92"/><stop offset="1" stop-color="#a98152" stop-opacity=".2"/></linearGradient>
+ <linearGradient id="gold" x1="0" x2="1"><stop stop-color="#7d5228"/><stop offset=".45" stop-color="#efc987"/><stop offset="1" stop-color="#aa7338"/></linearGradient>
+ <filter id="shadow"><feDropShadow dx="0" dy="30" stdDeviation="24" flood-color="#000" flood-opacity=".5"/></filter>
+</defs>
+<rect width="900" height="680" fill="url(#bg)"/>
+<g opacity=".12" stroke="#efc987"><path d="M0 120h900M0 220h900M0 320h900M0 420h900M0 520h900"/><path d="M120 0v680M300 0v680M480 0v680M660 0v680M840 0v680"/></g>
+<g filter="url(#shadow)">
+ <rect x="110" y="112" width="620" height="390" rx="28" fill="#171719" stroke="#b98b56" stroke-opacity=".65"/>
+ <rect x="132" y="136" width="576" height="342" rx="17" fill="url(#glass)" fill-opacity=".14" stroke="#fff" stroke-opacity=".14"/>
+ <circle cx="160" cy="158" r="5" fill="#dcb774"/><circle cx="178" cy="158" r="5" fill="#75614a"/><circle cx="196" cy="158" r="5" fill="#4c4337"/>
+ <rect x="164" y="205" width="234" height="26" rx="13" fill="#f1e9df" opacity=".88"/>
+ <rect x="164" y="246" width="176" height="11" rx="6" fill="#bba78c" opacity=".54"/>
+ <rect x="164" y="269" width="145" height="11" rx="6" fill="#bba78c" opacity=".34"/>
+ <rect x="164" y="326" width="114" height="38" rx="19" fill="url(#gold)"/>
+ <rect x="452" y="196" width="215" height="210" rx="24" fill="#0f1011" stroke="#d6b276" stroke-opacity=".46"/>
+ <circle cx="560" cy="300" r="60" fill="none" stroke="#d9b77d" stroke-opacity=".55"/><path d="M505 300h110M560 245v110" stroke="#d9b77d" stroke-opacity=".35"/>
+</g>
+<g transform="translate(624 278) rotate(7)" filter="url(#shadow)">
+ <rect width="150" height="292" rx="27" fill="#111214" stroke="#d5af72" stroke-opacity=".75"/>
+ <rect x="11" y="18" width="128" height="248" rx="19" fill="#e9dfd3"/>
+ <rect x="31" y="54" width="86" height="11" rx="6" fill="#1b1b1c"/>
+ <rect x="31" y="79" width="68" height="7" rx="4" fill="#967b5a" opacity=".55"/>
+ <rect x="31" y="118" width="86" height="86" rx="15" fill="#1b1b1c"/>
+ <path d="M47 177c21-45 42-45 63-10" fill="none" stroke="#d8b170" stroke-width="4"/>
+</g>
+<path d="M90 560h650" stroke="#b9874b" stroke-opacity=".5"/><circle cx="742" cy="560" r="5" fill="#efc987"/>
+</svg>
