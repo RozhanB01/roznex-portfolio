@@ -131,3 +131,25 @@ if(!reduceMotion&&finePointer){
     });
   });
 }
+
+
+// ROZNEX visual depth: project cards + about + contact collage
+if(!reduceMotion && finePointer){
+  document.querySelectorAll('[data-project-card], [data-about-visual], .contact-visual').forEach(card=>{
+    card.addEventListener('pointermove',event=>{
+      const r=card.getBoundingClientRect();
+      const x=(event.clientX-r.left)/r.width-.5;
+      const y=(event.clientY-r.top)/r.height-.5;
+      card.style.setProperty('--rx',`${(-y*2.2).toFixed(2)}deg`);
+      card.style.setProperty('--ry',`${(x*2.8).toFixed(2)}deg`);
+      const image=card.querySelector('img');
+      if(image) image.style.transform=`scale(1.045) translate3d(${(x*-5).toFixed(1)}px,${(y*-5).toFixed(1)}px,0)`;
+    },{passive:true});
+    card.addEventListener('pointerleave',()=>{
+      card.style.removeProperty('--rx');
+      card.style.removeProperty('--ry');
+      const image=card.querySelector('img');
+      if(image) image.style.transform='';
+    });
+  });
+}
