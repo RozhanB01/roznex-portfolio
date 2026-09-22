@@ -192,3 +192,9 @@ body.fa .contact-actions{justify-content:flex-start}
   .contact footer nav{flex-wrap:wrap;justify-content:center}
   body.fa .about-visual-overlay strong{text-align:right}
 }
+
+/* Private control entry */
+.contact footer .control-link{display:inline-flex;align-items:center;gap:.35rem;opacity:.42;transition:opacity .2s ease,color .2s ease}
+.contact footer .control-link:hover,.contact footer .control-link:focus-visible{opacity:1;color:var(--ink)}
+.contact footer .control-link>span:first-child{font-size:.78rem;line-height:1}
+@media(max-width:760px){.contact footer .control-link{opacity:.58}}
