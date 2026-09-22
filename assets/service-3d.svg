@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 680" role="img" aria-label="ROZNEX 3D visual">
+<defs>
+ <linearGradient id="bg" x1="0" x2="1" y2="1"><stop stop-color="#090a0b"/><stop offset=".52" stop-color="#1b1713"/><stop offset="1" stop-color="#0b0b0c"/></linearGradient>
+ <radialGradient id="halo"><stop stop-color="#f1c77e" stop-opacity=".34"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+ <linearGradient id="gold" x1=".1" y1="0" x2=".9" y2="1"><stop stop-color="#533016"/><stop offset=".25" stop-color="#f3d7a0"/><stop offset=".48" stop-color="#9f642c"/><stop offset=".7" stop-color="#f7d899"/><stop offset="1" stop-color="#6c3e1e"/></linearGradient>
+ <filter id="shadow"><feDropShadow dx="0" dy="28" stdDeviation="26" flood-color="#000" flood-opacity=".55"/></filter>
+</defs>
+<rect width="900" height="680" fill="url(#bg)"/><ellipse cx="480" cy="330" rx="340" ry="300" fill="url(#halo)"/>
+<g opacity=".22" fill="none" stroke="#ddba82">
+ <path d="M84 126l126-70 126 70v141l-126 71-126-71zM617 94l104-57 104 57v117l-104 58-104-58z"/>
+ <path d="M210 56v141l126 70M84 126l126 71 126-71M721 37v117l104 57M617 94l104 60 104-60"/>
+</g>
+<g transform="translate(230 110)" filter="url(#shadow)">
+ <path d="M234 30c109 0 198 88 198 197 0 66-32 124-82 160-38 28-61 69-61 115v31h-96v-31c0-47-22-88-61-115-49-36-81-94-81-160C51 118 130 30 234 30Z" fill="url(#gold)"/>
+ <path d="M233 130c54 0 97 43 97 97s-43 97-97 97-97-43-97-97 43-97 97-97Z" fill="#0d0d0e"/>
+ <path d="M233 160c37 0 67 30 67 67s-30 67-67 67-67-30-67-67 30-67 67-67Z" fill="none" stroke="#f7e6bf" stroke-opacity=".5"/>
+</g>
+<g fill="none" stroke="#f0cc8c" opacity=".28">
+ <ellipse cx="464" cy="337" rx="300" ry="118"/><ellipse cx="464" cy="337" rx="350" ry="172"/><path d="M114 337h700M464 76v522"/>
+</g>
+<g fill="#f2d49a"><circle cx="165" cy="337" r="6"/><circle cx="766" cy="337" r="6"/><circle cx="464" cy="76" r="6"/><circle cx="464" cy="598" r="6"/></g>
+</svg>
