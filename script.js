@@ -113,3 +113,21 @@ const serviceSpy=new IntersectionObserver(entries=>entries.forEach(entry=>{
   entry.target.classList.toggle('is-active',entry.isIntersecting&&entry.intersectionRatio>.55);
 }),{threshold:[.2,.55,.8]});
 serviceCards.forEach(card=>serviceSpy.observe(card));
+
+
+// Project cards: subtle cursor depth
+const projectCards=[...document.querySelectorAll('[data-project-card]')];
+if(!reduceMotion&&finePointer){
+  projectCards.forEach(card=>{
+    const media=card.querySelector('.project-media img');
+    card.addEventListener('pointermove',event=>{
+      const r=card.getBoundingClientRect();
+      const x=((event.clientX-r.left)/r.width-.5)*2;
+      const y=((event.clientY-r.top)/r.height-.5)*2;
+      if(media) media.style.transform=`scale(1.05) translate3d(${x*-5}px,${y*-5}px,0)`;
+    },{passive:true});
+    card.addEventListener('pointerleave',()=>{
+      if(media) media.style.transform='';
+    });
+  });
+}
