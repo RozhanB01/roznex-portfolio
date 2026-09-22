@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 
-const ADMIN_PASSWORD_HASH = '8b8d561d46967e6b21503d701f1ab077c4f2db779024fef84022e7a0b075b001';
+const ADMIN_PASSWORD_HASH = 'f7a15aa99a87a340d9d10a881e1033b45f93fdf8056c52a36b29da5caf934c3a';
 
 function safeEqual(left, right) {
   const a = Buffer.from(left);
