@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 680" role="img" aria-label="ROZNEX SEO visual">
+<defs>
+ <linearGradient id="bg" x1="0" x2="1" y2="1"><stop stop-color="#08090a"/><stop offset=".56" stop-color="#1c1814"/><stop offset="1" stop-color="#0b0b0c"/></linearGradient>
+ <linearGradient id="gold" x1="0" x2="1"><stop stop-color="#6d431c"/><stop offset=".45" stop-color="#f0cb8b"/><stop offset=".72" stop-color="#a6682e"/><stop offset="1" stop-color="#f5db9f"/></linearGradient>
+ <linearGradient id="ivory" x1="0" y1="1" x2="0" y2="0"><stop stop-color="#8d704f"/><stop offset=".45" stop-color="#f1e2c8"/><stop offset="1" stop-color="#fff8e9"/></linearGradient>
+ <filter id="shadow"><feDropShadow dx="0" dy="24" stdDeviation="20" flood-color="#000" flood-opacity=".55"/></filter>
+</defs>
+<rect width="900" height="680" fill="url(#bg)"/>
+<g opacity=".12" stroke="#e5bd7b"><path d="M85 540H820M85 460H820M85 380H820M85 300H820M85 220H820"/></g>
+<g filter="url(#shadow)">
+ <rect x="470" y="380" width="74" height="142" rx="13" fill="url(#ivory)"/>
+ <rect x="572" y="310" width="74" height="212" rx="13" fill="url(#ivory)"/>
+ <rect x="674" y="224" width="74" height="298" rx="13" fill="url(#ivory)"/>
+</g>
+<g transform="translate(122 112) rotate(-8 240 240)" filter="url(#shadow)">
+ <circle cx="244" cy="230" r="151" fill="#0e0f10" fill-opacity=".84" stroke="url(#gold)" stroke-width="34"/>
+ <circle cx="244" cy="230" r="120" fill="none" stroke="#f2d398" stroke-opacity=".2" stroke-width="2"/>
+ <path d="M355 342l143 143" stroke="url(#gold)" stroke-width="43" stroke-linecap="round"/>
+ <path d="M355 342l143 143" stroke="#fff0cc" stroke-opacity=".25" stroke-width="7" stroke-linecap="round"/>
+</g>
+<path d="M470 338c68-62 132-72 195-33 35 22 63 10 91-31" fill="none" stroke="#e6bd78" stroke-width="4" stroke-linecap="round"/>
+<circle cx="756" cy="274" r="8" fill="#f2d49a"/>
+</svg>
