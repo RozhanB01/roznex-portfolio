@@ -150,6 +150,36 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
     function safeImage(value=''){try{const u=new URL(String(value),location.origin);if(u.origin===location.origin)return u.pathname+u.search;return u.protocol==='https:'?u.href:''}catch{return ''}}
     function showToast(message){toast.textContent=message;toast.classList.add('show');setTimeout(function(){toast.classList.remove('show')},1900)}
     function showStorageMessage(message){storageBanner.textContent=message||'';storageBanner.classList.toggle('show',!!message)}
+    async function refreshStorageHealth(){
+      try{
+        const response=await fetch('/api/storage-health?ts='+Date.now(),{
+          headers:{Accept:'application/json'},
+          credentials:'same-origin',
+          cache:'no-store'
+        });
+        const data=await response.json();
+        storageReady=!!data.canWrite;
+        if(storageIndicator){
+          storageIndicator.textContent=storageReady?'MEDIA READY':'MEDIA ERROR';
+          storageIndicator.style.color=storageReady?'#2e7455':'#b04b3f';
+        }
+        if(!data.configured){
+          showStorageMessage('ذخیره‌سازی Vercel Blob به این پروژه وصل نیست یا BLOB_READ_WRITE_TOKEN وجود ندارد.');
+        }else if(!data.admin){
+          showStorageMessage('نشست مدیریت برای ذخیره‌سازی معتبر نیست. یک‌بار خروج کن و دوباره وارد شو.');
+        }else if(!data.canWrite){
+          showStorageMessage('اتصال Storage برقرار است اما تست نوشتن/خواندن شکست خورد: '+String(data.message||'خطای نامشخص'));
+        }else{
+          showStorageMessage('');
+        }
+        return data;
+      }catch(error){
+        storageReady=false;
+        if(storageIndicator){storageIndicator.textContent='MEDIA ERROR';storageIndicator.style.color='#b04b3f'}
+        showStorageMessage('تست Storage انجام نشد: '+String(error.message||error));
+        return {configured:false,admin:false,canWrite:false};
+      }
+    }
     function setPreview(url){
       const safe=safeImage(url);
       imagePreview.innerHTML=safe?'<img src="'+escapeHTML(safe)+'" alt="پیش‌نمایش تصویر پروژه">':'<span>◇</span>';
@@ -195,10 +225,11 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
     }
 
     async function loadProjects(){
+      const health=await refreshStorageHealth();
       try{
         const data=await requestJSON('/api/projects?admin=1');
-        storageReady=!!data.storageReady;
-        if(storageIndicator){storageIndicator.textContent=storageReady?'MEDIA READY':'MEDIA SETUP';storageIndicator.style.color=storageReady?'#2e7455':'#a86616'}
+        storageReady=!!data.storageReady && !!health.canWrite;
+        if(storageIndicator){storageIndicator.textContent=storageReady?'MEDIA READY':'MEDIA ERROR';storageIndicator.style.color=storageReady?'#2e7455':'#b04b3f'}
         projects=Array.isArray(data.projects)?data.projects:[];
         if(storageReady&&projects.length===0){
           let legacy=[];try{legacy=JSON.parse(localStorage.getItem(LEGACY_STORAGE_KEY)||'[]')}catch{}
@@ -212,7 +243,7 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
         showStorageMessage('');
       }catch(error){
         storageReady=false;
-        if(storageIndicator){storageIndicator.textContent='MEDIA SETUP';storageIndicator.style.color='#a86616'}
+        if(storageIndicator){storageIndicator.textContent='MEDIA ERROR';storageIndicator.style.color='#b04b3f'}
         let legacy=[];try{legacy=JSON.parse(localStorage.getItem(LEGACY_STORAGE_KEY)||'[]')}catch{}
         projects=Array.isArray(legacy)?legacy:[];
       }
@@ -334,6 +365,8 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
       submit.disabled=true;
       uploadState.textContent='';
       try{
+        const health=await refreshStorageHealth();
+        if(!health.canWrite) throw new Error('ذخیره‌سازی آماده نیست؛ پیام بالای داشبورد را بررسی کن.');
         await uploadSelectedImage();
         const fd=new FormData(form);
         const project={
