@@ -198,3 +198,10 @@ body.fa .contact-actions{justify-content:flex-start}
 .contact footer .control-link:hover,.contact footer .control-link:focus-visible{opacity:1;color:var(--ink)}
 .contact footer .control-link>span:first-child{font-size:.78rem;line-height:1}
 @media(max-width:760px){.contact footer .control-link{opacity:.58}}
+
+/* Projects published from the owner dashboard */
+.dashboard-project-grid{margin-bottom:1rem}
+.dashboard-project-grid[hidden]{display:none!important}
+.dashboard-project-tile{outline:1px solid rgba(167,122,69,.14);outline-offset:-1px}
+.dashboard-project-client{display:inline-flex;margin-top:.9rem;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:#8b7963}
+body.fa .dashboard-project-client{text-transform:none;letter-spacing:0}
