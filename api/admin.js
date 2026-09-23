@@ -164,29 +164,241 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
   </div>
   <div class="toast" id="toast"></div>
   <script>
-    const STORAGE_KEY='roznex_admin_projects_v1';
+    const LEGACY_STORAGE_KEY='roznex_admin_projects_v1';
     const labels={draft:'پیش‌نویس',review:'در حال بررسی',approved:'تأییدشده'};
-    let projects=readProjects();
+    let projects=[];
+    let storageReady=false;
+    let selectedImageFile=null;
     const modal=document.getElementById('project-modal');
     const form=document.getElementById('project-form');
     const toast=document.getElementById('toast');
-    function readProjects(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]')}catch{return []}}
-    function saveProjects(){localStorage.setItem(STORAGE_KEY,JSON.stringify(projects));render();showToast('تغییرات ذخیره شد')}
+    const imageInput=document.getElementById('image');
+    const imageUrlInput=document.getElementById('imageUrl');
+    const imagePreview=document.getElementById('image-preview');
+    const uploadState=document.getElementById('upload-state');
+    const storageBanner=document.getElementById('storage-banner');
+
     function fa(n){return new Intl.NumberFormat('fa-IR').format(n)}
-    function escapeHTML(value=''){return String(value).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[c]))}
-    function listHTML(items){if(!items.length)return '<div class="empty"><div><div class="icon">◇</div><h3>هنوز پروژه‌ای ثبت نشده</h3><p>اولین پروژه را اضافه کن، جزئیاتش را بررسی کن و فقط وقتی کامل شد آن را تأیید کن.</p><button class="btn primary" data-add>ثبت اولین پروژه</button></div></div>';return '<div class="project-list">'+items.map(p=>'<article class="project-row"><div><h3>'+escapeHTML(p.title)+' <span class="badge '+p.status+'">'+labels[p.status]+'</span></h3><p>'+escapeHTML([p.client,p.category,p.date].filter(Boolean).join(' · ')||'بدون جزئیات تکمیلی')+'</p></div><div class="row-actions"><button data-edit="'+p.id+'">ویرایش</button><button data-delete="'+p.id+'">حذف</button></div></article>').join('')+'</div>'}
-    function render(){document.getElementById('stat-all').textContent=fa(projects.length);['draft','review','approved'].forEach(s=>document.getElementById('stat-'+s).textContent=fa(projects.filter(p=>p.status===s).length));document.getElementById('recent-projects').innerHTML=listHTML(projects.slice(0,4));document.getElementById('all-projects').innerHTML=listHTML(projects)}
-    function openForm(id){form.reset();form.elements.id.value='';document.getElementById('dialog-title').textContent='پروژه جدید';if(id){const p=projects.find(item=>item.id===id);if(!p)return;Object.entries(p).forEach(([key,value])=>{if(form.elements[key])form.elements[key].value=value});document.getElementById('dialog-title').textContent='ویرایش پروژه'}modal.classList.add('open');setTimeout(()=>form.elements.title.focus(),50)}
-    function closeForm(){modal.classList.remove('open')}
-    function showToast(message){toast.textContent=message;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),1800)}
-    document.addEventListener('click',e=>{const add=e.target.closest('[data-add]');const edit=e.target.closest('[data-edit]');const del=e.target.closest('[data-delete]');const publish=e.target.closest('[data-publish]');if(add)openForm();if(edit)openForm(edit.dataset.edit);if(publish){const p=projects.find(item=>item.id===publish.dataset.publish);if(p){p.status='approved';p.updatedAt=new Date().toISOString();saveProjects();showToast('پروژه برای نمایش در سایت تأیید شد')}}if(del&&confirm('این پروژه حذف شود؟')){projects=projects.filter(p=>p.id!==del.dataset.delete);saveProjects()}if(e.target.closest('[data-close]'))closeForm()});
-    modal.addEventListener('click',e=>{if(e.target===modal)closeForm()});
-    form.addEventListener('submit',e=>{e.preventDefault();const data=Object.fromEntries(new FormData(form));const project={...data,id:data.id||crypto.randomUUID(),updatedAt:new Date().toISOString()};const index=projects.findIndex(p=>p.id===project.id);if(index>=0)projects[index]=project;else projects.unshift(project);saveProjects();closeForm()});
-    document.querySelectorAll('.nav button').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('.nav button,.view').forEach(el=>el.classList.remove('active'));button.classList.add('active');document.getElementById(button.dataset.view).classList.add('active');const copy={overview:['داشبورد مدیریت','همه چیز برای بررسی منظم پروژه‌ها، قبل از انتشار.'],projects:['مدیریت پروژه‌ها','ثبت، ویرایش و تأیید نمونه‌کارهای واقعی.'],sections:['بخش‌های سایت','وضعیت محتوای اصلی ROZNEX.']}[button.dataset.view];document.getElementById('page-title').textContent=copy[0];document.getElementById('page-subtitle').textContent=copy[1]}));
-    document.getElementById('export-projects').addEventListener('click',()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),projects},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='roznex-projects-backup.json';a.click();URL.revokeObjectURL(a.href);showToast('فایل پشتیبان آماده شد')});
-    document.getElementById('import-projects').addEventListener('click',()=>document.getElementById('import-file').click());
-    document.getElementById('import-file').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());if(!Array.isArray(data.projects))throw new Error();projects=data.projects;saveProjects()}catch{alert('فایل پشتیبان معتبر نیست')}e.target.value=''});
-    addEventListener('keydown',e=>{if(e.key==='Escape')closeForm()});render();
+    function escapeHTML(value=''){return String(value).replace(/[&<>'"]/g,function(char){return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[char]})}
+    function safeImage(value=''){try{const u=new URL(String(value));return u.protocol==='https:'?u.href:''}catch{return ''}}
+    function showToast(message){toast.textContent=message;toast.classList.add('show');setTimeout(function(){toast.classList.remove('show')},1900)}
+    function showStorageMessage(message){storageBanner.textContent=message||'';storageBanner.classList.toggle('show',!!message)}
+    function setPreview(url){
+      const safe=safeImage(url);
+      imagePreview.innerHTML=safe?'<img src="'+escapeHTML(safe)+'" alt="پیش‌نمایش تصویر پروژه">':'<span>◇</span>';
+    }
+
+    async function requestJSON(url,options){
+      const response=await fetch(url,Object.assign({credentials:'same-origin'},options||{}));
+      let data={};try{data=await response.json()}catch{}
+      if(response.status===401){showStorageMessage('نشست مدیریت منقضی شده است. صفحه را تازه کن و دوباره وارد شو.');throw new Error('نشست مدیریت منقضی شده است.')}
+      if(response.status===503&&data.error==='storage_not_configured'){showStorageMessage('برای فعال‌شدن ذخیره‌سازی دائمی تصاویر و پروژه‌ها، باید یک Vercel Blob Store به پروژه وصل شود. رابط کاربری آماده است و بعد از اتصال بدون تغییر کد فعال می‌شود.');throw new Error('فضای ذخیره‌سازی هنوز متصل نشده است.')}
+      if(!response.ok)throw new Error(data.error||'درخواست انجام نشد.');
+      return data;
+    }
+
+    async function api(action,payload){
+      return requestJSON('/api/projects',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({action:action},payload||{}))});
+    }
+
+    function listHTML(items){
+      if(!items.length)return '<div class="empty"><div><div class="icon">◇</div><h3>هنوز پروژه‌ای ثبت نشده</h3><p>اولین پروژه را اضافه کن، تصویرش را بارگذاری کن و فقط وقتی کامل شد آن را تأیید کن.</p><button class="btn primary" data-add>ثبت اولین پروژه</button></div></div>';
+      return '<div class="project-list">'+items.map(function(p){
+        const image=safeImage(p.imageUrl);
+        const thumb=image?'<img src="'+escapeHTML(image)+'" alt="">':'◇';
+        return '<article class="project-row"><div class="project-row-main"><div class="project-thumb">'+thumb+'</div><div><h3>'+escapeHTML(p.title)+' <span class="badge '+escapeHTML(p.status)+'">'+(labels[p.status]||'')+'</span></h3><p>'+escapeHTML([p.client,p.category,p.date].filter(Boolean).join(' · ')||'بدون جزئیات تکمیلی')+'</p></div></div><div class="row-actions"><button data-edit="'+escapeHTML(p.id)+'">ویرایش</button><button data-delete="'+escapeHTML(p.id)+'">حذف</button></div></article>';
+      }).join('')+'</div>';
+    }
+
+    function render(){
+      document.getElementById('stat-all').textContent=fa(projects.length);
+      ['draft','review','approved'].forEach(function(s){document.getElementById('stat-'+s).textContent=fa(projects.filter(function(p){return p.status===s}).length)});
+      document.getElementById('recent-projects').innerHTML=listHTML(projects.slice(0,4));
+      document.getElementById('all-projects').innerHTML=listHTML(projects);
+    }
+
+    async function loadProjects(){
+      try{
+        const data=await requestJSON('/api/projects?admin=1');
+        storageReady=!!data.storageReady;
+        projects=Array.isArray(data.projects)?data.projects:[];
+        if(storageReady&&projects.length===0){
+          let legacy=[];try{legacy=JSON.parse(localStorage.getItem(LEGACY_STORAGE_KEY)||'[]')}catch{}
+          if(Array.isArray(legacy)&&legacy.length){
+            const migrated=await api('import',{projects:legacy});
+            projects=migrated.projects||[];
+            localStorage.removeItem(LEGACY_STORAGE_KEY);
+            showToast('پروژه‌های قبلی به فضای دائمی منتقل شدند');
+          }
+        }
+        showStorageMessage('');
+      }catch(error){
+        storageReady=false;
+        let legacy=[];try{legacy=JSON.parse(localStorage.getItem(LEGACY_STORAGE_KEY)||'[]')}catch{}
+        projects=Array.isArray(legacy)?legacy:[];
+      }
+      render();
+    }
+
+    function openForm(id){
+      form.reset();
+      selectedImageFile=null;
+      uploadState.textContent='';
+      imageUrlInput.value='';
+      setPreview('');
+      form.elements.id.value='';
+      document.getElementById('dialog-title').textContent='پروژه جدید';
+      if(id){
+        const p=projects.find(function(item){return item.id===id});
+        if(!p)return;
+        Object.entries(p).forEach(function(entry){const key=entry[0],value=entry[1];if(form.elements[key])form.elements[key].value=value==null?'':value});
+        imageUrlInput.value=p.imageUrl||'';
+        setPreview(p.imageUrl||'');
+        document.getElementById('dialog-title').textContent='ویرایش پروژه';
+      }
+      modal.classList.add('open');
+      setTimeout(function(){form.elements.title.focus()},50);
+    }
+
+    function closeForm(){modal.classList.remove('open');selectedImageFile=null}
+
+    async function optimizeImage(file){
+      if(!file||!/^image\/(jpeg|png|webp)$/.test(file.type))throw new Error('فقط تصویر JPG، PNG یا WebP انتخاب کن.');
+      if(file.size>12*1024*1024)throw new Error('حجم فایل اولیه خیلی زیاد است؛ تصویر کوچک‌تری انتخاب کن.');
+      const objectUrl=URL.createObjectURL(file);
+      try{
+        const img=await new Promise(function(resolve,reject){
+          const el=new Image();el.onload=function(){resolve(el)};el.onerror=function(){reject(new Error('تصویر قابل خواندن نیست.'))};el.src=objectUrl;
+        });
+        const maxSide=1800;
+        const ratio=Math.min(1,maxSide/Math.max(img.naturalWidth,img.naturalHeight));
+        const canvas=document.createElement('canvas');
+        canvas.width=Math.max(1,Math.round(img.naturalWidth*ratio));
+        canvas.height=Math.max(1,Math.round(img.naturalHeight*ratio));
+        const ctx=canvas.getContext('2d',{alpha:false});
+        ctx.fillStyle='#f1ece5';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0,canvas.width,canvas.height);
+        let quality=.84;
+        let blob=null;
+        for(let i=0;i<4;i++){
+          blob=await new Promise(function(resolve){canvas.toBlob(resolve,'image/webp',quality)});
+          if(blob&&blob.size<=2.9*1024*1024)break;
+          quality-=.12;
+        }
+        if(!blob)throw new Error('بهینه‌سازی تصویر انجام نشد.');
+        if(blob.size>3.2*1024*1024)throw new Error('تصویر بعد از بهینه‌سازی هنوز بزرگ است.');
+        return blob;
+      }finally{URL.revokeObjectURL(objectUrl)}
+    }
+
+    async function blobToBase64(blob){
+      const buffer=await blob.arrayBuffer();
+      const bytes=new Uint8Array(buffer);
+      let binary='';
+      const chunk=0x8000;
+      for(let i=0;i<bytes.length;i+=chunk)binary+=String.fromCharCode.apply(null,bytes.subarray(i,i+chunk));
+      return btoa(binary);
+    }
+
+    async function uploadSelectedImage(){
+      if(!selectedImageFile)return imageUrlInput.value||'';
+      if(!storageReady)throw new Error('فضای ذخیره‌سازی دائمی هنوز فعال نیست.');
+      uploadState.textContent='در حال بهینه‌سازی تصویر…';
+      const optimized=await optimizeImage(selectedImageFile);
+      uploadState.textContent='در حال آپلود امن تصویر…';
+      const base64=await blobToBase64(optimized);
+      const result=await api('upload-image',{contentType:'image/webp',base64:base64});
+      imageUrlInput.value=result.url||'';
+      setPreview(imageUrlInput.value);
+      selectedImageFile=null;
+      uploadState.textContent='تصویر با موفقیت آپلود شد.';
+      return imageUrlInput.value;
+    }
+
+    imageInput.addEventListener('change',function(){
+      const file=imageInput.files&&imageInput.files[0];
+      selectedImageFile=file||null;
+      uploadState.textContent=file?'تصویر انتخاب شد؛ هنگام ذخیره آپلود می‌شود.':'';
+      if(file){
+        const url=URL.createObjectURL(file);
+        imagePreview.innerHTML='<img src="'+url+'" alt="پیش‌نمایش تصویر انتخاب‌شده">';
+        const previewImage=imagePreview.querySelector('img');
+        if(previewImage)previewImage.onload=function(){URL.revokeObjectURL(url)};
+      }else setPreview(imageUrlInput.value);
+    });
+
+    document.getElementById('remove-image').addEventListener('click',function(){
+      selectedImageFile=null;imageInput.value='';imageUrlInput.value='';uploadState.textContent='تصویر حذف شد؛ با ذخیره پروژه اعمال می‌شود.';setPreview('');
+    });
+
+    document.addEventListener('click',async function(e){
+      const add=e.target.closest('[data-add]');
+      const edit=e.target.closest('[data-edit]');
+      const del=e.target.closest('[data-delete]');
+      const publish=e.target.closest('[data-publish]');
+      if(add)openForm();
+      if(edit)openForm(edit.dataset.edit);
+      if(publish){
+        const p=projects.find(function(item){return item.id===publish.dataset.publish});
+        if(p){try{const data=await api('save',{project:Object.assign({},p,{status:'approved'})});projects=data.projects||projects;render();showToast('پروژه برای نمایش در سایت تأیید شد')}catch(err){showToast(err.message)}}
+      }
+      if(del&&confirm('این پروژه حذف شود؟')){
+        try{const data=await api('delete',{id:del.dataset.delete});projects=data.projects||[];render();showToast('پروژه حذف شد')}catch(err){showToast(err.message)}
+      }
+      if(e.target.closest('[data-close]'))closeForm();
+    });
+
+    modal.addEventListener('click',function(e){if(e.target===modal)closeForm()});
+
+    form.addEventListener('submit',async function(e){
+      e.preventDefault();
+      const submit=form.querySelector('button[type=submit]');
+      submit.disabled=true;
+      uploadState.textContent='';
+      try{
+        await uploadSelectedImage();
+        const fd=new FormData(form);
+        const project={
+          id:String(fd.get('id')||''),
+          title:String(fd.get('title')||''),
+          client:String(fd.get('client')||''),
+          category:String(fd.get('category')||''),
+          status:String(fd.get('status')||'draft'),
+          summary:String(fd.get('summary')||''),
+          url:String(fd.get('url')||''),
+          date:String(fd.get('date')||''),
+          notes:String(fd.get('notes')||''),
+          imageUrl:String(imageUrlInput.value||'')
+        };
+        const data=await api('save',{project:project});
+        projects=data.projects||projects;
+        render();closeForm();showToast('پروژه در فضای دائمی ذخیره شد');
+      }catch(err){
+        uploadState.textContent=err.message||'ذخیره پروژه انجام نشد.';
+      }finally{submit.disabled=false}
+    });
+
+    document.querySelectorAll('.nav button').forEach(function(button){
+      button.addEventListener('click',function(){
+        document.querySelectorAll('.nav button,.view').forEach(function(el){el.classList.remove('active')});
+        button.classList.add('active');document.getElementById(button.dataset.view).classList.add('active');
+        const copy={overview:['داشبورد مدیریت','همه چیز برای بررسی منظم پروژه‌ها، قبل از انتشار.'],projects:['مدیریت پروژه‌ها','ثبت، تصویر، ویرایش و تأیید نمونه‌کارهای واقعی.'],sections:['بخش‌های سایت','وضعیت محتوای اصلی ROZNEX.']}[button.dataset.view];
+        document.getElementById('page-title').textContent=copy[0];document.getElementById('page-subtitle').textContent=copy[1];
+      });
+    });
+
+    document.getElementById('export-projects').addEventListener('click',function(){
+      const blob=new Blob([JSON.stringify({version:2,exportedAt:new Date().toISOString(),projects:projects},null,2)],{type:'application/json'});
+      const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='roznex-projects-backup.json';a.click();URL.revokeObjectURL(a.href);showToast('فایل پشتیبان آماده شد');
+    });
+
+    document.getElementById('import-projects').addEventListener('click',function(){document.getElementById('import-file').click()});
+    document.getElementById('import-file').addEventListener('change',async function(e){
+      const file=e.target.files[0];if(!file)return;
+      try{const data=JSON.parse(await file.text());if(!Array.isArray(data.projects))throw new Error();const result=await api('import',{projects:data.projects});projects=result.projects||[];render();showToast('پشتیبان وارد شد')}catch{alert('فایل پشتیبان معتبر نیست یا ذخیره‌سازی فعال نشده است')}e.target.value='';
+    });
+
+    addEventListener('keydown',function(e){if(e.key==='Escape')closeForm()});
+    loadProjects();
   </script>
 </body>
 </html>`;
