@@ -1,5 +1,8 @@
 const { Readable } = require('stream');
 const { hasBlobStorage, isAdminRequest } = require('../lib/admin-session');
+const { blobOptions } = require('../lib/blob-config');
+
+const PROJECTS_PATH = 'roznex/private/projects.json';
 
 function cleanPath(value) {
   const path = String(value || '').trim().slice(0, 600);
@@ -8,7 +11,7 @@ function cleanPath(value) {
 
 async function loadProjects(blob) {
   try {
-    const result = await blob.get(PROJECTS_PATH, { access: 'private', useCache: false });
+    const result = await blob.get(PROJECTS_PATH, blobOptions({ access: 'private', useCache: false }));
     if (!result || result.statusCode !== 200) return [];
     const raw = await new Response(result.stream).text();
     const parsed = JSON.parse(raw);
@@ -50,10 +53,10 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    const result = await blob.get(pathname, {
+    const result = await blob.get(pathname, blobOptions({
       access: 'private',
       ifNoneMatch: req.headers['if-none-match'] || undefined
-    });
+    }));
 
     if (!result) {
       res.statusCode = 404;
