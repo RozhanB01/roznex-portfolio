@@ -68,15 +68,14 @@ function cleanHttpUrl(value) {
   }
 }
 
-function cleanImageUrl(value) {
-  const raw = cleanText(value, 1800);
-  if (!raw) return '';
-  try {
-    const u = new URL(raw);
-    return u.protocol === 'https:' ? u.href : '';
-  } catch {
-    return '';
-  }
+function cleanImagePath(value) {
+  const raw = cleanText(value, 600);
+  return /^roznex\/projects\/[a-f0-9-]+\.(jpg|png|webp)$/i.test(raw) ? raw : '';
+}
+
+function imageRoute(pathname, admin = false) {
+  if (!pathname) return '';
+  return '/api/project-image?path=' + encodeURIComponent(pathname) + (admin ? '&admin=1' : '');
 }
 
 function sanitizeProject(input = {}, existing = null) {
@@ -91,7 +90,7 @@ function sanitizeProject(input = {}, existing = null) {
     url: cleanHttpUrl(input.url),
     date: cleanText(input.date, 80),
     notes: cleanText(input.notes, 4000),
-    imageUrl: cleanImageUrl(input.imageUrl || existing?.imageUrl),
+    imagePath: cleanImagePath(input.imagePath || existing?.imagePath),
     updatedAt: new Date().toISOString()
   };
 }
@@ -105,9 +104,13 @@ function publicProject(project) {
     summary: project.summary,
     url: project.url,
     date: project.date,
-    imageUrl: project.imageUrl,
+    imageUrl: imageRoute(project.imagePath, false),
     updatedAt: project.updatedAt
   };
+}
+
+function adminProject(project) {
+  return { ...project, imageUrl: imageRoute(project.imagePath, true) };
 }
 
 async function readJsonBody(req) {
@@ -139,8 +142,7 @@ async function saveProjects(blob, projects) {
     {
       access: 'private',
       allowOverwrite: true,
-      contentType: 'application/json',
-      cacheControlMaxAge: 0
+      contentType: 'application/json'
     }
   );
 }
@@ -181,7 +183,7 @@ module.exports = async function handler(req, res) {
 
       const projects = await loadProjects(blob);
       return json(res, 200, {
-        projects: wantsAdmin ? projects : projects.filter(p => p.status === 'approved').map(publicProject),
+        projects: wantsAdmin ? projects.map(adminProject) : projects.filter(p => p.status === 'approved').map(publicProject),
         storageReady: true
       });
     }
@@ -203,7 +205,7 @@ module.exports = async function handler(req, res) {
       if (index >= 0) projects[index] = project;
       else projects.unshift(project);
       await saveProjects(blob, projects);
-      return json(res, 200, { project, projects });
+      return json(res, 200, { project: adminProject(project), projects: projects.map(adminProject) });
     }
 
     if (action === 'delete') {
@@ -211,17 +213,17 @@ module.exports = async function handler(req, res) {
       const found = projects.find(p => p.id === id);
       projects = projects.filter(p => p.id !== id);
       await saveProjects(blob, projects);
-      if (found?.imageUrl && found.imageUrl.includes('.blob.vercel-storage.com/')) {
-        try { await blob.del(found.imageUrl); } catch {}
+      if (found?.imagePath) {
+        try { await blob.del(found.imagePath); } catch {}
       }
-      return json(res, 200, { ok: true, projects });
+      return json(res, 200, { ok: true, projects: projects.map(adminProject) });
     }
 
     if (action === 'import') {
       if (!Array.isArray(body.projects)) return json(res, 400, { error: 'projects_required' });
       projects = body.projects.slice(0, 100).map(p => sanitizeProject(p));
       await saveProjects(blob, projects);
-      return json(res, 200, { ok: true, projects });
+      return json(res, 200, { ok: true, projects: projects.map(adminProject) });
     }
 
     if (action === 'upload-image') {
@@ -237,13 +239,16 @@ module.exports = async function handler(req, res) {
       const detected = detectImage(buffer, contentType);
       if (!detected) return json(res, 400, { error: 'bad_image_signature' });
       const [ext, actualType] = detected;
-      const result = await blob.put(`roznex/projects/${crypto.randomUUID()}.${ext}`, buffer, {
-        access: 'public',
-        addRandomSuffix: true,
-        contentType: actualType,
-        cacheControlMaxAge: 31536000
+      const pathname = 'roznex/projects/' + crypto.randomUUID() + '.' + ext;
+      const result = await blob.put(pathname, buffer, {
+        access: 'private',
+        addRandomSuffix: false,
+        contentType: actualType
       });
-      return json(res, 200, { url: result.url, pathname: result.pathname });
+      return json(res, 200, {
+        pathname: result.pathname || pathname,
+        previewUrl: imageRoute(result.pathname || pathname, true)
+      });
     }
 
     return json(res, 400, { error: 'unknown_action' });
