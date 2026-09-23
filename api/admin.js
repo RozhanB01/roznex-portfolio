@@ -1,50 +1,7 @@
 const crypto = require('crypto');
+const { hasBlobStorage, createAdminSession, isAdminRequest, destroyAdminSession } = require('../lib/admin-session');
 
 const ADMIN_PASSWORD_HASH = process.env.ROZNEX_ADMIN_PASSWORD_HASH || 'f7a15aa99a87a340d9d10a881e1033b45f93fdf8056c52a36b29da5caf934c3a';
-const SESSION_COOKIE = 'roznex_admin_session';
-const SESSION_TTL_MS = 12 * 60 * 60 * 1000;
-
-function safeEqual(left, right) {
-  const a = Buffer.from(String(left || ''));
-  const b = Buffer.from(String(right || ''));
-  return a.length === b.length && crypto.timingSafeEqual(a, b);
-}
-
-function getSessionSecret() {
-  const source = process.env.ROZNEX_ADMIN_SESSION_SECRET || process.env.BLOB_READ_WRITE_TOKEN || '';
-  if (!source) return '';
-  return crypto.createHash('sha256').update('roznex-admin-session:v1:' + source).digest();
-}
-
-function parseCookies(req) {
-  return Object.fromEntries(
-    String(req.headers.cookie || '').split(';').map(v => v.trim()).filter(Boolean).map(v => {
-      const i = v.indexOf('=');
-      return i < 0 ? [v, ''] : [v.slice(0, i), decodeURIComponent(v.slice(i + 1))];
-    })
-  );
-}
-
-function createSessionToken() {
-  const secret = getSessionSecret();
-  if (!secret) return '';
-  const exp = Date.now() + SESSION_TTL_MS;
-  const expText = String(exp);
-  const sig = crypto.createHmac('sha256', secret).update(expText).digest('base64url');
-  return expText + '.' + sig;
-}
-
-function hasValidSession(req) {
-  const secret = getSessionSecret();
-  if (!secret) return false;
-  const token = parseCookies(req)[SESSION_COOKIE] || '';
-  const [expText, sig] = token.split('.');
-  const exp = Number(expText);
-  if (!Number.isFinite(exp) || exp < Date.now() || exp > Date.now() + SESSION_TTL_MS + 60_000) return false;
-  const expected = crypto.createHmac('sha256', secret).update(expText).digest('base64url');
-  return safeEqual(sig, expected);
-}
-
 async function readBody(req) {
   if (typeof req.body === 'string') return req.body;
   if (req.body && typeof req.body === 'object') return new URLSearchParams(req.body).toString();
@@ -65,9 +22,8 @@ module.exports = async function handler(req, res) {
     const password = new URLSearchParams(body).get('password') || '';
     const passwordHash = crypto.createHash('sha256').update(password).digest('hex');
     if (safeEqual(passwordHash, ADMIN_PASSWORD_HASH)) {
-      const token = createSessionToken();
-      if (token) {
-        res.setHeader('Set-Cookie', SESSION_COOKIE + '=' + encodeURIComponent(token) + '; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=43200');
+      if (hasBlobStorage()) {
+        try { await createAdminSession(res); } catch (error) { console.error('ROZNEX admin session error', error); }
       }
       return res.end(DASHBOARD_HTML);
     }
@@ -75,7 +31,11 @@ module.exports = async function handler(req, res) {
     return res.end(loginHTML(true));
   }
 
-  if (req.method === 'GET' && hasValidSession(req)) return res.end(DASHBOARD_HTML);
+  if (req.method === 'GET' && req.url && req.url.includes('logout=1')) {
+    await destroyAdminSession(req, res);
+    return res.end(loginHTML(false));
+  }
+  if (req.method === 'GET' && await isAdminRequest(req)) return res.end(DASHBOARD_HTML);
   return res.end(loginHTML(false));
 };
 
@@ -109,7 +69,7 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
         <button data-view="projects"><i>◇</i> پروژه‌ها</button>
         <button data-view="sections"><i>▦</i> بخش‌های سایت</button>
       </nav>
-      <div class="side-foot"><a href="/" target="_blank">مشاهده سایت ↗</a><p>این پنل خصوصی برای بررسی و آماده‌سازی محتوای سایت ROZNEX است.</p></div>
+      <div class="side-foot"><a href="/" target="_blank">مشاهده سایت ↗</a><br><a href="/admin?logout=1">خروج امن از مدیریت</a><p>این پنل خصوصی برای بررسی و آماده‌سازی محتوای سایت ROZNEX است.</p></div>
     </aside>
     <main class="main">
       <header class="top"><div><h1 id="page-title">داشبورد مدیریت</h1><p id="page-subtitle">پروژه را ثبت کن، بررسی کن و با وضعیت «تأییدشده» روی سایت نمایش بده.</p></div><div class="owner"><span class="avatar">RB</span><span>روژان بهروزی</span><b id="storage-indicator" style="font-size:.58rem;color:#a86616">MEDIA v2</b></div></header>
