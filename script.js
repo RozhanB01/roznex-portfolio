@@ -153,3 +153,67 @@ if(!reduceMotion && finePointer){
     });
   });
 }
+
+
+/* Dashboard → homepage project preview.
+   Approved projects saved from /admin on this origin are rendered here. */
+const DASHBOARD_PROJECTS_KEY='roznex_admin_projects_v1';
+const dashboardProjectsRoot=document.getElementById('dashboard-projects');
+
+function safeProjectText(value=''){
+  return String(value).replace(/[&<>"']/g,char=>({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+  }[char]));
+}
+function projectVisualFor(category=''){
+  const c=String(category).toLowerCase();
+  if(c.includes('هوش')||c.includes('ai')) return './assets/service-ai.svg';
+  if(c.includes('سئو')||c.includes('seo')) return './assets/service-seo.svg';
+  if(c.includes('سه')||c.includes('3d')) return './assets/service-3d.svg';
+  return './assets/service-web.svg';
+}
+function readApprovedDashboardProjects(){
+  try{
+    const raw=JSON.parse(localStorage.getItem(DASHBOARD_PROJECTS_KEY)||'[]');
+    return Array.isArray(raw)?raw.filter(project=>project&&project.status==='approved'):[];
+  }catch{return []}
+}
+function renderDashboardProjects(){
+  if(!dashboardProjectsRoot) return;
+  const projects=readApprovedDashboardProjects();
+  if(!projects.length){
+    dashboardProjectsRoot.hidden=true;
+    dashboardProjectsRoot.innerHTML='';
+    return;
+  }
+  dashboardProjectsRoot.hidden=false;
+  dashboardProjectsRoot.innerHTML=projects.map((project,index)=>{
+    const title=safeProjectText(project.title||'ROZNEX Project');
+    const client=safeProjectText(project.client||'ROZNEX');
+    const category=safeProjectText(project.category||'Digital Product');
+    const summary=safeProjectText(project.summary||'پروژه تأییدشده در ROZNEX');
+    const date=safeProjectText(project.date||'');
+    const href=project.url&&/^https?:\/\//i.test(project.url)?safeProjectText(project.url):'#contact';
+    const visual=projectVisualFor(project.category);
+    return `
+      <article class="project-tile reveal visible dashboard-project-tile" data-project-card>
+        <a class="project-media" href="${href}" ${href.startsWith('http')?'target="_blank" rel="noreferrer"':''} aria-label="${title}">
+          <img src="${visual}" alt="" width="900" height="680" loading="lazy" decoding="async">
+          <span class="project-status">PUBLISHED / ROZNEX</span>
+          <span class="project-open">↗</span>
+        </a>
+        <div class="project-meta compact">
+          <div>
+            <span class="project-kicker">${String(index+1).padStart(2,'0')} / ${category}${date?' / '+date:''}</span>
+            <h3>${title}</h3>
+          </div>
+          <p>${summary}</p>
+          ${client?'<span class="dashboard-project-client">'+client+'</span>':''}
+        </div>
+      </article>`;
+  }).join('');
+}
+renderDashboardProjects();
+addEventListener('storage',event=>{
+  if(event.key===DASHBOARD_PROJECTS_KEY) renderDashboardProjects();
+});
