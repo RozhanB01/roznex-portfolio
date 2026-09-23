@@ -66,7 +66,7 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
       <div class="side-foot"><a href="/" target="_blank">مشاهده سایت ↗</a><p>این پنل خصوصی برای بررسی و آماده‌سازی محتوای سایت ROZNEX است.</p></div>
     </aside>
     <main class="main">
-      <header class="top"><div><h1 id="page-title">داشبورد مدیریت</h1><p id="page-subtitle">همه چیز برای بررسی منظم پروژه‌ها، قبل از انتشار.</p></div><div class="owner"><span class="avatar">RB</span><span>روژان بهروزی</span></div></header>
+      <header class="top"><div><h1 id="page-title">داشبورد مدیریت</h1><p id="page-subtitle">پروژه را ثبت کن، بررسی کن و با وضعیت «تأییدشده» روی سایت نمایش بده.</p></div><div class="owner"><span class="avatar">RB</span><span>روژان بهروزی</span></div></header>
 
       <section class="view active" id="overview">
         <div class="stats">
@@ -75,7 +75,7 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
           <div class="stat"><span>در حال بررسی</span><strong id="stat-review">۰</strong></div>
           <div class="stat"><span>تأییدشده</span><strong id="stat-approved">۰</strong></div>
         </div>
-        <div class="note"><h3>نمونه‌کارهای نمایشی حذف شدند</h3><p>هیچ پروژه‌ای در سایت عمومی منتشر نیست. هر پروژه را اینجا ثبت، بررسی و تأیید کن؛ سپس نسخه تأییدشده برای انتشار نهایی آماده می‌شود.</p></div>
+        <div class="note"><h3>نمونه‌کارهای نمایشی حذف شدند</h3><p>فقط پروژه‌هایی که وضعیتشان «تأییدشده» باشد در بخش نمونه‌کارهای صفحه اصلی نمایش داده می‌شوند. بعد از تأیید، صفحه اصلی را Refresh کن.</p></div>
         <div class="card"><div class="toolbar"><h2>آخرین پروژه‌ها</h2><button class="btn primary" data-add>+ پروژه جدید</button></div><div id="recent-projects"></div></div>
       </section>
 
@@ -131,7 +131,7 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
     function openForm(id){form.reset();form.elements.id.value='';document.getElementById('dialog-title').textContent='پروژه جدید';if(id){const p=projects.find(item=>item.id===id);if(!p)return;Object.entries(p).forEach(([key,value])=>{if(form.elements[key])form.elements[key].value=value});document.getElementById('dialog-title').textContent='ویرایش پروژه'}modal.classList.add('open');setTimeout(()=>form.elements.title.focus(),50)}
     function closeForm(){modal.classList.remove('open')}
     function showToast(message){toast.textContent=message;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),1800)}
-    document.addEventListener('click',e=>{const add=e.target.closest('[data-add]');const edit=e.target.closest('[data-edit]');const del=e.target.closest('[data-delete]');if(add)openForm();if(edit)openForm(edit.dataset.edit);if(del&&confirm('این پروژه حذف شود؟')){projects=projects.filter(p=>p.id!==del.dataset.delete);saveProjects()}if(e.target.closest('[data-close]'))closeForm()});
+    document.addEventListener('click',e=>{const add=e.target.closest('[data-add]');const edit=e.target.closest('[data-edit]');const del=e.target.closest('[data-delete]');const publish=e.target.closest('[data-publish]');if(add)openForm();if(edit)openForm(edit.dataset.edit);if(publish){const p=projects.find(item=>item.id===publish.dataset.publish);if(p){p.status='approved';p.updatedAt=new Date().toISOString();saveProjects();showToast('پروژه برای نمایش در سایت تأیید شد')}}if(del&&confirm('این پروژه حذف شود؟')){projects=projects.filter(p=>p.id!==del.dataset.delete);saveProjects()}if(e.target.closest('[data-close]'))closeForm()});
     modal.addEventListener('click',e=>{if(e.target===modal)closeForm()});
     form.addEventListener('submit',e=>{e.preventDefault();const data=Object.fromEntries(new FormData(form));const project={...data,id:data.id||crypto.randomUUID(),updatedAt:new Date().toISOString()};const index=projects.findIndex(p=>p.id===project.id);if(index>=0)projects[index]=project;else projects.unshift(project);saveProjects();closeForm()});
     document.querySelectorAll('.nav button').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('.nav button,.view').forEach(el=>el.classList.remove('active'));button.classList.add('active');document.getElementById(button.dataset.view).classList.add('active');const copy={overview:['داشبورد مدیریت','همه چیز برای بررسی منظم پروژه‌ها، قبل از انتشار.'],projects:['مدیریت پروژه‌ها','ثبت، ویرایش و تأیید نمونه‌کارهای واقعی.'],sections:['بخش‌های سایت','وضعیت محتوای اصلی ROZNEX.']}[button.dataset.view];document.getElementById('page-title').textContent=copy[0];document.getElementById('page-subtitle').textContent=copy[1]}));
