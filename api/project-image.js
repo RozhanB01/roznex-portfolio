@@ -1,41 +1,5 @@
-const crypto = require('crypto');
 const { Readable } = require('stream');
-
-const COOKIE_NAME = 'roznex_admin_session';
-const SESSION_TTL_MS = 12 * 60 * 60 * 1000;
-const PROJECTS_PATH = 'roznex/private/projects.json';
-
-function getSessionSecret() {
-  const source = process.env.ROZNEX_ADMIN_SESSION_SECRET || process.env.BLOB_READ_WRITE_TOKEN || '';
-  if (!source) return '';
-  return crypto.createHash('sha256').update('roznex-admin-session:v1:' + source).digest();
-}
-
-function parseCookies(req) {
-  return Object.fromEntries(
-    String(req.headers.cookie || '').split(';').map(v => v.trim()).filter(Boolean).map(v => {
-      const i = v.indexOf('=');
-      return i < 0 ? [v, ''] : [v.slice(0, i), decodeURIComponent(v.slice(i + 1))];
-    })
-  );
-}
-
-function safeEqual(a, b) {
-  const left = Buffer.from(String(a || ''));
-  const right = Buffer.from(String(b || ''));
-  return left.length === right.length && crypto.timingSafeEqual(left, right);
-}
-
-function isAdmin(req) {
-  const secret = getSessionSecret();
-  if (!secret) return false;
-  const token = parseCookies(req)[COOKIE_NAME] || '';
-  const [expText, sig] = token.split('.');
-  const exp = Number(expText);
-  if (!Number.isFinite(exp) || exp < Date.now() || exp > Date.now() + SESSION_TTL_MS + 60_000) return false;
-  const expected = crypto.createHmac('sha256', secret).update(expText).digest('base64url');
-  return safeEqual(sig, expected);
-}
+const { hasBlobStorage, isAdminRequest } = require('../lib/admin-session');
 
 function cleanPath(value) {
   const path = String(value || '').trim().slice(0, 600);
@@ -62,7 +26,7 @@ module.exports = async function handler(req, res) {
     res.statusCode = 405;
     return res.end('Method not allowed');
   }
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+  if (!hasBlobStorage()) {
     res.statusCode = 404;
     return res.end('Not found');
   }
@@ -75,7 +39,7 @@ module.exports = async function handler(req, res) {
 
   try {
     const blob = await import('@vercel/blob');
-    const adminPreview = String(req.query?.admin || '') === '1' && isAdmin(req);
+    const adminPreview = String(req.query?.admin || '') === '1' && await isAdminRequest(req);
 
     if (!adminPreview) {
       const projects = await loadProjects(blob);
