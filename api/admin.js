@@ -2,6 +2,12 @@ const crypto = require('crypto');
 const { hasBlobStorage, createAdminSession, isAdminRequest, destroyAdminSession } = require('../lib/admin-session');
 
 const ADMIN_PASSWORD_HASH = process.env.ROZNEX_ADMIN_PASSWORD_HASH || 'f7a15aa99a87a340d9d10a881e1033b45f93fdf8056c52a36b29da5caf934c3a';
+
+function safeEqual(left, right) {
+  const a = Buffer.from(String(left || ''));
+  const b = Buffer.from(String(right || ''));
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
 async function readBody(req) {
   if (typeof req.body === 'string') return req.body;
   if (req.body && typeof req.body === 'object') return new URLSearchParams(req.body).toString();
