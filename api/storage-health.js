@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 const { hasBlobStorage, isAdminRequest } = require('../lib/admin-session');
-const { blobOptions } = require('../lib/blob-config');
+const { blobOptions, getBlobTokenKey, getBlobStoreIdKey } = require('../lib/blob-config');
 
 function json(res, status, value) {
   res.statusCode = status;
@@ -21,7 +21,9 @@ module.exports = async function handler(req, res) {
       configured: false,
       admin: false,
       canWrite: false,
-      message: 'Blob read-write token is missing'
+      message: 'Blob read-write token is missing',
+      detectedTokenKey: getBlobTokenKey() || null,
+      detectedStoreKey: getBlobStoreIdKey() || null
     });
   }
 
@@ -30,7 +32,9 @@ module.exports = async function handler(req, res) {
       configured: true,
       admin: false,
       canWrite: false,
-      message: 'Admin session is not active'
+      message: 'Admin session is not active',
+      detectedTokenKey: getBlobTokenKey() || null,
+      detectedStoreKey: getBlobStoreIdKey() || null
     });
   }
 
@@ -54,7 +58,9 @@ module.exports = async function handler(req, res) {
       configured: true,
       admin: true,
       canWrite: result?.statusCode === 200 && text === 'ok',
-      message: result?.statusCode === 200 && text === 'ok' ? 'storage_ok' : 'storage_readback_failed'
+      message: result?.statusCode === 200 && text === 'ok' ? 'storage_ok' : 'storage_readback_failed',
+      detectedTokenKey: getBlobTokenKey() || null,
+      detectedStoreKey: getBlobStoreIdKey() || null
     });
   } catch (error) {
     console.error('ROZNEX storage health error', {
@@ -66,7 +72,9 @@ module.exports = async function handler(req, res) {
       configured: true,
       admin: true,
       canWrite: false,
-      message: String(error?.message || 'storage_test_failed').slice(0, 220)
+      message: String(error?.message || 'storage_test_failed').slice(0, 220),
+      detectedTokenKey: getBlobTokenKey() || null,
+      detectedStoreKey: getBlobStoreIdKey() || null
     });
   }
 };
