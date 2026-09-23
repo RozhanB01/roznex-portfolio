@@ -1,5 +1,9 @@
 const crypto = require('crypto');
 const { hasBlobStorage, isAdminRequest } = require('../lib/admin-session');
+const { blobOptions } = require('../lib/blob-config');
+
+const PROJECTS_PATH = 'roznex/private/projects.json';
+const MAX_IMAGE_BYTES = 3.2 * 1024 * 1024;
 
 function sameOrigin(req) {
   const fetchSite = String(req.headers['sec-fetch-site'] || '').toLowerCase();
@@ -95,7 +99,7 @@ async function readJsonBody(req) {
 async function loadProjects(blob) {
   if (!hasBlobStorage()) return [];
   try {
-    const result = await blob.get(PROJECTS_PATH, { access: 'private', useCache: false });
+    const result = await blob.get(PROJECTS_PATH, blobOptions({ access: 'private', useCache: false }));
     if (!result || result.statusCode !== 200) return [];
     const raw = await new Response(result.stream).text();
     const parsed = JSON.parse(raw);
@@ -111,16 +115,16 @@ async function saveProjects(blob, projects) {
   const result = await blob.put(
     PROJECTS_PATH,
     payload,
-    {
+    blobOptions({
       access: 'private',
       addRandomSuffix: false,
       allowOverwrite: true,
       contentType: 'application/json',
       cacheControlMaxAge: 60
-    }
+    })
   );
 
-  const verify = await blob.get(PROJECTS_PATH, { access: 'private', useCache: false });
+  const verify = await blob.get(PROJECTS_PATH, blobOptions({ access: 'private', useCache: false }));
   if (!verify || verify.statusCode !== 200) throw new Error('project_store_verify_failed');
 
   const raw = await new Response(verify.stream).text();
@@ -208,7 +212,7 @@ module.exports = async function handler(req, res) {
       const saved = await saveProjects(blob, projects);
       projects = saved.projects;
       if (found?.imagePath) {
-        try { await blob.del(found.imagePath); } catch {}
+        try { await blob.del(found.imagePath, blobOptions()); } catch {}
       }
       return json(res, 200, { ok: true, projects: projects.map(adminProject) });
     }
@@ -235,11 +239,11 @@ module.exports = async function handler(req, res) {
       if (!detected) return json(res, 400, { error: 'bad_image_signature' });
       const [ext, actualType] = detected;
       const pathname = 'roznex/projects/' + crypto.randomUUID() + '.' + ext;
-      const result = await blob.put(pathname, buffer, {
+      const result = await blob.put(pathname, buffer, blobOptions({
         access: 'private',
         addRandomSuffix: false,
         contentType: actualType
-      });
+      }));
       return json(res, 200, {
         pathname: result.pathname || pathname,
         previewUrl: imageRoute(result.pathname || pathname, true)
