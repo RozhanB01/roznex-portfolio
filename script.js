@@ -155,8 +155,8 @@ if(!reduceMotion && finePointer){
 }
 
 
-/* Dashboard → homepage project preview.
-   Approved projects saved from /admin on this origin are rendered here. */
+/* Persistent dashboard projects → homepage.
+   Public visitors receive only approved/safe fields from the server API. */
 const DASHBOARD_PROJECTS_KEY='roznex_admin_projects_v1';
 const dashboardProjectsRoot=document.getElementById('dashboard-projects');
 
@@ -172,15 +172,48 @@ function projectVisualFor(category=''){
   if(c.includes('سه')||c.includes('3d')) return './assets/service-3d.svg';
   return './assets/service-web.svg';
 }
-function readApprovedDashboardProjects(){
+function safeHttpUrl(value=''){
+  try{
+    const u=new URL(String(value));
+    return (u.protocol==='https:'||u.protocol==='http:')?u.href:'';
+  }catch{return ''}
+}
+function safeImageUrl(value=''){
+  try{
+    const u=new URL(String(value));
+    return u.protocol==='https:'?u.href:'';
+  }catch{return ''}
+}
+function localApprovedFallback(){
   try{
     const raw=JSON.parse(localStorage.getItem(DASHBOARD_PROJECTS_KEY)||'[]');
     return Array.isArray(raw)?raw.filter(project=>project&&project.status==='approved'):[];
   }catch{return []}
 }
-function renderDashboardProjects(){
-  if(!dashboardProjectsRoot) return;
-  const projects=readApprovedDashboardProjects();
+function bindDashboardProjectMotion(){
+  if(reduceMotion||!finePointer||!dashboardProjectsRoot)return;
+  dashboardProjectsRoot.querySelectorAll('[data-project-card]').forEach(card=>{
+    if(card.dataset.motionBound==='1')return;
+    card.dataset.motionBound='1';
+    card.addEventListener('pointermove',event=>{
+      const r=card.getBoundingClientRect();
+      const x=(event.clientX-r.left)/r.width-.5;
+      const y=(event.clientY-r.top)/r.height-.5;
+      card.style.setProperty('--rx',`${(-y*2.2).toFixed(2)}deg`);
+      card.style.setProperty('--ry',`${(x*2.8).toFixed(2)}deg`);
+      const image=card.querySelector('img');
+      if(image)image.style.transform=`scale(1.045) translate3d(${(x*-5).toFixed(1)}px,${(y*-5).toFixed(1)}px,0)`;
+    },{passive:true});
+    card.addEventListener('pointerleave',()=>{
+      card.style.removeProperty('--rx');
+      card.style.removeProperty('--ry');
+      const image=card.querySelector('img');
+      if(image)image.style.transform='';
+    });
+  });
+}
+function renderDashboardProjects(projects=[]){
+  if(!dashboardProjectsRoot)return;
   if(!projects.length){
     dashboardProjectsRoot.hidden=true;
     dashboardProjectsRoot.innerHTML='';
@@ -193,12 +226,14 @@ function renderDashboardProjects(){
     const category=safeProjectText(project.category||'Digital Product');
     const summary=safeProjectText(project.summary||'پروژه تأییدشده در ROZNEX');
     const date=safeProjectText(project.date||'');
-    const href=project.url&&/^https?:\/\//i.test(project.url)?safeProjectText(project.url):'#contact';
-    const visual=projectVisualFor(project.category);
+    const targetUrl=safeHttpUrl(project.url);
+    const href=targetUrl?safeProjectText(targetUrl):'#contact';
+    const imageUrl=safeImageUrl(project.imageUrl);
+    const visual=safeProjectText(imageUrl||projectVisualFor(project.category));
     return `
       <article class="project-tile reveal visible dashboard-project-tile" data-project-card>
-        <a class="project-media" href="${href}" ${href.startsWith('http')?'target="_blank" rel="noreferrer"':''} aria-label="${title}">
-          <img src="${visual}" alt="" width="900" height="680" loading="lazy" decoding="async">
+        <a class="project-media" href="${href}" ${targetUrl?'target="_blank" rel="noreferrer"':''} aria-label="${title}">
+          <img src="${visual}" alt="${title}" width="1200" height="900" loading="lazy" decoding="async">
           <span class="project-status">PUBLISHED / ROZNEX</span>
           <span class="project-open">↗</span>
         </a>
@@ -212,8 +247,18 @@ function renderDashboardProjects(){
         </div>
       </article>`;
   }).join('');
+  bindDashboardProjectMotion();
 }
-renderDashboardProjects();
-addEventListener('storage',event=>{
-  if(event.key===DASHBOARD_PROJECTS_KEY) renderDashboardProjects();
-});
+async function loadPublishedProjects(){
+  let projects=[];
+  try{
+    const response=await fetch('/api/projects',{headers:{Accept:'application/json'}});
+    if(!response.ok)throw new Error('projects unavailable');
+    const data=await response.json();
+    projects=Array.isArray(data.projects)?data.projects:[];
+  }catch{
+    projects=localApprovedFallback();
+  }
+  renderDashboardProjects(projects);
+}
+loadPublishedProjects();
