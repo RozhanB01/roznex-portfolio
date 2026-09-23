@@ -160,7 +160,17 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
       let data={};try{data=await response.json()}catch{}
       if(response.status===401){showStorageMessage('نشست مدیریت منقضی شده است. صفحه را تازه کن و دوباره وارد شو.');throw new Error('نشست مدیریت منقضی شده است.')}
       if(response.status===503&&data.error==='storage_not_configured'){showStorageMessage('برای فعال‌شدن ذخیره‌سازی دائمی تصاویر و پروژه‌ها، باید یک Vercel Blob Store به پروژه وصل شود. رابط کاربری آماده است و بعد از اتصال بدون تغییر کد فعال می‌شود.');throw new Error('فضای ذخیره‌سازی هنوز متصل نشده است.')}
-      if(!response.ok)throw new Error(data.error||'درخواست انجام نشد.');
+      if(!response.ok){
+        const messages={
+          title_required:'نام پروژه الزامی است.',
+          project_not_persisted:'پروژه روی سرور ذخیره نشد.',
+          project_store_verify_failed:'ذخیره‌سازی پروژه تأیید نشد.',
+          project_store_invalid:'فایل پروژه‌ها معتبر نیست.',
+          storage_not_configured:'فضای ذخیره‌سازی سایت فعال نیست.',
+          unauthorized:'نشست مدیریت منقضی شده است.'
+        };
+        throw new Error(messages[data.error]||data.error||'درخواست انجام نشد.');
+      }
       return data;
     }
 
@@ -340,7 +350,23 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
         };
         const data=await api('save',{project:project});
         projects=data.projects||projects;
-        render();closeForm();showToast('پروژه در فضای دائمی ذخیره شد');
+        render();
+
+        if(data.published){
+          const publicResponse=await fetch('/api/projects?fresh='+Date.now(),{
+            headers:{Accept:'application/json'},
+            cache:'no-store',
+            credentials:'same-origin'
+          });
+          const publicData=publicResponse.ok?await publicResponse.json():{projects:[]};
+          const visible=Array.isArray(publicData.projects)&&publicData.projects.some(function(item){return item.id===data.project.id});
+          if(!visible) throw new Error('پروژه ذخیره شد اما انتشار عمومی هنوز تأیید نشد. دوباره ذخیره کن.');
+          closeForm();
+          showToast('پروژه ذخیره و روی سایت منتشر شد ✓');
+        }else{
+          closeForm();
+          showToast('پروژه ذخیره شد؛ برای نمایش عمومی وضعیت را تأییدشده بگذار');
+        }
       }catch(err){
         uploadState.textContent=err.message||'ذخیره پروژه انجام نشد.';
       }finally{submit.disabled=false}
