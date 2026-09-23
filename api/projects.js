@@ -96,15 +96,27 @@ async function loadProjects(blob) {
 }
 
 async function saveProjects(blob, projects) {
-  await blob.put(
+  const payload = JSON.stringify({ version: 2, updatedAt: new Date().toISOString(), projects }, null, 2);
+  const result = await blob.put(
     PROJECTS_PATH,
-    JSON.stringify({ version: 2, updatedAt: new Date().toISOString(), projects }, null, 2),
+    payload,
     {
       access: 'private',
+      addRandomSuffix: false,
       allowOverwrite: true,
-      contentType: 'application/json'
+      contentType: 'application/json',
+      cacheControlMaxAge: 60
     }
   );
+
+  const verify = await blob.get(PROJECTS_PATH, { access: 'private', useCache: false });
+  if (!verify || verify.statusCode !== 200) throw new Error('project_store_verify_failed');
+
+  const raw = await new Response(verify.stream).text();
+  const parsed = JSON.parse(raw);
+  if (!Array.isArray(parsed?.projects)) throw new Error('project_store_invalid');
+
+  return { result, projects: parsed.projects };
 }
 
 function detectImage(buffer, claimedType) {
@@ -165,15 +177,25 @@ module.exports = async function handler(req, res) {
       if (!project.title) return json(res, 400, { error: 'title_required' });
       if (index >= 0) projects[index] = project;
       else projects.unshift(project);
-      await saveProjects(blob, projects);
-      return json(res, 200, { project: adminProject(project), projects: projects.map(adminProject) });
+
+      const saved = await saveProjects(blob, projects);
+      const persisted = saved.projects.find(p => p.id === project.id);
+      if (!persisted) return json(res, 500, { error: 'project_not_persisted' });
+
+      return json(res, 200, {
+        ok: true,
+        published: persisted.status === 'approved',
+        project: adminProject(persisted),
+        projects: saved.projects.map(adminProject)
+      });
     }
 
     if (action === 'delete') {
       const id = cleanText(body.id, 80);
       const found = projects.find(p => p.id === id);
       projects = projects.filter(p => p.id !== id);
-      await saveProjects(blob, projects);
+      const saved = await saveProjects(blob, projects);
+      projects = saved.projects;
       if (found?.imagePath) {
         try { await blob.del(found.imagePath); } catch {}
       }
@@ -183,7 +205,8 @@ module.exports = async function handler(req, res) {
     if (action === 'import') {
       if (!Array.isArray(body.projects)) return json(res, 400, { error: 'projects_required' });
       projects = body.projects.slice(0, 100).map(p => sanitizeProject(p));
-      await saveProjects(blob, projects);
+      const saved = await saveProjects(blob, projects);
+      projects = saved.projects;
       return json(res, 200, { ok: true, projects: projects.map(adminProject) });
     }
 
@@ -215,6 +238,8 @@ module.exports = async function handler(req, res) {
     return json(res, 400, { error: 'unknown_action' });
   } catch (error) {
     console.error('ROZNEX projects API error', error);
-    return json(res, 500, { error: 'server_error' });
+    const known = ['project_store_verify_failed','project_store_invalid','project_not_persisted'];
+    const code = known.includes(String(error?.message || '')) ? String(error.message) : 'server_error';
+    return json(res, 500, { error: code });
   }
 };
