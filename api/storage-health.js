@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const { hasBlobStorage, isAdminRequest } = require('../lib/admin-session');
+const { blobOptions } = require('../lib/blob-config');
 
 function json(res, status, value) {
   res.statusCode = status;
@@ -20,7 +21,7 @@ module.exports = async function handler(req, res) {
       configured: false,
       admin: false,
       canWrite: false,
-      message: 'BLOB_READ_WRITE_TOKEN is missing'
+      message: 'Blob read-write token is missing'
     });
   }
 
@@ -37,17 +38,17 @@ module.exports = async function handler(req, res) {
   const path = 'roznex/private/health/' + crypto.randomUUID() + '.txt';
 
   try {
-    await blob.put(path, 'ok', {
+    await blob.put(path, 'ok', blobOptions({
       access: 'private',
       addRandomSuffix: false,
       contentType: 'text/plain',
       cacheControlMaxAge: 60
-    });
+    }));
 
-    const result = await blob.get(path, { access: 'private', useCache: false });
+    const result = await blob.get(path, blobOptions({ access: 'private', useCache: false }));
     const text = result && result.statusCode === 200 ? await new Response(result.stream).text() : '';
 
-    try { await blob.del(path); } catch {}
+    try { await blob.del(path, blobOptions()); } catch {}
 
     return json(res, 200, {
       configured: true,
