@@ -156,7 +156,7 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
         <div class="field full"><label for="summary">خلاصه پروژه</label><textarea id="summary" name="summary" placeholder="هدف، مسئله و نتیجه پروژه را بنویس..."></textarea></div>
         <div class="field"><label for="url">لینک پروژه</label><input id="url" name="url" type="url" placeholder="https://"></div>
         <div class="field"><label for="date">تاریخ پروژه</label><input id="date" name="date" placeholder="مثلاً شهریور ۱۴۰۵"></div>
-        <div class="field full"><label for="image">تصویر اصلی پروژه</label><div class="image-uploader"><div class="image-uploader-top"><div class="image-preview" id="image-preview"><span>◇</span></div><div class="image-controls"><input id="image" type="file" accept="image/jpeg,image/png,image/webp"><input id="imageUrl" name="imageUrl" type="hidden"><p class="image-help">JPG، PNG یا WebP. تصویر قبل از آپلود برای وب بهینه می‌شود و روی فضای ذخیره‌سازی سایت قرار می‌گیرد.</p><div class="upload-state" id="upload-state"></div><button class="btn" id="remove-image" type="button">حذف تصویر انتخاب‌شده</button></div></div></div></div>
+        <div class="field full"><label for="image">تصویر اصلی پروژه</label><div class="image-uploader"><div class="image-uploader-top"><div class="image-preview" id="image-preview"><span>◇</span></div><div class="image-controls"><input id="image" type="file" accept="image/jpeg,image/png,image/webp"><input id="imagePath" name="imagePath" type="hidden"><p class="image-help">JPG، PNG یا WebP. تصویر قبل از آپلود برای وب بهینه می‌شود و روی فضای ذخیره‌سازی سایت قرار می‌گیرد.</p><div class="upload-state" id="upload-state"></div><button class="btn" id="remove-image" type="button">حذف تصویر انتخاب‌شده</button></div></div></div></div>
         <div class="field full"><label for="notes">یادداشت خصوصی بررسی</label><textarea id="notes" name="notes" placeholder="چه چیزهایی باید قبل از انتشار اصلاح شوند؟"></textarea></div>
       </div>
       <div class="dialog-actions"><button class="btn primary" type="submit">ذخیره پروژه</button><button class="btn" type="button" data-close>انصراف</button></div>
@@ -173,14 +173,14 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
     const form=document.getElementById('project-form');
     const toast=document.getElementById('toast');
     const imageInput=document.getElementById('image');
-    const imageUrlInput=document.getElementById('imageUrl');
+    const imagePathInput=document.getElementById('imagePath');
     const imagePreview=document.getElementById('image-preview');
     const uploadState=document.getElementById('upload-state');
     const storageBanner=document.getElementById('storage-banner');
 
     function fa(n){return new Intl.NumberFormat('fa-IR').format(n)}
     function escapeHTML(value=''){return String(value).replace(/[&<>'"]/g,function(char){return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[char]})}
-    function safeImage(value=''){try{const u=new URL(String(value));return u.protocol==='https:'?u.href:''}catch{return ''}}
+    function safeImage(value=''){try{const u=new URL(String(value),location.origin);if(u.origin===location.origin)return u.pathname+u.search;return u.protocol==='https:'?u.href:''}catch{return ''}}
     function showToast(message){toast.textContent=message;toast.classList.add('show');setTimeout(function(){toast.classList.remove('show')},1900)}
     function showStorageMessage(message){storageBanner.textContent=message||'';storageBanner.classList.toggle('show',!!message)}
     function setPreview(url){
@@ -244,7 +244,7 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
       form.reset();
       selectedImageFile=null;
       uploadState.textContent='';
-      imageUrlInput.value='';
+      imagePathInput.value='';
       setPreview('');
       form.elements.id.value='';
       document.getElementById('dialog-title').textContent='پروژه جدید';
@@ -252,7 +252,7 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
         const p=projects.find(function(item){return item.id===id});
         if(!p)return;
         Object.entries(p).forEach(function(entry){const key=entry[0],value=entry[1];if(form.elements[key])form.elements[key].value=value==null?'':value});
-        imageUrlInput.value=p.imageUrl||'';
+        imagePathInput.value=p.imagePath||'';
         setPreview(p.imageUrl||'');
         document.getElementById('dialog-title').textContent='ویرایش پروژه';
       }
@@ -300,18 +300,18 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
     }
 
     async function uploadSelectedImage(){
-      if(!selectedImageFile)return imageUrlInput.value||'';
+      if(!selectedImageFile)return imagePathInput.value||'';
       if(!storageReady)throw new Error('فضای ذخیره‌سازی دائمی هنوز فعال نیست.');
       uploadState.textContent='در حال بهینه‌سازی تصویر…';
       const optimized=await optimizeImage(selectedImageFile);
       uploadState.textContent='در حال آپلود امن تصویر…';
       const base64=await blobToBase64(optimized);
       const result=await api('upload-image',{contentType:'image/webp',base64:base64});
-      imageUrlInput.value=result.url||'';
-      setPreview(imageUrlInput.value);
+      imagePathInput.value=result.pathname||'';
+      setPreview(result.previewUrl||'');
       selectedImageFile=null;
       uploadState.textContent='تصویر با موفقیت آپلود شد.';
-      return imageUrlInput.value;
+      return imagePathInput.value;
     }
 
     imageInput.addEventListener('change',function(){
@@ -323,11 +323,11 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
         imagePreview.innerHTML='<img src="'+url+'" alt="پیش‌نمایش تصویر انتخاب‌شده">';
         const previewImage=imagePreview.querySelector('img');
         if(previewImage)previewImage.onload=function(){URL.revokeObjectURL(url)};
-      }else setPreview(imageUrlInput.value);
+      }else {const current=projects.find(function(p){return p.id===form.elements.id.value});setPreview(current&&current.imageUrl||'')}
     });
 
     document.getElementById('remove-image').addEventListener('click',function(){
-      selectedImageFile=null;imageInput.value='';imageUrlInput.value='';uploadState.textContent='تصویر حذف شد؛ با ذخیره پروژه اعمال می‌شود.';setPreview('');
+      selectedImageFile=null;imageInput.value='';imagePathInput.value='';uploadState.textContent='تصویر حذف شد؛ با ذخیره پروژه اعمال می‌شود.';setPreview('');
     });
 
     document.addEventListener('click',async function(e){
@@ -367,7 +367,7 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
           url:String(fd.get('url')||''),
           date:String(fd.get('date')||''),
           notes:String(fd.get('notes')||''),
-          imageUrl:String(imageUrlInput.value||'')
+          imagePath:String(imagePathInput.value||'')
         };
         const data=await api('save',{project:project});
         projects=data.projects||projects;
