@@ -180,7 +180,8 @@ function safeHttpUrl(value=''){
 }
 function safeImageUrl(value=''){
   try{
-    const u=new URL(String(value));
+    const u=new URL(String(value),location.origin);
+    if(u.origin===location.origin) return u.pathname+u.search;
     return u.protocol==='https:'?u.href:'';
   }catch{return ''}
 }
