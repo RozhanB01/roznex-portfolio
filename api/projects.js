@@ -2,12 +2,23 @@ const crypto = require('crypto');
 const { hasBlobStorage, isAdminRequest } = require('../lib/admin-session');
 
 function sameOrigin(req) {
+  const fetchSite = String(req.headers['sec-fetch-site'] || '').toLowerCase();
+  if (fetchSite === 'same-origin') return true;
+
   const origin = String(req.headers.origin || '');
   if (!origin) return true;
+
   try {
     const u = new URL(origin);
-    const host = String(req.headers.host || '');
-    return u.host === host && u.protocol === 'https:';
+    const forwardedHost = String(req.headers['x-forwarded-host'] || '').split(',')[0].trim();
+    const host = forwardedHost || String(req.headers.host || '');
+    const allowedHosts = new Set([
+      host,
+      String(process.env.VERCEL_URL || ''),
+      String(process.env.VERCEL_BRANCH_URL || ''),
+      String(process.env.VERCEL_PROJECT_PRODUCTION_URL || '')
+    ].filter(Boolean));
+    return u.protocol === 'https:' && allowedHosts.has(u.host);
   } catch {
     return false;
   }
@@ -237,7 +248,11 @@ module.exports = async function handler(req, res) {
 
     return json(res, 400, { error: 'unknown_action' });
   } catch (error) {
-    console.error('ROZNEX projects API error', error);
+    console.error('ROZNEX projects API error', {
+      message: error?.message,
+      name: error?.name,
+      stack: error?.stack
+    });
     const known = ['project_store_verify_failed','project_store_invalid','project_not_persisted'];
     const code = known.includes(String(error?.message || '')) ? String(error.message) : 'server_error';
     return json(res, 500, { error: code });
