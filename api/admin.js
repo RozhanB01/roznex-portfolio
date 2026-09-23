@@ -112,7 +112,7 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
       <div class="side-foot"><a href="/" target="_blank">مشاهده سایت ↗</a><p>این پنل خصوصی برای بررسی و آماده‌سازی محتوای سایت ROZNEX است.</p></div>
     </aside>
     <main class="main">
-      <header class="top"><div><h1 id="page-title">داشبورد مدیریت</h1><p id="page-subtitle">پروژه را ثبت کن، بررسی کن و با وضعیت «تأییدشده» روی سایت نمایش بده.</p></div><div class="owner"><span class="avatar">RB</span><span>روژان بهروزی</span></div></header>
+      <header class="top"><div><h1 id="page-title">داشبورد مدیریت</h1><p id="page-subtitle">پروژه را ثبت کن، بررسی کن و با وضعیت «تأییدشده» روی سایت نمایش بده.</p></div><div class="owner"><span class="avatar">RB</span><span>روژان بهروزی</span><b id="storage-indicator" style="font-size:.58rem;color:#a86616">MEDIA v2</b></div></header>
       <div class="storage-banner" id="storage-banner"></div>
 
       <section class="view active" id="overview">
@@ -156,7 +156,7 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
         <div class="field full"><label for="summary">خلاصه پروژه</label><textarea id="summary" name="summary" placeholder="هدف، مسئله و نتیجه پروژه را بنویس..."></textarea></div>
         <div class="field"><label for="url">لینک پروژه</label><input id="url" name="url" type="url" placeholder="https://"></div>
         <div class="field"><label for="date">تاریخ پروژه</label><input id="date" name="date" placeholder="مثلاً شهریور ۱۴۰۵"></div>
-        <div class="field full"><label for="image">تصویر اصلی پروژه</label><div class="image-uploader"><div class="image-uploader-top"><div class="image-preview" id="image-preview"><span>◇</span></div><div class="image-controls"><input id="image" type="file" accept="image/jpeg,image/png,image/webp"><input id="imagePath" name="imagePath" type="hidden"><p class="image-help">JPG، PNG یا WebP. تصویر قبل از آپلود برای وب بهینه می‌شود و روی فضای ذخیره‌سازی سایت قرار می‌گیرد.</p><div class="upload-state" id="upload-state"></div><button class="btn" id="remove-image" type="button">حذف تصویر انتخاب‌شده</button></div></div></div></div>
+        <div class="field full"><label for="image">تصویر اصلی پروژه <strong style="color:var(--gold)">— آپلود مستقیم</strong></label><div class="image-uploader"><div class="image-uploader-top"><div class="image-preview" id="image-preview"><span>◇</span></div><div class="image-controls"><input id="image" type="file" accept="image/jpeg,image/png,image/webp"><input id="imagePath" name="imagePath" type="hidden"><p class="image-help">JPG، PNG یا WebP. تصویر قبل از آپلود برای وب بهینه می‌شود و روی فضای ذخیره‌سازی سایت قرار می‌گیرد.</p><div class="upload-state" id="upload-state"></div><button class="btn" id="remove-image" type="button">حذف تصویر انتخاب‌شده</button></div></div></div></div>
         <div class="field full"><label for="notes">یادداشت خصوصی بررسی</label><textarea id="notes" name="notes" placeholder="چه چیزهایی باید قبل از انتشار اصلاح شوند؟"></textarea></div>
       </div>
       <div class="dialog-actions"><button class="btn primary" type="submit">ذخیره پروژه</button><button class="btn" type="button" data-close>انصراف</button></div>
@@ -177,6 +177,7 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
     const imagePreview=document.getElementById('image-preview');
     const uploadState=document.getElementById('upload-state');
     const storageBanner=document.getElementById('storage-banner');
+    const storageIndicator=document.getElementById('storage-indicator');
 
     function fa(n){return new Intl.NumberFormat('fa-IR').format(n)}
     function escapeHTML(value=''){return String(value).replace(/[&<>'"]/g,function(char){return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[char]})}
@@ -221,6 +222,7 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
       try{
         const data=await requestJSON('/api/projects?admin=1');
         storageReady=!!data.storageReady;
+        if(storageIndicator){storageIndicator.textContent=storageReady?'MEDIA READY':'MEDIA SETUP';storageIndicator.style.color=storageReady?'#2e7455':'#a86616'}
         projects=Array.isArray(data.projects)?data.projects:[];
         if(storageReady&&projects.length===0){
           let legacy=[];try{legacy=JSON.parse(localStorage.getItem(LEGACY_STORAGE_KEY)||'[]')}catch{}
@@ -234,6 +236,7 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
         showStorageMessage('');
       }catch(error){
         storageReady=false;
+        if(storageIndicator){storageIndicator.textContent='MEDIA SETUP';storageIndicator.style.color='#a86616'}
         let legacy=[];try{legacy=JSON.parse(localStorage.getItem(LEGACY_STORAGE_KEY)||'[]')}catch{}
         projects=Array.isArray(legacy)?legacy:[];
       }
