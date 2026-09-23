@@ -1,45 +1,5 @@
 const crypto = require('crypto');
-
-const COOKIE_NAME = 'roznex_admin_session';
-const SESSION_TTL_MS = 12 * 60 * 60 * 1000;
-const PROJECTS_PATH = 'roznex/private/projects.json';
-const MAX_IMAGE_BYTES = 3.2 * 1024 * 1024;
-
-function getSessionSecret() {
-  const source = process.env.ROZNEX_ADMIN_SESSION_SECRET || process.env.BLOB_READ_WRITE_TOKEN || '';
-  if (!source) return '';
-  return crypto.createHash('sha256').update('roznex-admin-session:v1:' + source).digest();
-}
-
-function parseCookies(req) {
-  return Object.fromEntries(
-    String(req.headers.cookie || '')
-      .split(';')
-      .map(v => v.trim())
-      .filter(Boolean)
-      .map(v => {
-        const i = v.indexOf('=');
-        return i < 0 ? [v, ''] : [v.slice(0, i), decodeURIComponent(v.slice(i + 1))];
-      })
-  );
-}
-
-function safeEqualText(a, b) {
-  const left = Buffer.from(String(a || ''));
-  const right = Buffer.from(String(b || ''));
-  return left.length === right.length && crypto.timingSafeEqual(left, right);
-}
-
-function isAdmin(req) {
-  const secret = getSessionSecret();
-  if (!secret) return false;
-  const token = parseCookies(req)[COOKIE_NAME] || '';
-  const [expText, sig] = token.split('.');
-  const exp = Number(expText);
-  if (!Number.isFinite(exp) || exp < Date.now() || exp > Date.now() + SESSION_TTL_MS + 60_000) return false;
-  const expected = crypto.createHmac('sha256', secret).update(expText).digest('base64url');
-  return safeEqualText(sig, expected);
-}
+const { hasBlobStorage, isAdminRequest } = require('../lib/admin-session');
 
 function sameOrigin(req) {
   const origin = String(req.headers.origin || '');
@@ -122,7 +82,7 @@ async function readJsonBody(req) {
 }
 
 async function loadProjects(blob) {
-  if (!process.env.BLOB_READ_WRITE_TOKEN) return [];
+  if (!hasBlobStorage()) return [];
   try {
     const result = await blob.get(PROJECTS_PATH, { access: 'private', useCache: false });
     if (!result || result.statusCode !== 200) return [];
@@ -171,15 +131,16 @@ module.exports = async function handler(req, res) {
 
     if (req.method === 'GET') {
       const wantsAdmin = String(req.query?.admin || '') === '1';
-      if (wantsAdmin && !isAdmin(req)) return json(res, 401, { error: 'unauthorized' });
 
-      if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      if (!hasBlobStorage()) {
         return json(res, wantsAdmin ? 503 : 200, {
           projects: [],
           storageReady: false,
           error: wantsAdmin ? 'storage_not_configured' : undefined
         });
       }
+
+      if (wantsAdmin && !(await isAdminRequest(req))) return json(res, 401, { error: 'unauthorized' });
 
       const projects = await loadProjects(blob);
       return json(res, 200, {
@@ -189,9 +150,9 @@ module.exports = async function handler(req, res) {
     }
 
     if (req.method !== 'POST') return json(res, 405, { error: 'method_not_allowed' });
-    if (!isAdmin(req)) return json(res, 401, { error: 'unauthorized' });
+    if (!hasBlobStorage()) return json(res, 503, { error: 'storage_not_configured' });
+    if (!(await isAdminRequest(req))) return json(res, 401, { error: 'unauthorized' });
     if (!sameOrigin(req)) return json(res, 403, { error: 'bad_origin' });
-    if (!process.env.BLOB_READ_WRITE_TOKEN) return json(res, 503, { error: 'storage_not_configured' });
 
     const body = await readJsonBody(req);
     const action = cleanText(body.action, 40);
