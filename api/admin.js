@@ -1,11 +1,48 @@
 const crypto = require('crypto');
 
-const ADMIN_PASSWORD_HASH = 'f7a15aa99a87a340d9d10a881e1033b45f93fdf8056c52a36b29da5caf934c3a';
+const ADMIN_PASSWORD_HASH = process.env.ROZNEX_ADMIN_PASSWORD_HASH || 'f7a15aa99a87a340d9d10a881e1033b45f93fdf8056c52a36b29da5caf934c3a';
+const SESSION_COOKIE = 'roznex_admin_session';
+const SESSION_TTL_MS = 12 * 60 * 60 * 1000;
 
 function safeEqual(left, right) {
-  const a = Buffer.from(left);
-  const b = Buffer.from(right);
+  const a = Buffer.from(String(left || ''));
+  const b = Buffer.from(String(right || ''));
   return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
+function getSessionSecret() {
+  const source = process.env.ROZNEX_ADMIN_SESSION_SECRET || process.env.BLOB_READ_WRITE_TOKEN || '';
+  if (!source) return '';
+  return crypto.createHash('sha256').update('roznex-admin-session:v1:' + source).digest();
+}
+
+function parseCookies(req) {
+  return Object.fromEntries(
+    String(req.headers.cookie || '').split(';').map(v => v.trim()).filter(Boolean).map(v => {
+      const i = v.indexOf('=');
+      return i < 0 ? [v, ''] : [v.slice(0, i), decodeURIComponent(v.slice(i + 1))];
+    })
+  );
+}
+
+function createSessionToken() {
+  const secret = getSessionSecret();
+  if (!secret) return '';
+  const exp = Date.now() + SESSION_TTL_MS;
+  const expText = String(exp);
+  const sig = crypto.createHmac('sha256', secret).update(expText).digest('base64url');
+  return expText + '.' + sig;
+}
+
+function hasValidSession(req) {
+  const secret = getSessionSecret();
+  if (!secret) return false;
+  const token = parseCookies(req)[SESSION_COOKIE] || '';
+  const [expText, sig] = token.split('.');
+  const exp = Number(expText);
+  if (!Number.isFinite(exp) || exp < Date.now() || exp > Date.now() + SESSION_TTL_MS + 60_000) return false;
+  const expected = crypto.createHmac('sha256', secret).update(expText).digest('base64url');
+  return safeEqual(sig, expected);
 }
 
 async function readBody(req) {
@@ -20,16 +57,25 @@ module.exports = async function handler(req, res) {
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.setHeader('Cache-Control', 'private, no-store, max-age=0');
   res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'no-referrer');
 
   if (req.method === 'POST') {
     const body = await readBody(req);
     const password = new URLSearchParams(body).get('password') || '';
     const passwordHash = crypto.createHash('sha256').update(password).digest('hex');
-    if (safeEqual(passwordHash, ADMIN_PASSWORD_HASH)) return res.end(DASHBOARD_HTML);
+    if (safeEqual(passwordHash, ADMIN_PASSWORD_HASH)) {
+      const token = createSessionToken();
+      if (token) {
+        res.setHeader('Set-Cookie', SESSION_COOKIE + '=' + encodeURIComponent(token) + '; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=43200');
+      }
+      return res.end(DASHBOARD_HTML);
+    }
     res.statusCode = 401;
     return res.end(loginHTML(true));
   }
 
+  if (req.method === 'GET' && hasValidSession(req)) return res.end(DASHBOARD_HTML);
   return res.end(loginHTML(false));
 };
 
