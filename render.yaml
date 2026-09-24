@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: roznex-portfolio
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ROZNEX_BLOB_READ_WRITE_TOKEN
+        sync: false
