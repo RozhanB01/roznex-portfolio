@@ -253,7 +253,7 @@ function renderDashboardProjects(projects=[]){
 async function loadPublishedProjects(){
   let projects=[];
   try{
-    const response=await fetch('/api/projects',{headers:{Accept:'application/json'}});
+    const response=await fetch('/api/projects?fresh='+Date.now(),{headers:{Accept:'application/json'},cache:'no-store'});
     if(!response.ok)throw new Error('projects unavailable');
     const data=await response.json();
     projects=Array.isArray(data.projects)?data.projects:[];
