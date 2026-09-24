@@ -280,7 +280,7 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
         const img=await new Promise(function(resolve,reject){
           const el=new Image();el.onload=function(){resolve(el)};el.onerror=function(){reject(new Error('تصویر قابل خواندن نیست.'))};el.src=objectUrl;
         });
-        const maxSide=1800;
+        const maxSide=1600;
         const ratio=Math.min(1,maxSide/Math.max(img.naturalWidth,img.naturalHeight));
         const canvas=document.createElement('canvas');
         canvas.width=Math.max(1,Math.round(img.naturalWidth*ratio));
@@ -291,11 +291,11 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
         let blob=null;
         for(let i=0;i<4;i++){
           blob=await new Promise(function(resolve){canvas.toBlob(resolve,'image/webp',quality)});
-          if(blob&&blob.size<=2.9*1024*1024)break;
+          if(blob&&blob.size<=1.55*1024*1024)break;
           quality-=.12;
         }
         if(!blob)throw new Error('بهینه‌سازی تصویر انجام نشد.');
-        if(blob.size>3.2*1024*1024)throw new Error('تصویر بعد از بهینه‌سازی هنوز بزرگ است.');
+        if(blob.size>1.8*1024*1024)throw new Error('تصویر بعد از بهینه‌سازی هنوز بزرگ است.');
         return blob;
       }finally{URL.revokeObjectURL(objectUrl)}
     }
