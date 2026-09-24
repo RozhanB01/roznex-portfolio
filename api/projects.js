@@ -3,7 +3,7 @@ const { hasBlobStorage, isAdminRequest } = require('../lib/admin-session');
 const { blobOptions } = require('../lib/blob-config');
 
 const PROJECTS_PATH = 'roznex/private/projects.json';
-const MAX_IMAGE_BYTES = 3.2 * 1024 * 1024;
+const MAX_IMAGE_BYTES = 1.8 * 1024 * 1024;
 
 function sameOrigin(req) {
   const fetchSite = String(req.headers['sec-fetch-site'] || '').toLowerCase();
@@ -65,7 +65,9 @@ function sanitizeProject(input = {}, existing = null) {
     url: cleanHttpUrl(input.url),
     date: cleanText(input.date, 80),
     notes: cleanText(input.notes, 4000),
-    imagePath: cleanImagePath(input.imagePath || existing?.imagePath),
+    imagePath: Object.prototype.hasOwnProperty.call(input, 'imagePath')
+      ? cleanImagePath(input.imagePath)
+      : cleanImagePath(existing?.imagePath),
     updatedAt: new Date().toISOString()
   };
 }
@@ -188,7 +190,8 @@ module.exports = async function handler(req, res) {
     if (action === 'save') {
       const incoming = body.project || {};
       const index = projects.findIndex(p => p.id === incoming.id);
-      const project = sanitizeProject(incoming, index >= 0 ? projects[index] : null);
+      const existing = index >= 0 ? projects[index] : null;
+      const project = sanitizeProject(incoming, existing);
       if (!project.title) return json(res, 400, { error: 'title_required' });
       if (index >= 0) projects[index] = project;
       else projects.unshift(project);
@@ -196,6 +199,10 @@ module.exports = async function handler(req, res) {
       const saved = await saveProjects(blob, projects);
       const persisted = saved.projects.find(p => p.id === project.id);
       if (!persisted) return json(res, 500, { error: 'project_not_persisted' });
+
+      if (existing?.imagePath && existing.imagePath !== persisted.imagePath) {
+        try { await blob.del(existing.imagePath, blobOptions()); } catch {}
+      }
 
       return json(res, 200, {
         ok: true,
