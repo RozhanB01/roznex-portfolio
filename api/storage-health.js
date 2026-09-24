@@ -67,7 +67,7 @@ module.exports = async function handler(req, res) {
       name: error?.name,
       message: error?.message
     });
-    try { await blob.del(path); } catch {}
+    try { await blob.del(path, blobOptions()); } catch {}
     return json(res, 200, {
       configured: true,
       admin: true,
