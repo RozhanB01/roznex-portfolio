@@ -1,0 +1,74 @@
+name: Production Smoke Test
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for production deployment
+        run: sleep 45
+
+      - name: Check ROZNEX production
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="https://roznex-portfolio.vercel.app"
+
+          retry() {
+            local url="$1"
+            local out="$2"
+            for i in {1..12}; do
+              code=$(curl -L -sS -o "$out" -w "%{http_code}" --max-time 20 "$url" || true)
+              echo "$url -> $code"
+              if [ "$code" = "200" ]; then return 0; fi
+              sleep 10
+            done
+            echo "Failed: $url"
+            cat "$out" || true
+            return 1
+          }
+
+          retry "$BASE/" home.html
+          retry "$BASE/api/projects?fresh=$(date +%s)" projects.json
+          retry "$BASE/api/storage-health?ts=$(date +%s)" storage.json
+
+          python - <<'PY'
+          import json, re, sys, urllib.request
+
+          home=open('home.html',encoding='utf-8').read()
+          if 'ROZNEX' not in home:
+              raise SystemExit('Homepage does not contain ROZNEX')
+          if 'projects-media-final-1' not in home:
+              raise SystemExit('Homepage is not serving the latest script version')
+
+          projects=json.load(open('projects.json',encoding='utf-8'))
+          if not isinstance(projects.get('projects'), list):
+              raise SystemExit('Public projects API shape is invalid')
+
+          storage=json.load(open('storage.json',encoding='utf-8'))
+          print('storage:', json.dumps(storage, ensure_ascii=False))
+          if storage.get('configured') is not True:
+              raise SystemExit('Blob storage is not configured in production')
+
+          public=projects.get('projects') or []
+          print('public projects:', len(public))
+          if public:
+              image=public[0].get('imageUrl')
+              if image:
+                  url='https://roznex-portfolio.vercel.app'+image if image.startswith('/') else image
+                  req=urllib.request.Request(url,headers={'User-Agent':'ROZNEX-Smoke-Test'})
+                  with urllib.request.urlopen(req,timeout=20) as r:
+                      if r.status != 200:
+                          raise SystemExit(f'Project image returned {r.status}')
+                      ctype=r.headers.get('content-type','')
+                      if not ctype.startswith('image/'):
+                          raise SystemExit(f'Project image content-type invalid: {ctype}')
+                  print('project image: ok')
+          PY
