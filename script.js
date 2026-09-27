@@ -263,3 +263,63 @@ async function loadPublishedProjects(){
   renderDashboardProjects(projects);
 }
 loadPublishedProjects();
+
+// Hero cursor reveal: one softly-lagging oval, desktop fine pointers only.
+(()=>{
+  const reveal=document.querySelector('.hero-cursor-reveal');
+  if(!hero||!reveal||reduceMotion||!matchMedia('(hover: hover) and (pointer: fine)').matches)return;
+
+  const halfW=55;
+  const halfH=70;
+  let targetX=0,targetY=0,currentX=0,currentY=0;
+  let initialized=false;
+  let rafId=0;
+
+  const paint=()=>{
+    const dx=targetX-currentX;
+    const dy=targetY-currentY;
+    currentX+=dx*.22;
+    currentY+=dy*.22;
+
+    const pos=`${(currentX-halfW).toFixed(2)}px ${(currentY-halfH).toFixed(2)}px`;
+    reveal.style.webkitMaskPosition=pos;
+    reveal.style.maskPosition=pos;
+
+    if(Math.abs(dx)>.3||Math.abs(dy)>.3){
+      rafId=requestAnimationFrame(paint);
+    }else{
+      currentX=targetX;
+      currentY=targetY;
+      const finalPos=`${(currentX-halfW).toFixed(2)}px ${(currentY-halfH).toFixed(2)}px`;
+      reveal.style.webkitMaskPosition=finalPos;
+      reveal.style.maskPosition=finalPos;
+      rafId=0;
+    }
+  };
+
+  hero.addEventListener('pointermove',event=>{
+    const rect=hero.getBoundingClientRect();
+    targetX=event.clientX-rect.left;
+    targetY=event.clientY-rect.top;
+
+    if(!initialized){
+      currentX=targetX;
+      currentY=targetY;
+      initialized=true;
+      reveal.style.opacity='1';
+      const pos=`${(currentX-halfW).toFixed(2)}px ${(currentY-halfH).toFixed(2)}px`;
+      reveal.style.webkitMaskPosition=pos;
+      reveal.style.maskPosition=pos;
+      return;
+    }
+
+    reveal.style.opacity='1';
+    if(!rafId)rafId=requestAnimationFrame(paint);
+  },{passive:true});
+
+  hero.addEventListener('pointerleave',()=>{
+    reveal.style.opacity='0';
+    initialized=false;
+    if(rafId){cancelAnimationFrame(rafId);rafId=0}
+  });
+})();
