@@ -323,3 +323,22 @@ loadPublishedProjects();
     if(rafId){cancelAnimationFrame(rafId);rafId=0}
   });
 })();
+
+
+// Robot face hotspot: reacts only when the pointer reaches the robot's face.
+(()=>{
+  if(!hero||reduceMotion||!matchMedia('(hover: hover) and (pointer: fine)').matches)return;
+  const face={x:.68,y:.39,rx:.09,ry:.145};
+
+  hero.addEventListener('pointermove',event=>{
+    const r=hero.getBoundingClientRect();
+    const nx=(event.clientX-r.left)/r.width;
+    const ny=(event.clientY-r.top)/r.height;
+    const dx=(nx-face.x)/face.rx;
+    const dy=(ny-face.y)/face.ry;
+    const overFace=(dx*dx+dy*dy)<=1;
+    hero.classList.toggle('face-active',overFace);
+  },{passive:true});
+
+  hero.addEventListener('pointerleave',()=>hero.classList.remove('face-active'));
+})();
