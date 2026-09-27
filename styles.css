@@ -241,3 +241,34 @@ body.fa .dashboard-project-client{text-transform:none;letter-spacing:0}
 @media(prefers-reduced-motion:reduce){
   .hero-cursor-reveal{display:none}
 }
+
+
+/* Robot face interaction — visible only while the pointer is over the face. */
+.hero{--face-x:68%;--face-y:39%;--face-glow:0}
+.hero-media:before{
+  content:"";
+  position:absolute;
+  z-index:3;
+  left:var(--face-x);
+  top:var(--face-y);
+  width:clamp(150px,16vw,250px);
+  aspect-ratio:.82;
+  transform:translate(-50%,-50%) scale(calc(.94 + var(--face-glow) * .06));
+  border-radius:48% 48% 44% 44%;
+  pointer-events:none;
+  opacity:var(--face-glow);
+  background:
+    radial-gradient(circle at 39% 43%,rgba(255,236,193,.72) 0 3px,rgba(210,155,82,.32) 5px,transparent 14px),
+    radial-gradient(circle at 61% 43%,rgba(255,236,193,.72) 0 3px,rgba(210,155,82,.32) 5px,transparent 14px),
+    radial-gradient(ellipse at center,rgba(213,166,103,.18) 0 34%,rgba(255,244,222,.09) 52%,transparent 72%);
+  box-shadow:0 0 38px rgba(196,143,78,.24),inset 0 0 34px rgba(255,240,207,.12);
+  mix-blend-mode:screen;
+  transition:opacity .24s ease,transform .35s cubic-bezier(.2,.75,.25,1);
+}
+.hero.face-active .hero-media>img{
+  filter:saturate(1.06) contrast(1.035) brightness(1.015);
+}
+.hero.face-active .hero-media:before{--face-glow:1}
+@media (hover:none),(pointer:coarse),(max-width:760px),(prefers-reduced-motion:reduce){
+  .hero-media:before{display:none}
+}
