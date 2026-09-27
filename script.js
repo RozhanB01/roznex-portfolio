@@ -324,21 +324,92 @@ loadPublishedProjects();
   });
 })();
 
-
-// Robot face hotspot: reacts only when the pointer reaches the robot's face.
+// Robot face interaction: precise image-relative hotspot with mouse, pen and touch support.
 (()=>{
-  if(!hero||reduceMotion||!matchMedia('(hover: hover) and (pointer: fine)').matches)return;
-  const face={x:.68,y:.39,rx:.09,ry:.145};
+  if(!hero||!heroMedia)return;
 
-  hero.addEventListener('pointermove',event=>{
-    const r=hero.getBoundingClientRect();
-    const nx=(event.clientX-r.left)/r.width;
-    const ny=(event.clientY-r.top)/r.height;
+  // Override the older desktop-only CSS without changing the site's palette or robot artwork.
+  if(!document.getElementById('roznex-face-interaction-fix')){
+    const style=document.createElement('style');
+    style.id='roznex-face-interaction-fix';
+    style.textContent=`
+      .hero-media{touch-action:pan-y pinch-zoom}
+      .hero-media:before{
+        display:block!important;
+        width:clamp(165px,18vw,280px)!important;
+        opacity:var(--face-glow)!important;
+      }
+      .hero.face-active .hero-media:before{
+        --face-glow:1;
+        opacity:1!important;
+        transform:translate(-50%,-50%) scale(1.06)!important;
+        box-shadow:
+          0 0 48px rgba(196,143,78,.34),
+          0 0 95px rgba(196,143,78,.16),
+          inset 0 0 38px rgba(255,240,207,.16)!important;
+      }
+      .hero.face-active .hero-media>img{
+        filter:saturate(1.09) contrast(1.045) brightness(1.025)!important;
+      }
+      @media(max-width:760px){
+        .hero{--face-x:84%;--face-y:39%}
+        .hero-media:before{width:clamp(145px,42vw,200px)!important}
+      }
+      @media(prefers-reduced-motion:reduce){
+        .hero-media:before{transition:none!important}
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  const desktopFace={x:.68,y:.39,rx:.12,ry:.18};
+  // The hero image is heavily cropped on narrow screens (object-position: 58% center),
+  // so the same source-image face lands farther to the right in the visible mobile frame.
+  const mobileFace={x:.84,y:.39,rx:.20,ry:.21};
+  let holdTimer=0;
+
+  const faceForViewport=()=>innerWidth<=760?mobileFace:desktopFace;
+  const isOverFace=(clientX,clientY)=>{
+    const r=heroMedia.getBoundingClientRect();
+    if(!r.width||!r.height)return false;
+    const face=faceForViewport();
+    const nx=(clientX-r.left)/r.width;
+    const ny=(clientY-r.top)/r.height;
     const dx=(nx-face.x)/face.rx;
     const dy=(ny-face.y)/face.ry;
-    const overFace=(dx*dx+dy*dy)<=1;
-    hero.classList.toggle('face-active',overFace);
+    return dx*dx+dy*dy<=1;
+  };
+
+  const deactivate=()=>{
+    hero.classList.remove('face-active');
+    if(holdTimer){clearTimeout(holdTimer);holdTimer=0}
+  };
+
+  const flash=()=>{
+    hero.classList.add('face-active');
+    if(holdTimer)clearTimeout(holdTimer);
+    holdTimer=setTimeout(()=>{
+      hero.classList.remove('face-active');
+      holdTimer=0;
+    },1200);
+  };
+
+  heroMedia.addEventListener('pointermove',event=>{
+    if(event.pointerType==='touch'){
+      if(event.buttons&&isOverFace(event.clientX,event.clientY))flash();
+      return;
+    }
+    hero.classList.toggle('face-active',isOverFace(event.clientX,event.clientY));
   },{passive:true});
 
-  hero.addEventListener('pointerleave',()=>hero.classList.remove('face-active'));
+  heroMedia.addEventListener('pointerdown',event=>{
+    if(isOverFace(event.clientX,event.clientY))flash();
+  },{passive:true});
+
+  heroMedia.addEventListener('pointerleave',event=>{
+    if(event.pointerType!=='touch')deactivate();
+  },{passive:true});
+
+  heroMedia.addEventListener('pointercancel',deactivate,{passive:true});
+  addEventListener('resize',()=>hero.classList.remove('face-active'),{passive:true});
 })();
