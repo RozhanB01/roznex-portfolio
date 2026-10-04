@@ -216,10 +216,10 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
             <article class="section-card">
               <header><h3>Hero — انگلیسی</h3><span class="status">Editable</span></header>
               <div class="cms-fields">
-                <label><span>خط ۱</span><input name="hero_en_1" placeholder="I BUILD"></label>
-                <label><span>خط ۲</span><input name="hero_en_2" placeholder="DIGITAL"></label>
-                <label><span>خط ۳</span><input name="hero_en_3" placeholder="EXPERIENCES"></label>
-                <label><span>خط ۴</span><input name="hero_en_4" placeholder="THAT THINK."></label>
+                <label><span>خط ۱</span><input name="hero_en_1" placeholder="DESIGN."></label>
+                <label><span>خط ۲</span><input name="hero_en_2" placeholder="CODE."></label>
+                <label><span>خط ۳</span><input name="hero_en_3" placeholder="INTELLIGENCE."></label>
+                <label><span>خط ۴</span><input name="hero_en_4" placeholder="BUILT AS ONE."></label>
                 <label class="wide"><span>توضیح کوتاه</span><textarea name="hero_en_description" placeholder="AI-powered products..."></textarea></label>
               </div>
             </article>
