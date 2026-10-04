@@ -596,3 +596,5 @@ body.fa .proof-band>a:last-child{border-left:0}
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
   .reveal{opacity:1!important;transform:none!important}
 }
+
+.contact-next{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.55rem;margin-top:1rem}.contact-next span{display:flex;align-items:center;gap:.55rem;padding:.7rem .8rem;border:1px solid rgba(17,20,27,.13);border-radius:999px;background:rgba(255,255,255,.14)}.contact-next b{font-size:.52rem;letter-spacing:.08em;color:#8a755e}.contact-next em{font-style:normal;font-size:.62rem;color:#615a53}@media(max-width:760px){.contact-next{grid-template-columns:1fr}.contact-next span{border-radius:.8rem;justify-content:flex-start}}
