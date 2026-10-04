@@ -33,6 +33,49 @@ function sameOrigin(req) {
   }
 }
 
+const REQUEST_RATE_PREFIX = 'roznex/private/request-rate/';
+const REQUEST_RATE_WINDOW_MS = 30 * 60 * 1000;
+const REQUEST_RATE_MAX = 5;
+
+function requestClientAddress(req) {
+  return String(req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || 'unknown')
+    .split(',')[0].trim().slice(0, 160);
+}
+
+function requestRatePath(req) {
+  const digest = crypto.createHash('sha256').update(requestClientAddress(req)).digest('hex');
+  return REQUEST_RATE_PREFIX + digest + '.json';
+}
+
+async function loadRequestRate(blob, req) {
+  const empty = { count: 0, resetAt: 0 };
+  try {
+    const path = requestRatePath(req);
+    const result = await blob.get(path, blobOptions({ access: 'private', useCache: false }));
+    if (!result || result.statusCode !== 200) return empty;
+    const raw = await new Response(result.stream).text();
+    const data = JSON.parse(raw);
+    const now = Date.now();
+    const resetAt = Number(data?.resetAt || 0);
+    if (!resetAt || resetAt <= now) {
+      try { await blob.del(path, blobOptions()); } catch {}
+      return empty;
+    }
+    return { count: Math.max(0, Number(data?.count || 0)), resetAt };
+  } catch {
+    return empty;
+  }
+}
+
+async function recordAcceptedRequest(blob, req, current) {
+  const now = Date.now();
+  const resetAt = current.resetAt > now ? current.resetAt : now + REQUEST_RATE_WINDOW_MS;
+  const state = { count: current.resetAt > now ? current.count + 1 : 1, resetAt };
+  await blob.put(requestRatePath(req), JSON.stringify(state), blobOptions({
+    access: 'private', addRandomSuffix: false, allowOverwrite: true,
+    contentType: 'application/json', cacheControlMaxAge: 60
+  }));
+}
 async function readBody(req) {
   if (req.body && typeof req.body === 'object') return req.body;
   const chunks = [];
@@ -103,6 +146,12 @@ module.exports = async function handler(req, res) {
       if (!hasBlobStorage()) return json(res, 503, { error: 'storage_not_configured' });
       if (!(await isAdminRequest(req))) return json(res, 401, { error: 'unauthorized' });
       const blob = await import('@vercel/blob');
+      const rate = await loadRequestRate(blob, req);
+      if (rate.count >= REQUEST_RATE_MAX) {
+        const seconds = Math.max(1, Math.ceil((rate.resetAt - Date.now()) / 1000));
+        res.setHeader('Retry-After', String(seconds));
+        return json(res, 429, { error: 'rate_limited', retryAfter: seconds });
+      }
       const requests = await loadRequests(blob);
       return json(res, 200, { requests, storageReady: true });
     }
@@ -140,6 +189,9 @@ module.exports = async function handler(req, res) {
 
       requests.unshift(request);
       await saveRequests(blob, requests);
+      try { await recordAcceptedRequest(blob, req, rate); } catch (error) {
+        console.error('ROZNEX request rate-limit write error', { name: error?.name, message: error?.message });
+      }
       return json(res, 201, { ok: true, id: request.id });
     }
 
