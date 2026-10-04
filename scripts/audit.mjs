@@ -53,6 +53,17 @@ else ok('SmartQuote catalog absent from public source');
 if(!quote.includes('ROZNEX_QUOTE_CATALOG_JSON'))fail('SmartQuote private catalog env is not enforced');
 else ok('SmartQuote private catalog env enforced');
 
+if(!quote.includes('ROZNEX_QUOTE_SIGNING_SECRET'))fail('SmartQuote server-side signing secret is not enforced');
+else ok('server-side SmartQuote signing secret enforced');
+if(!quote.includes('v:Number(p.v||0)'))fail('SmartQuote invite payload version is not preserved');
+else ok('SmartQuote invite payload version preserved');
+
+const invite=fs.readFileSync(path.join(root,'api/admin-invite.js'),'utf8');
+if(invite.includes('roznex_signing_key')||invite.includes('privateKey'))fail('browser-stored SmartQuote signing key detected');
+else ok('SmartQuote signing stays server-side');
+if(!invite.includes('ROZNEX_PUBLIC_ORIGIN'))fail('canonical SmartQuote invitation origin is not enforced');
+else ok('canonical SmartQuote invitation origin enforced');
+
 const admin=fs.readFileSync(path.join(root,'api/admin.js'),'utf8');
 if(/ROZNEX_ADMIN_PASSWORD_HASH\s*\|\|\s*['"][a-f0-9]{64}/i.test(admin))fail('hard-coded admin password hash fallback detected');
 else ok('no hard-coded admin password hash fallback');

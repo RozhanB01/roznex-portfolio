@@ -12,9 +12,10 @@ During setup, set:
 
 - `ROZNEX_ADMIN_PASSWORD_HASH` — SHA-256 hash of the private dashboard password. Do not commit the password or its hash to the repository.
 - `ROZNEX_ADMIN_SESSION_SECRET` — optional extra random secret for stateless admin sessions. If omitted, the configured admin password hash is used as the session signing secret.
-- `ROZNEX_BLOB_READ_WRITE_TOKEN` — read/write token from the connected Vercel Blob store. Required for persistent projects, images, and project-request inbox storage.
+- `ROZNEX_READ_WRITE_TOKEN` — read/write token created by the connected Vercel Blob store when the `ROZNEX_` prefix is used. The runtime also supports `ROZNEX_BLOB_READ_WRITE_TOKEN` and `BLOB_READ_WRITE_TOKEN` for compatibility.
 - `ROZNEX_QUOTE_CATALOG_JSON` — private JSON catalog for SmartQuote pricing. Keep this only in the deployment environment; never commit prices to the repository.
 - `ROZNEX_QUOTE_SIGNING_SECRET` — random server-side secret used to sign time-limited SmartQuote invitations.
+- `ROZNEX_PUBLIC_ORIGIN` — canonical public origin used when generating customer invitation links (for production: `https://roznex-portfolio.vercel.app`).
 
 After deployment:
 
