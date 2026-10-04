@@ -534,3 +534,5 @@ body.fa .dashboard-project-client{text-transform:none;letter-spacing:0}
 @media(max-width:620px){.home-insights-grid{grid-template-columns:1fr}.home-insight-card,.home-insight-card:last-child{grid-column:auto;min-height:16rem}.home-insight-card h3{font-size:2rem}.home-insights-more .button{width:100%;justify-content:space-between}}
 
 .service-detail-link{display:inline-flex;margin-top:.9rem;width:max-content;color:inherit;text-decoration:none;font-size:.64rem;border-bottom:1px solid currentColor;padding-bottom:.22rem;opacity:.78}.service-detail-link:hover{opacity:1}@media(max-width:760px){.service-detail-link{font-size:.68rem}}
+
+.about-profile-link{display:inline-flex;margin:.65rem 0 .2rem;width:max-content;color:inherit;text-decoration:none;font-size:.62rem;letter-spacing:.06em;border-bottom:1px solid currentColor;padding-bottom:.2rem;opacity:.7}.about-profile-link:hover{opacity:1}@media(max-width:760px){.about-profile-link{font-size:.66rem;margin:.55rem 0 .1rem}}
