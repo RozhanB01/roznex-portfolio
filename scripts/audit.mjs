@@ -11,7 +11,14 @@ const required=[
   'index.html','styles.css','script.js','manifest.webmanifest','robots.txt','sitemap.xml',
   'vercel.json','server.js','api/admin.js','api/quote.js','api/projects.js',
   'api/requests.js','api/site-content.js','lib/admin-session.js','lib/blob-config.js',
-  '.well-known/security.txt'
+  '.well-known/security.txt',
+  'insights/index.html','insights/insights.css','insights/rss.xml',
+  'insights/fa/ai-agent-business/index.html',
+  'insights/en/ai-agents-for-business/index.html',
+  'insights/fa/professional-corporate-website/index.html',
+  'insights/en/professional-corporate-website/index.html',
+  'insights/fa/technical-seo-nextjs/index.html',
+  'insights/en/technical-seo-nextjs/index.html'
 ];
 for(const file of required){
   if(fs.existsSync(path.join(root,file)))ok('exists '+file);
@@ -98,6 +105,38 @@ for(const rel of htmlFiles){
     fail(rel+' references missing local file '+ref);
   }
 }
+
+
+/* SEO article checks */
+const seoArticles=[
+  'insights/fa/ai-agent-business/index.html',
+  'insights/en/ai-agents-for-business/index.html',
+  'insights/fa/professional-corporate-website/index.html',
+  'insights/en/professional-corporate-website/index.html',
+  'insights/fa/technical-seo-nextjs/index.html',
+  'insights/en/technical-seo-nextjs/index.html'
+];
+const sitemap=fs.readFileSync(path.join(root,'sitemap.xml'),'utf8');
+for(const rel of seoArticles){
+  const html=fs.readFileSync(path.join(root,rel),'utf8');
+  const canonical=(html.match(/<link rel="canonical" href="([^"]+)"/)||[])[1]||'';
+  if(!canonical)fail(rel+' missing canonical');
+  else ok('canonical '+rel);
+  if(!html.includes('hreflang='))fail(rel+' missing hreflang');
+  else ok('hreflang '+rel);
+  if(!html.includes('"@type":"BlogPosting"'))fail(rel+' missing BlogPosting schema');
+  else ok('BlogPosting schema '+rel);
+  if(!html.includes('"@type":"BreadcrumbList"'))fail(rel+' missing breadcrumb schema');
+  else ok('breadcrumb schema '+rel);
+  if(!html.includes('<meta name="description"'))fail(rel+' missing meta description');
+  if(canonical&&!sitemap.includes('<loc>'+canonical+'</loc>'))fail(rel+' canonical missing from sitemap');
+  else if(canonical)ok('sitemap '+rel);
+}
+const insightsIndex=fs.readFileSync(path.join(root,'insights/index.html'),'utf8');
+if(!insightsIndex.includes('application/rss+xml'))fail('Insights index missing RSS discovery');
+else ok('Insights RSS discovery');
+if(!fs.readFileSync(path.join(root,'index.html'),'utf8').includes('/insights/'))fail('Homepage does not link to Insights');
+else ok('Homepage links to Insights');
 
 if(failures.length){
   console.error('\nROZNEX audit failed with '+failures.length+' issue(s).');

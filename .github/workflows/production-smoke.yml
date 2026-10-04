@@ -48,6 +48,10 @@ jobs:
 
           retry_status "$BASE/" home.html 200
           retry_status "$BASE/start/" start.html 200
+          retry_status "$BASE/insights/" insights.html 200
+          retry_status "$BASE/insights/fa/ai-agent-business/" insight-fa.html 200
+          retry_status "$BASE/insights/en/technical-seo-nextjs/" insight-en.html 200
+          retry_status "$BASE/sitemap.xml" sitemap.xml 200
           retry_status "$BASE/admin" admin.html 200
           retry_status "$BASE/quote/" quote.html 401 no
           retry_status "$BASE/.well-known/security.txt" security.txt 200
@@ -62,6 +66,22 @@ jobs:
               raise SystemExit('Homepage does not contain ROZNEX')
           if not re.search(r'script\.js\?v=[^"\']+', home):
               raise SystemExit('Homepage does not reference a versioned script asset')
+
+          insights=open('insights.html',encoding='utf-8').read()
+          if 'ROZNEX / INSIGHTS' not in insights or '/insights/fa/ai-agent-business/' not in insights:
+              raise SystemExit('Insights hub did not render expected content')
+
+          insight_fa=open('insight-fa.html',encoding='utf-8').read()
+          if 'BlogPosting' not in insight_fa or 'hreflang=' not in insight_fa or 'rel="canonical"' not in insight_fa:
+              raise SystemExit('Persian Insight SEO metadata is incomplete')
+
+          insight_en=open('insight-en.html',encoding='utf-8').read()
+          if 'BlogPosting' not in insight_en or 'hreflang=' not in insight_en or 'rel="canonical"' not in insight_en:
+              raise SystemExit('English Insight SEO metadata is incomplete')
+
+          sitemap_text=open('sitemap.xml',encoding='utf-8').read()
+          if '/insights/fa/ai-agent-business/' not in sitemap_text or '/insights/en/technical-seo-nextjs/' not in sitemap_text:
+              raise SystemExit('Sitemap is missing Insights URLs')
 
           start=open('start.html',encoding='utf-8').read()
           if 'id="projectForm"' not in start or '/api/requests' not in start:
