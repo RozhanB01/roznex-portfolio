@@ -52,6 +52,68 @@ const setLanguage=(fa,animate=false)=>{
 setLanguage(localStorage.getItem('roznex-language')==='fa');
 lang.addEventListener('click',()=>setLanguage(html.lang!=='fa',true));
 
+const CMS_BINDINGS={
+  hero_en_description:['.hero-description','en'],
+  hero_fa_description:['.hero-description','fa'],
+  about_en_title:['.about-content h2','en'],
+  about_fa_title:['.about-content h2','fa'],
+  about_en_body:['.about-content>p','en'],
+  about_fa_body:['.about-content>p','fa'],
+  contact_en_title:['.contact-copy h2','en'],
+  contact_fa_title:['.contact-copy h2','fa'],
+  contact_en_body:['.contact-copy>p','en'],
+  contact_fa_body:['.contact-copy>p','fa']
+};
+async function loadSiteContent(){
+  try{
+    const response=await fetch('/api/site-content?fresh='+Date.now(),{headers:{Accept:'application/json'},cache:'no-store'});
+    if(!response.ok)return;
+    const data=await response.json();
+    const content=data&&data.content||{};
+    const heroLines=[...document.querySelectorAll('#hero-title>span')];
+    for(let i=0;i<4;i++){
+      if(heroLines[i]){
+        if(content['hero_en_'+(i+1)])heroLines[i].dataset.en=content['hero_en_'+(i+1)];
+        if(content['hero_fa_'+(i+1)])heroLines[i].dataset.fa=content['hero_fa_'+(i+1)];
+      }
+    }
+    if(content.hero_fa_tagline){
+      const tagline=document.querySelector('.fa-line');
+      if(tagline){tagline.textContent=content.hero_fa_tagline;tagline.style.whiteSpace='pre-line'}
+    }
+    Object.entries(CMS_BINDINGS).forEach(([key,binding])=>{
+      const value=content[key];
+      if(!value)return;
+      const el=document.querySelector(binding[0]);
+      if(el)el.dataset[binding[1]]=value;
+    });
+    const serviceCards=[...document.querySelectorAll('.service-card')];
+    const ids=['ai','web','3d','seo'];
+    ids.forEach((id,index)=>{
+      const card=serviceCards[index];if(!card)return;
+      const title=card.querySelector('h3'),bodyEl=card.querySelector('p');
+      if(title){
+        if(content['service_'+id+'_en_title'])title.dataset.en=content['service_'+id+'_en_title'];
+        if(content['service_'+id+'_fa_title'])title.dataset.fa=content['service_'+id+'_fa_title'];
+      }
+      if(bodyEl){
+        if(content['service_'+id+'_en_body'])bodyEl.dataset.en=content['service_'+id+'_en_body'];
+        if(content['service_'+id+'_fa_body'])bodyEl.dataset.fa=content['service_'+id+'_fa_body'];
+      }
+    });
+    if(content.seo_title){
+      document.title=content.seo_title;
+      document.querySelectorAll('meta[property="og:title"],meta[name="twitter:title"]').forEach(el=>el.setAttribute('content',content.seo_title));
+    }
+    if(content.seo_description){
+      const meta=document.querySelector('meta[name="description"]');if(meta)meta.setAttribute('content',content.seo_description);
+      document.querySelectorAll('meta[property="og:description"],meta[name="twitter:description"]').forEach(el=>el.setAttribute('content',content.seo_description));
+    }
+    setLanguage(html.lang==='fa');
+  }catch{}
+}
+loadSiteContent();
+
 const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{
   if(entry.isIntersecting){entry.target.classList.add('visible');observer.unobserve(entry.target)}
 }),{threshold:.12,rootMargin:'0px 0px -7%'});

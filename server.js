@@ -7,6 +7,7 @@ const projectImageHandler = require('./api/project-image');
 const storageHealthHandler = require('./api/storage-health');
 const requestsHandler = require('./api/requests');
 const adminInviteHandler = require('./api/admin-invite');
+const siteContentHandler = require('./api/site-content');
 
 const app = express();
 const root = __dirname;
@@ -36,6 +37,7 @@ app.all('/api/projects', projectsHandler);
 app.all('/api/project-image', projectImageHandler);
 app.all('/api/storage-health', storageHealthHandler);
 app.all('/api/requests', requestsHandler);
+app.all('/api/site-content', siteContentHandler);
 app.all(['/admin', '/admin/'], adminHandler);
 app.all(['/admin/invite', '/admin/invite/'], adminInviteHandler);
 
