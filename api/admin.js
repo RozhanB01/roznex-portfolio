@@ -1,5 +1,6 @@
 const crypto = require('crypto');
-const { createAdminSession, isAdminRequest, destroyAdminSession } = require('../lib/admin-session');
+const { createAdminSession, isAdminRequest, destroyAdminSession, hasBlobStorage } = require('../lib/admin-session');
+const { blobOptions } = require('../lib/blob-config');
 
 const ADMIN_PASSWORD_HASH = String(process.env.ROZNEX_ADMIN_PASSWORD_HASH || '').trim().toLowerCase();
 
@@ -7,6 +8,69 @@ function safeEqual(left, right) {
   const a = Buffer.from(String(left || ''));
   const b = Buffer.from(String(right || ''));
   return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+const LOGIN_RATE_PREFIX = 'roznex/private/login-rate/';
+const LOGIN_MAX_FAILURES = 8;
+const LOGIN_WINDOW_MS = 15 * 60 * 1000;
+
+function clientAddress(req) {
+  return String(req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || 'unknown')
+    .split(',')[0].trim().slice(0, 160);
+}
+
+function loginRatePath(req) {
+  const digest = crypto.createHash('sha256').update(clientAddress(req)).digest('hex');
+  return LOGIN_RATE_PREFIX + digest + '.json';
+}
+
+async function loadLoginRate(req) {
+  const empty = { count: 0, resetAt: 0, blockedUntil: 0 };
+  if (!hasBlobStorage()) return empty;
+  try {
+    const blob = await import('@vercel/blob');
+    const path = loginRatePath(req);
+    const result = await blob.get(path, blobOptions({ access: 'private', useCache: false }));
+    if (!result || result.statusCode !== 200) return empty;
+    const raw = await new Response(result.stream).text();
+    const data = JSON.parse(raw);
+    const now = Date.now();
+    const resetAt = Number(data?.resetAt || 0);
+    if (!resetAt || resetAt <= now) {
+      try { await blob.del(path, blobOptions()); } catch {}
+      return empty;
+    }
+    return {
+      count: Math.max(0, Number(data?.count || 0)),
+      resetAt,
+      blockedUntil: Math.max(0, Number(data?.blockedUntil || 0))
+    };
+  } catch {
+    return empty;
+  }
+}
+
+async function recordLoginFailure(req) {
+  if (!hasBlobStorage()) return { count: 1, resetAt: Date.now() + LOGIN_WINDOW_MS, blockedUntil: 0 };
+  const blob = await import('@vercel/blob');
+  const now = Date.now();
+  const current = await loadLoginRate(req);
+  const resetAt = current.resetAt > now ? current.resetAt : now + LOGIN_WINDOW_MS;
+  const count = current.resetAt > now ? current.count + 1 : 1;
+  const blockedUntil = count >= LOGIN_MAX_FAILURES ? resetAt : 0;
+  const state = { count, resetAt, blockedUntil };
+  await blob.put(loginRatePath(req), JSON.stringify(state), blobOptions({
+    access: 'private', addRandomSuffix: false, allowOverwrite: true,
+    contentType: 'application/json', cacheControlMaxAge: 60
+  }));
+  return state;
+}
+
+async function clearLoginFailures(req) {
+  if (!hasBlobStorage()) return;
+  try {
+    const blob = await import('@vercel/blob');
+    await blob.del(loginRatePath(req), blobOptions());
+  } catch {}
 }
 async function readBody(req) {
   if (typeof req.body === 'string') return req.body;
@@ -24,6 +88,14 @@ module.exports = async function handler(req, res) {
   res.setHeader('Referrer-Policy', 'no-referrer');
 
   if (req.method === 'POST') {
+    const loginRate = await loadLoginRate(req);
+    if (loginRate.blockedUntil > Date.now()) {
+      const seconds = Math.max(1, Math.ceil((loginRate.blockedUntil - Date.now()) / 1000));
+      res.setHeader('Retry-After', String(seconds));
+      res.statusCode = 429;
+      return res.end(loginHTML(false, false, true));
+    }
+
     if (!/^[a-f0-9]{64}$/.test(ADMIN_PASSWORD_HASH)) {
       res.statusCode = 503;
       return res.end(loginHTML(false, true));
@@ -32,6 +104,7 @@ module.exports = async function handler(req, res) {
     const password = new URLSearchParams(body).get('password') || '';
     const passwordHash = crypto.createHash('sha256').update(password).digest('hex');
     if (safeEqual(passwordHash, ADMIN_PASSWORD_HASH)) {
+      await clearLoginFailures(req);
       try {
         const created = await createAdminSession(res);
         if (!created) {
@@ -44,6 +117,13 @@ module.exports = async function handler(req, res) {
         return res.end(loginHTML(false, true));
       }
       return res.end(DASHBOARD_HTML);
+    }
+    const failed = await recordLoginFailure(req);
+    if (failed.blockedUntil > Date.now()) {
+      const seconds = Math.max(1, Math.ceil((failed.blockedUntil - Date.now()) / 1000));
+      res.setHeader('Retry-After', String(seconds));
+      res.statusCode = 429;
+      return res.end(loginHTML(false, false, true));
     }
     res.statusCode = 401;
     return res.end(loginHTML(true));
@@ -61,8 +141,8 @@ module.exports = async function handler(req, res) {
   return res.end(loginHTML(false));
 };
 
-function loginHTML(hasError, configError = false) {
-  return String.raw`<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><title>ورود به ROZNEX Control</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700&family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet"><style>*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:1.25rem;background:#efe8df;color:#11141b;font-family:Vazirmatn,Manrope,sans-serif}.login{width:min(27rem,100%);background:rgba(255,251,246,.88);border:1px solid #d8cdbf;border-radius:28px;padding:2rem;box-shadow:0 30px 90px rgba(50,38,24,.14);position:relative;overflow:hidden}.login:before{content:"";position:absolute;width:15rem;height:15rem;border:1px solid rgba(184,139,85,.25);border-radius:50%;top:-8rem;left:-6rem;box-shadow:0 0 0 3rem rgba(184,139,85,.05)}.brand{font:700 1rem Manrope;letter-spacing:.2em;position:relative}.kicker{font:600 .65rem Manrope;letter-spacing:.15em;color:#9b7b55;margin-top:3.5rem}.login h1{font-size:2.2rem;letter-spacing:-.05em;margin:.7rem 0 .5rem}.login p{font-size:.8rem;color:#716a62;line-height:1.8;margin:0 0 1.4rem}label{display:block;font-size:.75rem;margin-bottom:.45rem}input{width:100%;border:1px solid #d8cdbf;background:white;border-radius:13px;padding:.85rem 1rem;font:500 1rem Manrope;outline:none;direction:ltr}input:focus{border-color:#b88b55;box-shadow:0 0 0 3px rgba(184,139,85,.12)}button{width:100%;border:0;border-radius:13px;padding:.9rem;margin-top:.8rem;background:#11141b;color:white;font:600 .9rem Vazirmatn;cursor:pointer}.error{background:#f9e3df;color:#923d35;padding:.7rem .8rem;border-radius:11px;font-size:.74rem;margin-bottom:1rem}.back{display:block;text-align:center;color:#746d65;text-decoration:none;font-size:.72rem;margin-top:1.2rem}</style></head><body><main class="login"><div class="brand">ROZNEX</div><div class="kicker">PRIVATE CONTROL DESK</div><h1>ورود به مدیریت</h1><p>برای ورود به داشبورد خصوصی، فقط رمز مدیریت را وارد کن.</p>${configError?'<div class="error">تنظیم امنیتی مدیریت کامل نیست. متغیر ROZNEX_ADMIN_PASSWORD_HASH باید در محیط Production تنظیم شود.</div>':''}${hasError?'<div class="error">رمز واردشده درست نیست. دوباره تلاش کن.</div>':''}<form method="post" action="/admin" autocomplete="off"><label for="password">رمز مدیریت</label><input id="password" name="password" type="password" required autofocus autocomplete="current-password"><button type="submit">ورود به داشبورد</button></form><a class="back" href="/">بازگشت به سایت</a></main></body></html>`;
+function loginHTML(hasError, configError = false, rateLimited = false) {
+  return String.raw`<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><title>ورود به ROZNEX Control</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700&family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet"><style>*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:1.25rem;background:#efe8df;color:#11141b;font-family:Vazirmatn,Manrope,sans-serif}.login{width:min(27rem,100%);background:rgba(255,251,246,.88);border:1px solid #d8cdbf;border-radius:28px;padding:2rem;box-shadow:0 30px 90px rgba(50,38,24,.14);position:relative;overflow:hidden}.login:before{content:"";position:absolute;width:15rem;height:15rem;border:1px solid rgba(184,139,85,.25);border-radius:50%;top:-8rem;left:-6rem;box-shadow:0 0 0 3rem rgba(184,139,85,.05)}.brand{font:700 1rem Manrope;letter-spacing:.2em;position:relative}.kicker{font:600 .65rem Manrope;letter-spacing:.15em;color:#9b7b55;margin-top:3.5rem}.login h1{font-size:2.2rem;letter-spacing:-.05em;margin:.7rem 0 .5rem}.login p{font-size:.8rem;color:#716a62;line-height:1.8;margin:0 0 1.4rem}label{display:block;font-size:.75rem;margin-bottom:.45rem}input{width:100%;border:1px solid #d8cdbf;background:white;border-radius:13px;padding:.85rem 1rem;font:500 1rem Manrope;outline:none;direction:ltr}input:focus{border-color:#b88b55;box-shadow:0 0 0 3px rgba(184,139,85,.12)}button{width:100%;border:0;border-radius:13px;padding:.9rem;margin-top:.8rem;background:#11141b;color:white;font:600 .9rem Vazirmatn;cursor:pointer}.error{background:#f9e3df;color:#923d35;padding:.7rem .8rem;border-radius:11px;font-size:.74rem;margin-bottom:1rem}.back{display:block;text-align:center;color:#746d65;text-decoration:none;font-size:.72rem;margin-top:1.2rem}</style></head><body><main class="login"><div class="brand">ROZNEX</div><div class="kicker">PRIVATE CONTROL DESK</div><h1>ورود به مدیریت</h1><p>برای ورود به داشبورد خصوصی، فقط رمز مدیریت را وارد کن.</p>${configError?'<div class="error">تنظیم امنیتی مدیریت کامل نیست. متغیر ROZNEX_ADMIN_PASSWORD_HASH باید در محیط Production تنظیم شود.</div>':''}${rateLimited?'<div class="error">تعداد تلاش‌های ناموفق زیاد شده است. ورود برای مدت کوتاهی موقتاً قفل شده است.</div>':''}${hasError?'<div class="error">رمز واردشده درست نیست. دوباره تلاش کن.</div>':''}<form method="post" action="/admin" autocomplete="off"><label for="password">رمز مدیریت</label><input id="password" name="password" type="password" required autofocus autocomplete="current-password"><button type="submit">ورود به داشبورد</button></form><a class="back" href="/">بازگشت به سایت</a></main></body></html>`;
 }
 
 const DASHBOARD_HTML = String.raw`<!doctype html>
@@ -243,7 +323,7 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
           storageIndicator.style.color=storageReady?'#2e7455':'#b04b3f';
         }
         if(!data.configured){
-          showStorageMessage('ذخیره‌سازی Vercel Blob به این پروژه وصل نیست یا BLOB_READ_WRITE_TOKEN وجود ندارد.');
+          showStorageMessage('اتصال Vercel Blob برای این پروژه فعال نیست.');
         }else if(!data.admin){
           showStorageMessage('نشست مدیریت برای ذخیره‌سازی معتبر نیست. یک‌بار خروج کن و دوباره وارد شو.');
         }else if(!data.canWrite){
