@@ -41,6 +41,12 @@ for(const file of all.filter(f=>f.endsWith('.json')||f.endsWith('.webmanifest'))
   catch(error){fail('invalid json '+path.relative(root,file)+': '+error.message)}
 }
 
+const blobConfig=fs.readFileSync(path.join(root,'lib/blob-config.js'),'utf8');
+if(!blobConfig.includes('ROZNEX_READ_WRITE_TOKEN'))fail('custom-prefix Vercel Blob token is not supported');
+else ok('custom-prefix Vercel Blob token supported');
+if(!blobConfig.includes('ROZNEX_STORE_ID'))fail('custom-prefix Vercel Blob store id is not supported');
+else ok('custom-prefix Vercel Blob store id supported');
+
 const quote=fs.readFileSync(path.join(root,'api/quote.js'),'utf8');
 if(quote.includes('const CATALOG={'))fail('SmartQuote catalog must not be committed in public source');
 else ok('SmartQuote catalog absent from public source');
