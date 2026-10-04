@@ -18,6 +18,86 @@ function clean(value, max = 500) {
   return String(value ?? '').replace(/\u0000/g, '').trim().slice(0, max);
 }
 
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+async function sendProjectRequestEmail(request) {
+  const apiKey = String(process.env.RESEND_API_KEY || '').trim();
+  const to = String(process.env.ROZNEX_NOTIFICATION_EMAIL || '').trim();
+  const from = String(process.env.ROZNEX_EMAIL_FROM || 'ROZNEX <onboarding@resend.dev>').trim();
+
+  if (!apiKey || !to) return { sent: false, reason: 'email_not_configured' };
+
+  const rows = [
+    ['کد درخواست', request.id],
+    ['نام', request.name],
+    ['شرکت / برند', request.company || '—'],
+    ['ایمیل', request.email],
+    ['موبایل', request.mobile],
+    ['نوع پروژه', request.type],
+    ['عنوان پروژه', request.project],
+    ['هدف', request.goal],
+    ['قابلیت‌های مدنظر', request.features || '—'],
+    ['زمان‌بندی', request.timeline || '—'],
+    ['بودجه', request.budget || '—'],
+    ['توضیحات', request.notes || '—'],
+    ['زمان ثبت', request.createdAt]
+  ];
+
+  const html = `<!doctype html>
+  <html lang="fa" dir="rtl">
+  <body style="margin:0;background:#f3eee8;color:#171817;font-family:Arial,sans-serif">
+    <div style="max-width:680px;margin:0 auto;padding:28px 18px">
+      <div style="font-size:13px;letter-spacing:2px;margin-bottom:18px">ROZNEX / NEW PROJECT REQUEST</div>
+      <h1 style="font-size:26px;margin:0 0 8px">درخواست پروژه جدید</h1>
+      <p style="color:#6f675f;margin:0 0 24px">یک درخواست جدید از فرم سایت ثبت شده است.</p>
+      <div style="background:#fff;border:1px solid #ddd3c7;border-radius:16px;overflow:hidden">
+        ${rows.map(([label, value]) => `
+          <div style="padding:12px 16px;border-bottom:1px solid #eee6dd">
+            <div style="font-size:11px;color:#8c7c6b;margin-bottom:4px">${escapeHtml(label)}</div>
+            <div style="font-size:14px;line-height:1.7;white-space:pre-wrap">${escapeHtml(value)}</div>
+          </div>`).join('')}
+      </div>
+      <p style="margin:22px 0 0;font-size:12px;color:#796f66">برای مدیریت درخواست وارد پنل ROZNEX شو.</p>
+      <a href="https://roznex-portfolio.vercel.app/admin" style="display:inline-block;margin-top:10px;padding:10px 16px;border-radius:999px;background:#171817;color:#fff;text-decoration:none;font-size:13px">باز کردن پنل مدیریت</a>
+    </div>
+  </body></html>`;
+
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      'Idempotency-Key': `project-request/${request.id}`
+    },
+    body: JSON.stringify({
+      from,
+      to: [to],
+      reply_to: request.email || undefined,
+      subject: `ROZNEX — درخواست پروژه جدید از ${request.name}`,
+      html
+    })
+  });
+
+  let data = null;
+  try { data = await response.json(); } catch {}
+
+  if (!response.ok) {
+    const error = new Error('email_delivery_failed');
+    error.status = response.status;
+    error.details = data;
+    throw error;
+  }
+
+  return { sent: true, id: data?.id || null };
+}
+
 function sameOrigin(req) {
   const site = String(req.headers['sec-fetch-site'] || '').toLowerCase();
   if (site && !['same-origin', 'same-site', 'none'].includes(site)) return false;
@@ -146,12 +226,6 @@ module.exports = async function handler(req, res) {
       if (!hasBlobStorage()) return json(res, 503, { error: 'storage_not_configured' });
       if (!(await isAdminRequest(req))) return json(res, 401, { error: 'unauthorized' });
       const blob = await import('@vercel/blob');
-      const rate = await loadRequestRate(blob, req);
-      if (rate.count >= REQUEST_RATE_MAX) {
-        const seconds = Math.max(1, Math.ceil((rate.resetAt - Date.now()) / 1000));
-        res.setHeader('Retry-After', String(seconds));
-        return json(res, 429, { error: 'rate_limited', retryAfter: seconds });
-      }
       const requests = await loadRequests(blob);
       return json(res, 200, { requests, storageReady: true });
     }
@@ -178,6 +252,12 @@ module.exports = async function handler(req, res) {
       }
 
       const blob = await import('@vercel/blob');
+      const rate = await loadRequestRate(blob, req);
+      if (rate.count >= REQUEST_RATE_MAX) {
+        const seconds = Math.max(1, Math.ceil((rate.resetAt - Date.now()) / 1000));
+        res.setHeader('Retry-After', String(seconds));
+        return json(res, 429, { error: 'rate_limited', retryAfter: seconds });
+      }
       const requests = await loadRequests(blob);
       const recentDuplicate = requests.some(item =>
         item &&
@@ -189,10 +269,32 @@ module.exports = async function handler(req, res) {
 
       requests.unshift(request);
       await saveRequests(blob, requests);
+
       try { await recordAcceptedRequest(blob, req, rate); } catch (error) {
         console.error('ROZNEX request rate-limit write error', { name: error?.name, message: error?.message });
       }
-      return json(res, 201, { ok: true, id: request.id });
+
+      let notification = { sent: false, reason: 'email_not_configured' };
+      try {
+        notification = await sendProjectRequestEmail(request);
+      } catch (error) {
+        console.error('ROZNEX request email error', {
+          name: error?.name,
+          message: error?.message,
+          status: error?.status || null
+        });
+        notification = { sent: false, reason: 'email_delivery_failed' };
+      }
+
+      request.notification = {
+        sent: Boolean(notification.sent),
+        sentAt: notification.sent ? new Date().toISOString() : null,
+        providerId: notification.id || null,
+        reason: notification.sent ? null : notification.reason || 'email_delivery_failed'
+      };
+      await saveRequests(blob, requests);
+
+      return json(res, 201, { ok: true, id: request.id, notified: Boolean(notification.sent) });
     }
 
     if (!hasBlobStorage()) return json(res, 503, { error: 'storage_not_configured' });
