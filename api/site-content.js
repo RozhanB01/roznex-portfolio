@@ -38,6 +38,23 @@ function sanitize(input = {}) {
   return out;
 }
 
+function sameOrigin(req) {
+  const site = String(req.headers['sec-fetch-site'] || '').toLowerCase();
+  if (site && !['same-origin', 'same-site', 'none'].includes(site)) return false;
+
+  const origin = String(req.headers.origin || '');
+  if (!origin) return true;
+
+  try {
+    const url = new URL(origin);
+    const forwardedHost = String(req.headers['x-forwarded-host'] || '').split(',')[0].trim();
+    const host = forwardedHost || String(req.headers.host || '');
+    return url.protocol === 'https:' && url.host === host;
+  } catch {
+    return false;
+  }
+}
+
 async function readBody(req) {
   if (req.body && typeof req.body === 'object') return req.body;
   const chunks = [];
@@ -89,6 +106,7 @@ module.exports = async function handler(req, res) {
     }
 
     if (req.method !== 'POST') return json(res, 405, { error: 'method_not_allowed' });
+    if (!sameOrigin(req)) return json(res, 403, { error: 'bad_origin' });
     if (!hasBlobStorage()) return json(res, 503, { error: 'storage_not_configured' });
     if (!(await isAdminRequest(req))) return json(res, 401, { error: 'unauthorized' });
 

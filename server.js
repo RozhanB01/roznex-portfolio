@@ -55,6 +55,12 @@ const staticOptions = {
 app.use('/assets', express.static(path.join(root, 'assets'), { ...staticOptions, maxAge: '7d' }));
 app.use('/start', express.static(path.join(root, 'start'), staticOptions));
 
+app.get('/.well-known/security.txt', (req, res) => {
+  res.type('text/plain');
+  res.setHeader('Cache-Control', 'public, max-age=86400');
+  res.sendFile(path.join(root, '.well-known', 'security.txt'));
+});
+
 for (const file of ['styles.css', 'script.js', 'manifest.webmanifest', 'robots.txt', 'sitemap.xml']) {
   app.get('/' + file, (req, res) => res.sendFile(path.join(root, file)));
 }
