@@ -37,7 +37,7 @@ function safePayload(value){
   const p=value&&typeof value==='object'?value:{};
   const clean=(v,max=180)=>String(v??'').replace(/\u0000/g,'').trim().slice(0,max);
   return {
-    v:1,
+    v:Number(p.v||0),
     client:clean(p.client,120),
     company:clean(p.company,140),
     project:clean(p.project,180),
