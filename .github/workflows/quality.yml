@@ -18,4 +18,4 @@ jobs:
         with:
           node-version: 22
       - name: Run repository audit
-        run: node scripts/audit.mjs
+        run: npm run check
