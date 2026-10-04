@@ -4,7 +4,10 @@
     { "source": "/admin/", "destination": "/api/admin" },
     { "source": "/admin/invite", "destination": "/api/admin-invite" },
     { "source": "/admin/invite/", "destination": "/api/admin-invite" },
-    { "source": "/admin/invite/(.*)", "destination": "/api/admin-invite" }
+    { "source": "/admin/invite/(.*)", "destination": "/api/admin-invite" },
+    { "source": "/quote", "destination": "/api/quote" },
+    { "source": "/quote/", "destination": "/api/quote" },
+    { "source": "/quote/(.*)", "destination": "/api/quote" }
   ],
   "headers": [
     {

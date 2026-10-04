@@ -8,6 +8,7 @@ const storageHealthHandler = require('./api/storage-health');
 const requestsHandler = require('./api/requests');
 const adminInviteHandler = require('./api/admin-invite');
 const siteContentHandler = require('./api/site-content');
+const quoteHandler = require('./api/quote');
 
 const app = express();
 const root = __dirname;
@@ -38,6 +39,7 @@ app.all('/api/project-image', projectImageHandler);
 app.all('/api/storage-health', storageHealthHandler);
 app.all('/api/requests', requestsHandler);
 app.all('/api/site-content', siteContentHandler);
+app.all(['/quote', '/quote/', '/quote/index.html'], quoteHandler);
 app.all(['/admin', '/admin/'], adminHandler);
 app.all(['/admin/invite', '/admin/invite/'], adminInviteHandler);
 
@@ -51,7 +53,6 @@ const staticOptions = {
 };
 
 app.use('/assets', express.static(path.join(root, 'assets'), { ...staticOptions, maxAge: '7d' }));
-app.use('/quote', express.static(path.join(root, 'quote'), staticOptions));
 app.use('/start', express.static(path.join(root, 'start'), staticOptions));
 
 for (const file of ['styles.css', 'script.js', 'manifest.webmanifest', 'robots.txt', 'sitemap.xml']) {
