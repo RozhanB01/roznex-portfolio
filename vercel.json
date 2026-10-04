@@ -3,7 +3,8 @@
     { "source": "/admin", "destination": "/api/admin" },
     { "source": "/admin/", "destination": "/api/admin" },
     { "source": "/admin/invite", "destination": "/api/admin-invite" },
-    { "source": "/admin/invite/", "destination": "/api/admin-invite" }
+    { "source": "/admin/invite/", "destination": "/api/admin-invite" },
+    { "source": "/admin/invite/(.*)", "destination": "/api/admin-invite" }
   ],
   "headers": [
     {
