@@ -60,6 +60,7 @@ const setLanguage=(fa,animate=false)=>{
   html.dir=fa?'rtl':'ltr';
   body.classList.toggle('fa',fa);
   document.querySelectorAll('[data-en]').forEach(el=>el.textContent=fa?el.dataset.fa:el.dataset.en);
+  document.querySelectorAll('[data-href-en]').forEach(el=>el.setAttribute('href',fa?el.dataset.hrefFa:el.dataset.hrefEn));
   lang.innerHTML=fa?'<span class="selected">FA</span><i></i><span>EN</span>':'<span>FA</span><i></i><span class="selected">EN</span>';
   lang.setAttribute('aria-label',fa?'Switch language to English':'تغییر زبان به فارسی');
   const menuOpen=menu.getAttribute('aria-expanded')==='true';
