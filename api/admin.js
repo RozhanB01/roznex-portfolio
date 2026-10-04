@@ -116,9 +116,17 @@ module.exports = async function handler(req, res) {
         res.statusCode = 503;
         return res.end(loginHTML(false, true));
       }
-      return res.end(DASHBOARD_HTML);
+      res.statusCode = 303;
+      res.setHeader('Location', '/admin');
+      return res.end();
     }
-    const failed = await recordLoginFailure(req);
+
+    let failed = { count: 1, resetAt: Date.now() + LOGIN_WINDOW_MS, blockedUntil: 0 };
+    try {
+      failed = await recordLoginFailure(req);
+    } catch (error) {
+      console.error('ROZNEX admin rate-limit error', { name: error?.name, message: error?.message });
+    }
     if (failed.blockedUntil > Date.now()) {
       const seconds = Math.max(1, Math.ceil((failed.blockedUntil - Date.now()) / 1000));
       res.setHeader('Retry-After', String(seconds));
@@ -131,7 +139,9 @@ module.exports = async function handler(req, res) {
 
   if (req.method === 'GET' && req.url && req.url.includes('logout=1')) {
     await destroyAdminSession(req, res);
-    return res.end(loginHTML(false));
+    res.statusCode = 303;
+    res.setHeader('Location', '/admin');
+    return res.end();
   }
   if (req.method === 'GET' && await isAdminRequest(req)) return res.end(DASHBOARD_HTML);
   if (!/^[a-f0-9]{64}$/.test(ADMIN_PASSWORD_HASH)) {
