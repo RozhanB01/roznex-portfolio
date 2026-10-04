@@ -28,18 +28,31 @@ const updateScroll=()=>{
 addEventListener('scroll',()=>{if(!ticking){requestAnimationFrame(updateScroll);ticking=true}},{passive:true});
 updateScroll();
 
+const setMenuOpen=(open,focusFirst=false)=>{
+  menu.setAttribute('aria-expanded',String(open));
+  menu.setAttribute('aria-label',html.lang==='fa'?(open?'بستن منو':'باز کردن منو'):(open?'Close navigation':'Open navigation'));
+  mobileNav.hidden=!open;
+  body.classList.toggle('nav-open',open);
+  if(open&&focusFirst){
+    const first=mobileNav.querySelector('a');
+    if(first)requestAnimationFrame(()=>first.focus({preventScroll:true}));
+  }
+};
+
 menu.addEventListener('click',()=>{
   const open=menu.getAttribute('aria-expanded')==='true';
-  const nextOpen=!open;
-  menu.setAttribute('aria-expanded',String(nextOpen));
-  menu.setAttribute('aria-label',html.lang==='fa'?(nextOpen?'بستن منو':'باز کردن منو'):(nextOpen?'Close navigation':'Open navigation'));
-  mobileNav.hidden=open;
+  setMenuOpen(!open,!open);
 });
-mobileNav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{
-  mobileNav.hidden=true;
-  menu.setAttribute('aria-expanded','false');
-  menu.setAttribute('aria-label',html.lang==='fa'?'باز کردن منو':'Open navigation');
-}));
+mobileNav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>setMenuOpen(false)));
+document.addEventListener('keydown',event=>{
+  if(event.key==='Escape'&&menu.getAttribute('aria-expanded')==='true'){
+    setMenuOpen(false);
+    menu.focus({preventScroll:true});
+  }
+});
+addEventListener('resize',()=>{
+  if(innerWidth>900&&menu.getAttribute('aria-expanded')==='true')setMenuOpen(false);
+},{passive:true});
 
 const setLanguage=(fa,animate=false)=>{
   if(animate) body.classList.add('language-switching');
