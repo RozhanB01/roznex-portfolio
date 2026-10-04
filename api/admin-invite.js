@@ -129,7 +129,12 @@ module.exports=async function handler(req,res){
     try{
       const body=await readBody(req);
       const token=makeInvite(body);
-      const origin='https://'+String(req.headers['x-forwarded-host']||req.headers.host||'roznex-portfolio.vercel.app').split(',')[0].trim();
+      const configuredOrigin=String(process.env.ROZNEX_PUBLIC_ORIGIN||'https://roznex-portfolio.vercel.app').trim().replace(/\/$/,'');
+      let origin='https://roznex-portfolio.vercel.app';
+      try{
+        const parsed=new URL(configuredOrigin);
+        if(parsed.protocol==='https:')origin=parsed.origin;
+      }catch{}
       return json(res,200,{ok:true,url:origin+'/quote/?invite='+encodeURIComponent(token)});
     }catch(error){
       const code=String(error?.message||'server_error');
