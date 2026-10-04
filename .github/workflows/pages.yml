@@ -1,4 +1,4 @@
-name: Deploy ROZNEX to GitHub Pages
+name: Redirect ROZNEX GitHub Pages to Vercel
 
 on:
   push:
@@ -21,16 +21,32 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Build redirect-only site
+        shell: bash
+        run: |
+          mkdir -p public
+          cat > public/index.html <<'HTML'
+          <!doctype html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width,initial-scale=1">
+            <meta name="robots" content="noindex,nofollow,noarchive">
+            <meta http-equiv="refresh" content="0;url=https://roznex-portfolio.vercel.app/">
+            <link rel="canonical" href="https://roznex-portfolio.vercel.app/">
+            <title>ROZNEX</title>
+          </head>
+          <body>
+            <p><a href="https://roznex-portfolio.vercel.app/">Open ROZNEX</a></p>
+          </body>
+          </html>
+          HTML
       - name: Configure Pages
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
-      - name: Upload site
+      - name: Upload redirect site
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: public
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
