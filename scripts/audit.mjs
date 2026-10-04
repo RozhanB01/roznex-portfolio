@@ -112,6 +112,28 @@ for(const rel of htmlFiles){
 }
 
 
+/* Case study SEO checks */
+const caseStudyPages=[
+  'work/fa/industrial-intelligence/index.html','work/en/industrial-intelligence/index.html',
+  'work/fa/familyos/index.html','work/en/familyos/index.html',
+  'work/fa/vilara/index.html','work/en/vilara/index.html',
+  'work/fa/lilium/index.html','work/en/lilium/index.html'
+];
+for(const rel of ['work/index.html','work/work.css',...caseStudyPages]){
+  if(!fs.existsSync(path.join(root,rel)))fail('missing '+rel);
+}
+const workSitemap=fs.readFileSync(path.join(root,'sitemap.xml'),'utf8');
+for(const rel of caseStudyPages){
+  const html=fs.readFileSync(path.join(root,rel),'utf8');
+  const canonical=(html.match(/<link rel="canonical" href="([^"]+)"/)||[])[1]||'';
+  if(!canonical)fail(rel+' missing canonical'); else ok('canonical '+rel);
+  if(!html.includes('hreflang='))fail(rel+' missing hreflang'); else ok('hreflang '+rel);
+  if(!html.includes('"@type":"CreativeWork"'))fail(rel+' missing CreativeWork schema'); else ok('CreativeWork schema '+rel);
+  if(!html.includes('"@type":"BreadcrumbList"'))fail(rel+' missing breadcrumb schema'); else ok('breadcrumb '+rel);
+  if(canonical&&!workSitemap.includes('<loc>'+canonical+'</loc>'))fail(rel+' canonical missing from sitemap'); else if(canonical)ok('sitemap '+rel);
+}
+if(!fs.readFileSync(path.join(root,'index.html'),'utf8').includes('/work/'))fail('Homepage does not link to case studies'); else ok('Homepage links to case studies');
+
 /* Commercial service SEO checks */
 const servicePages=[
   'services/fa/ai-agents/index.html','services/en/ai-agents/index.html',

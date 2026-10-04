@@ -48,6 +48,8 @@ jobs:
 
           retry_status "$BASE/" home.html 200
           retry_status "$BASE/start/" start.html 200
+          retry_status "$BASE/work/" work.html 200
+          retry_status "$BASE/work/en/industrial-intelligence/" work-case.html 200
           retry_status "$BASE/services/" services.html 200
           retry_status "$BASE/services/fa/ai-agents/" service-fa.html 200
           retry_status "$BASE/services/en/technical-seo/" service-en.html 200
@@ -69,6 +71,13 @@ jobs:
               raise SystemExit('Homepage does not contain ROZNEX')
           if not re.search(r'script\.js\?v=[^"\']+', home):
               raise SystemExit('Homepage does not reference a versioned script asset')
+
+          work=open('work.html',encoding='utf-8').read()
+          work_case=open('work-case.html',encoding='utf-8').read()
+          if 'ROZNEX / CASE STUDIES' not in work:
+              raise SystemExit('Case study hub did not render')
+          if '"@type":"CreativeWork"' not in work_case or 'rel="canonical"' not in work_case:
+              raise SystemExit('Case study SEO metadata is incomplete')
 
           services=open('services.html',encoding='utf-8').read()
           if 'ROZNEX / SERVICES' not in services or '/services/en/ai-agents/' not in services:
