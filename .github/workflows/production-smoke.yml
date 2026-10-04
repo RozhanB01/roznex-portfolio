@@ -1,17 +1,24 @@
 name: Production Smoke Test
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: roznex-production-smoke
+  cancel-in-progress: true
+
 jobs:
   smoke:
     runs-on: ubuntu-latest
+    timeout-minutes: 6
     steps:
       - name: Wait for production deployment
-        run: sleep 45
+        run: sleep 55
 
       - name: Check ROZNEX production
         shell: bash
@@ -19,32 +26,58 @@ jobs:
           set -euo pipefail
           BASE="https://roznex-portfolio.vercel.app"
 
-          retry() {
+          retry_status() {
             local url="$1"
             local out="$2"
-            for i in {1..12}; do
-              code=$(curl -L -sS -o "$out" -w "%{http_code}" --max-time 20 "$url" || true)
-              echo "$url -> $code"
-              if [ "$code" = "200" ]; then return 0; fi
-              sleep 10
+            local expected="$3"
+            local follow="${4:-yes}"
+            for i in {1..15}; do
+              if [ "$follow" = "yes" ]; then
+                code=$(curl -L -sS -o "$out" -w "%{http_code}" --max-time 20 "$url" || true)
+              else
+                code=$(curl -sS -o "$out" -w "%{http_code}" --max-time 20 "$url" || true)
+              fi
+              echo "$url -> $code (expected $expected)"
+              if [ "$code" = "$expected" ]; then return 0; fi
+              sleep 8
             done
             echo "Failed: $url"
             cat "$out" || true
             return 1
           }
 
-          retry "$BASE/" home.html
-          retry "$BASE/api/projects?fresh=$(date +%s)" projects.json
-          retry "$BASE/api/storage-health?ts=$(date +%s)" storage.json
+          retry_status "$BASE/" home.html 200
+          retry_status "$BASE/start/" start.html 200
+          retry_status "$BASE/admin" admin.html 200
+          retry_status "$BASE/quote/" quote.html 401 no
+          retry_status "$BASE/.well-known/security.txt" security.txt 200
+          retry_status "$BASE/api/projects?fresh=$(date +%s)" projects.json 200
+          retry_status "$BASE/api/storage-health?ts=$(date +%s)" storage.json 200
 
           python - <<'PY'
-          import json, re, sys, urllib.request
+          import json, re, urllib.request
 
           home=open('home.html',encoding='utf-8').read()
           if 'ROZNEX' not in home:
               raise SystemExit('Homepage does not contain ROZNEX')
-          if 'projects-media-final-1' not in home:
-              raise SystemExit('Homepage is not serving the latest script version')
+          if not re.search(r'script\.js\?v=[^"\']+', home):
+              raise SystemExit('Homepage does not reference a versioned script asset')
+
+          start=open('start.html',encoding='utf-8').read()
+          if 'id="projectForm"' not in start or '/api/requests' not in start:
+              raise SystemExit('Project intake form is not wired to the requests API')
+
+          admin=open('admin.html',encoding='utf-8').read()
+          if 'ورود به مدیریت' not in admin:
+              raise SystemExit('Admin login page did not render')
+
+          quote=open('quote.html',encoding='utf-8').read()
+          if 'پیش‌فاکتور خصوصی است' not in quote:
+              raise SystemExit('Locked SmartQuote page did not render')
+
+          security=open('security.txt',encoding='utf-8').read()
+          if 'Contact:' not in security or 'Expires:' not in security:
+              raise SystemExit('security.txt is incomplete')
 
           projects=json.load(open('projects.json',encoding='utf-8'))
           if not isinstance(projects.get('projects'), list):
@@ -54,6 +87,8 @@ jobs:
           print('storage:', json.dumps(storage, ensure_ascii=False))
           if storage.get('configured') is not True:
               raise SystemExit('Blob storage is not configured in production')
+          if 'detectedTokenKey' in storage or 'detectedStoreKey' in storage:
+              raise SystemExit('Public storage health leaks environment key names')
 
           public=projects.get('projects') or []
           print('public projects:', len(public))
