@@ -1,0 +1,174 @@
+const crypto = require('crypto');
+const { hasBlobStorage, isAdminRequest } = require('../lib/admin-session');
+const { blobOptions } = require('../lib/blob-config');
+
+const REQUESTS_PATH = 'roznex/private/requests.json';
+const MAX_REQUESTS = 500;
+const STATUS = new Set(['new', 'review', 'qualified', 'closed', 'rejected']);
+
+function json(res, status, value) {
+  res.statusCode = status;
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.end(JSON.stringify(value));
+}
+
+function clean(value, max = 500) {
+  return String(value ?? '').replace(/\u0000/g, '').trim().slice(0, max);
+}
+
+function sameOrigin(req) {
+  const site = String(req.headers['sec-fetch-site'] || '').toLowerCase();
+  if (site && !['same-origin', 'same-site', 'none'].includes(site)) return false;
+  const origin = String(req.headers.origin || '');
+  if (!origin) return true;
+  try {
+    const u = new URL(origin);
+    const forwardedHost = String(req.headers['x-forwarded-host'] || '').split(',')[0].trim();
+    const host = forwardedHost || String(req.headers.host || '');
+    return u.protocol === 'https:' && u.host === host;
+  } catch {
+    return false;
+  }
+}
+
+async function readBody(req) {
+  if (req.body && typeof req.body === 'object') return req.body;
+  const chunks = [];
+  for await (const chunk of req) chunks.push(Buffer.from(chunk));
+  const raw = Buffer.concat(chunks).toString('utf8');
+  return raw ? JSON.parse(raw) : {};
+}
+
+async function loadRequests(blob) {
+  if (!hasBlobStorage()) return [];
+  try {
+    const result = await blob.get(REQUESTS_PATH, blobOptions({ access: 'private', useCache: false }));
+    if (!result || result.statusCode !== 200) return [];
+    const raw = await new Response(result.stream).text();
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed?.requests) ? parsed.requests : [];
+  } catch (error) {
+    if (error?.name === 'BlobNotFoundError' || /not found/i.test(String(error?.message || ''))) return [];
+    throw error;
+  }
+}
+
+async function saveRequests(blob, requests) {
+  const payload = JSON.stringify({
+    version: 1,
+    updatedAt: new Date().toISOString(),
+    requests: requests.slice(0, MAX_REQUESTS)
+  }, null, 2);
+
+  await blob.put(
+    REQUESTS_PATH,
+    payload,
+    blobOptions({
+      access: 'private',
+      addRandomSuffix: false,
+      allowOverwrite: true,
+      contentType: 'application/json',
+      cacheControlMaxAge: 60
+    })
+  );
+}
+
+function publicPayload(body) {
+  return {
+    id: 'RZN-REQ-' + Date.now().toString(36).toUpperCase() + '-' + crypto.randomBytes(3).toString('hex').toUpperCase(),
+    name: clean(body.name, 120),
+    company: clean(body.company, 140),
+    mobile: clean(body.mobile, 60),
+    email: clean(body.email, 180).toLowerCase(),
+    type: clean(body.type, 100),
+    project: clean(body.project, 180),
+    goal: clean(body.goal, 2200),
+    features: clean(body.features, 2200),
+    timeline: clean(body.timeline, 120),
+    budget: clean(body.budget, 120),
+    notes: clean(body.notes, 2600),
+    status: 'new',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+}
+
+module.exports = async function handler(req, res) {
+  try {
+    if (!sameOrigin(req)) return json(res, 403, { error: 'bad_origin' });
+
+    if (req.method === 'GET') {
+      if (!hasBlobStorage()) return json(res, 503, { error: 'storage_not_configured' });
+      if (!(await isAdminRequest(req))) return json(res, 401, { error: 'unauthorized' });
+      const blob = await import('@vercel/blob');
+      const requests = await loadRequests(blob);
+      return json(res, 200, { requests, storageReady: true });
+    }
+
+    if (req.method !== 'POST') return json(res, 405, { error: 'method_not_allowed' });
+    const body = await readBody(req);
+    const action = clean(body.action, 40);
+
+    if (!action) {
+      if (clean(body.website, 200)) {
+        return json(res, 200, { ok: true, id: 'RZN-REQ-RECEIVED' });
+      }
+      if (!hasBlobStorage()) return json(res, 503, { error: 'storage_not_configured' });
+
+      const request = publicPayload(body);
+      if (!request.name || !request.mobile || !request.email || !request.type || !request.project || !request.goal) {
+        return json(res, 400, { error: 'required_fields' });
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(request.email)) {
+        return json(res, 400, { error: 'bad_email' });
+      }
+      if (request.mobile.replace(/\D/g, '').length < 7) {
+        return json(res, 400, { error: 'bad_mobile' });
+      }
+
+      const blob = await import('@vercel/blob');
+      const requests = await loadRequests(blob);
+      const recentDuplicate = requests.some(item =>
+        item &&
+        item.email === request.email &&
+        item.project === request.project &&
+        Date.now() - Date.parse(item.createdAt || 0) < 5 * 60 * 1000
+      );
+      if (recentDuplicate) return json(res, 200, { ok: true, id: requests.find(item => item.email === request.email && item.project === request.project)?.id });
+
+      requests.unshift(request);
+      await saveRequests(blob, requests);
+      return json(res, 201, { ok: true, id: request.id });
+    }
+
+    if (!hasBlobStorage()) return json(res, 503, { error: 'storage_not_configured' });
+    if (!(await isAdminRequest(req))) return json(res, 401, { error: 'unauthorized' });
+
+    const blob = await import('@vercel/blob');
+    let requests = await loadRequests(blob);
+    const id = clean(body.id, 100);
+
+    if (action === 'status') {
+      const status = clean(body.status, 40);
+      if (!STATUS.has(status)) return json(res, 400, { error: 'bad_status' });
+      const index = requests.findIndex(item => item.id === id);
+      if (index < 0) return json(res, 404, { error: 'not_found' });
+      requests[index] = { ...requests[index], status, updatedAt: new Date().toISOString() };
+      await saveRequests(blob, requests);
+      return json(res, 200, { ok: true, requests });
+    }
+
+    if (action === 'delete') {
+      requests = requests.filter(item => item.id !== id);
+      await saveRequests(blob, requests);
+      return json(res, 200, { ok: true, requests });
+    }
+
+    return json(res, 400, { error: 'unknown_action' });
+  } catch (error) {
+    console.error('ROZNEX requests API error', { name: error?.name, message: error?.message });
+    return json(res, 500, { error: 'server_error' });
+  }
+};

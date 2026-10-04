@@ -19,7 +19,7 @@
     .wizard-progress{display:grid;grid-template-columns:repeat(3,1fr);margin:0 0 1rem;border:1px solid var(--line);border-radius:1rem;overflow:hidden;background:rgba(245,240,233,.72)}.progress-step{position:relative;padding:.8rem 1rem;border-left:1px solid var(--line);color:#8a8279}.progress-step:last-child{border-left:0}.progress-step b{display:block;font:600 .58rem Manrope;color:var(--gold);margin-bottom:.15rem}.progress-step span{font-size:.66rem}.progress-step.active{background:#17181a;color:#fff}.progress-step.complete{background:#e6dacb;color:var(--ink)}
     .card{background:rgba(245,240,233,.92);border:1px solid var(--line);border-radius:1.5rem;padding:clamp(1rem,3vw,2rem)}.head{display:flex;justify-content:space-between;gap:1rem;align-items:flex-start;padding-bottom:1.2rem;border-bottom:1px solid var(--line);margin-bottom:1.2rem}.head h2{margin:0;font-size:1.15rem}.head p{margin:.35rem 0 0;font-size:.68rem;color:var(--muted);line-height:1.8}.index{font:600 .62rem Manrope;color:var(--gold)}
     .form-step[hidden]{display:none}.form-step{border:0;padding:0;margin:0;min-width:0}.form-step legend{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
-    .fields{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}.field{display:flex;flex-direction:column;gap:.4rem}.full{grid-column:1/-1}.field span{font-size:.66rem;font-weight:600;color:#57534e}input,select,textarea{width:100%;border:1px solid var(--line);background:#faf6f0;color:var(--ink);border-radius:.85rem;padding:.82rem .9rem;outline:none}input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(167,122,69,.1)}textarea{min-height:7rem;resize:vertical}
+    .fields{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}.field{display:flex;flex-direction:column;gap:.4rem}.full{grid-column:1/-1}.field span{font-size:.66rem;font-weight:600;color:#57534e}input,select,textarea{width:100%;border:1px solid var(--line);background:#faf6f0;color:var(--ink);border-radius:.85rem;padding:.82rem .9rem;outline:none}input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(167,122,69,.1)}textarea{min-height:7rem;resize:vertical}.hp{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden!important}
     .notice{margin:1rem 0 0;padding:.85rem 1rem;border:1px solid #dec9ac;background:#f3e7d7;border-radius:1rem;font-size:.63rem;line-height:1.9;color:#6f5d48}.actions{display:flex;justify-content:space-between;align-items:center;gap:.65rem;margin-top:1.2rem}.action-group{display:flex;gap:.65rem}.primary{border:0;background:#17181a;color:#fff;border-radius:999px;padding:.85rem 1.25rem;font-weight:700;min-width:12rem}.secondary{border:1px solid var(--line);background:transparent;border-radius:999px;padding:.85rem 1.1rem}.secondary:disabled{opacity:.35;cursor:not-allowed}.save-state{font-size:.6rem;color:#827a71}.status{font-size:.68rem;color:#6e655c;line-height:1.8;margin-top:.8rem;min-height:1.2rem}.status.error{color:#963f36}.review{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:1rem}.review div{border:1px solid var(--line);border-radius:.85rem;background:#faf6f0;padding:.75rem}.review span{display:block;color:#81786f;font-size:.58rem;margin-bottom:.25rem}.review strong{display:block;font-size:.7rem;overflow-wrap:anywhere}.review .wide{grid-column:1/-1}
     .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin-top:1rem}.step{border:1px solid var(--line);border-radius:1rem;padding:1rem;background:#f8f2ea}.step b{display:block;font:600 .65rem Manrope;color:var(--gold);margin-bottom:.5rem}.step strong{display:block;font-size:.76rem;margin-bottom:.25rem}.step span{font-size:.6rem;line-height:1.8;color:var(--muted)}
     @media(max-width:760px){.hero,.fields,.steps,.review{grid-template-columns:1fr}.hero{padding-top:2rem}.full,.review .wide{grid-column:auto}.actions{align-items:stretch;flex-direction:column}.action-group{display:grid;grid-template-columns:1fr 1fr}.primary,.secondary{width:100%;min-width:0}.save-state{text-align:center}.wizard-progress{grid-template-columns:1fr}.progress-step{display:none;border:0}.progress-step.active{display:block}}
@@ -45,6 +45,7 @@
   <section class="card">
     <div class="head"><div><h2>فرم درخواست پروژه</h2><p>اطلاعاتی را بنویسید که برای بررسی اولیه پروژه لازم است.</p></div><span class="index">01</span></div>
     <form id="projectForm">
+      <div class="hp" aria-hidden="true"><label>Website<input id="website" tabindex="-1" autocomplete="off"></label></div>
       <fieldset class="form-step" data-step="1"><legend>اطلاعات تماس</legend><div class="fields">
         <label class="field"><span>نام و نام خانوادگی *</span><input id="name" required autocomplete="name"></label>
         <label class="field"><span>نام شرکت / برند</span><input id="company" autocomplete="organization"></label>
@@ -142,32 +143,68 @@ $('clearDraft').addEventListener('click',()=>{
   $('saveState').textContent='پیش‌نویس پاک شد.';
 });
 
-form.addEventListener('submit',e=>{
+form.addEventListener('submit',async e=>{
   e.preventDefault();
   if(!form.reportValidity())return;
-  const id=requestId();
-  const lines=[
-    'ROZNEX PROJECT REQUEST',
-    'Request ID: '+id,
-    '',
-    'نام: '+$('name').value.trim(),
-    'شرکت/برند: '+($('company').value.trim()||'—'),
-    'موبایل: '+$('mobile').value.trim(),
-    'ایمیل: '+$('email').value.trim(),
-    'نوع پروژه: '+$('type').value,
-    'عنوان پروژه: '+$('project').value.trim(),
-    'هدف اصلی: '+$('goal').value.trim(),
-    'امکانات مهم: '+($('features').value.trim()||'—'),
-    'زمان شروع: '+$('timeline').value,
-    'بودجه تقریبی: '+($('budget').value||'مشخص نشده'),
-    'توضیحات: '+($('notes').value.trim()||'—')
-  ];
-  const body=lines.join('\n');
-  try{navigator.clipboard.writeText(body)}catch(err){}
-  const subject='ROZNEX Project Request — '+id+' — '+$('project').value.trim();
-  localStorage.removeItem(draftKey);
-  setStatus('درخواست با شماره '+id+' آماده شد. برنامه ایمیل شما باز می‌شود؛ لطفاً ایمیل را ارسال کنید. یک نسخه از اطلاعات نیز در کلیپ‌بورد کپی شده است.');
-  setTimeout(()=>{location.href='mailto:rozhanbehrouzi79@gmail.com?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body)},250);
+
+  const button=$('submitRequest');
+  button.disabled=true;
+  setStatus('در حال ثبت امن درخواست…');
+
+  const payload={
+    name:$('name').value.trim(),
+    company:$('company').value.trim(),
+    mobile:$('mobile').value.trim(),
+    email:$('email').value.trim(),
+    type:$('type').value,
+    project:$('project').value.trim(),
+    goal:$('goal').value.trim(),
+    features:$('features').value.trim(),
+    timeline:$('timeline').value,
+    budget:$('budget').value,
+    notes:$('notes').value.trim(),
+    website:$('website').value.trim()
+  };
+
+  try{
+    const response=await fetch('/api/requests',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      credentials:'same-origin',
+      body:JSON.stringify(payload)
+    });
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok)throw new Error(data.error||'request_failed');
+
+    localStorage.removeItem(draftKey);
+    $('saveState').textContent='درخواست روی سرور ثبت شد.';
+    setStatus('درخواست شما با شماره '+data.id+' با موفقیت ثبت شد. Roznex پس از بررسی برای مرحله بعد با شما تماس می‌گیرد.');
+    button.textContent='درخواست ثبت شد ✓';
+  }catch(error){
+    const id=requestId();
+    const lines=[
+      'ROZNEX PROJECT REQUEST',
+      'Request ID: '+id,
+      '',
+      'نام: '+payload.name,
+      'شرکت/برند: '+(payload.company||'—'),
+      'موبایل: '+payload.mobile,
+      'ایمیل: '+payload.email,
+      'نوع پروژه: '+payload.type,
+      'عنوان پروژه: '+payload.project,
+      'هدف اصلی: '+payload.goal,
+      'امکانات مهم: '+(payload.features||'—'),
+      'زمان شروع: '+payload.timeline,
+      'بودجه تقریبی: '+(payload.budget||'مشخص نشده'),
+      'توضیحات: '+(payload.notes||'—')
+    ];
+    const body=lines.join('\n');
+    try{await navigator.clipboard.writeText(body)}catch(err){}
+    const subject='ROZNEX Project Request — '+id+' — '+payload.project;
+    setStatus('ثبت مستقیم سرور در دسترس نبود؛ نسخه پشتیبان ایمیل آماده شده تا درخواست شما از دست نرود.',true);
+    setTimeout(()=>{location.href='mailto:rozhanbehrouzi79@gmail.com?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body)},350);
+    button.disabled=false;
+  }
 });
 restoreDraft();
 showStep(1);
