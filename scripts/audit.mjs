@@ -12,6 +12,11 @@ const required=[
   'vercel.json','server.js','api/admin.js','api/quote.js','api/projects.js',
   'api/requests.js','api/site-content.js','lib/admin-session.js','lib/blob-config.js',
   '.well-known/security.txt',
+  'services/index.html','services/services.css',
+  'services/fa/ai-agents/index.html','services/en/ai-agents/index.html',
+  'services/fa/web-design/index.html','services/en/web-design/index.html',
+  'services/fa/3d-web/index.html','services/en/3d-web/index.html',
+  'services/fa/technical-seo/index.html','services/en/technical-seo/index.html',
   'insights/index.html','insights/insights.css','insights/rss.xml',
   'insights/fa/ai-agent-business/index.html',
   'insights/en/ai-agents-for-business/index.html',
@@ -106,6 +111,31 @@ for(const rel of htmlFiles){
   }
 }
 
+
+/* Commercial service SEO checks */
+const servicePages=[
+  'services/fa/ai-agents/index.html','services/en/ai-agents/index.html',
+  'services/fa/web-design/index.html','services/en/web-design/index.html',
+  'services/fa/3d-web/index.html','services/en/3d-web/index.html',
+  'services/fa/technical-seo/index.html','services/en/technical-seo/index.html'
+];
+const serviceSitemap=fs.readFileSync(path.join(root,'sitemap.xml'),'utf8');
+for(const rel of servicePages){
+  const html=fs.readFileSync(path.join(root,rel),'utf8');
+  const canonical=(html.match(/<link rel="canonical" href="([^"]+)"/)||[])[1]||'';
+  if(!canonical)fail(rel+' missing canonical');
+  else ok('canonical '+rel);
+  if(!html.includes('hreflang='))fail(rel+' missing hreflang');
+  else ok('hreflang '+rel);
+  if(!html.includes('"@type":"Service"'))fail(rel+' missing Service schema');
+  else ok('Service schema '+rel);
+  if(!html.includes('"@type":"BreadcrumbList"'))fail(rel+' missing breadcrumb schema');
+  else ok('breadcrumb schema '+rel);
+  if(canonical&&!serviceSitemap.includes('<loc>'+canonical+'</loc>'))fail(rel+' canonical missing from sitemap');
+  else if(canonical)ok('sitemap '+rel);
+}
+if(!fs.readFileSync(path.join(root,'index.html'),'utf8').includes('/services/'))fail('Homepage does not link to service pages');
+else ok('Homepage links to service pages');
 
 /* SEO article checks */
 const seoArticles=[
