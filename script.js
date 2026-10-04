@@ -30,12 +30,15 @@ updateScroll();
 
 menu.addEventListener('click',()=>{
   const open=menu.getAttribute('aria-expanded')==='true';
-  menu.setAttribute('aria-expanded',String(!open));
+  const nextOpen=!open;
+  menu.setAttribute('aria-expanded',String(nextOpen));
+  menu.setAttribute('aria-label',html.lang==='fa'?(nextOpen?'بستن منو':'باز کردن منو'):(nextOpen?'Close navigation':'Open navigation'));
   mobileNav.hidden=open;
 });
 mobileNav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{
   mobileNav.hidden=true;
   menu.setAttribute('aria-expanded','false');
+  menu.setAttribute('aria-label',html.lang==='fa'?'باز کردن منو':'Open navigation');
 }));
 
 const setLanguage=(fa,animate=false)=>{
@@ -46,6 +49,10 @@ const setLanguage=(fa,animate=false)=>{
   document.querySelectorAll('[data-en]').forEach(el=>el.textContent=fa?el.dataset.fa:el.dataset.en);
   lang.innerHTML=fa?'<span class="selected">FA</span><i></i><span>EN</span>':'<span>FA</span><i></i><span class="selected">EN</span>';
   lang.setAttribute('aria-label',fa?'Switch language to English':'تغییر زبان به فارسی');
+  const menuOpen=menu.getAttribute('aria-expanded')==='true';
+  menu.setAttribute('aria-label',fa?(menuOpen?'بستن منو':'باز کردن منو'):(menuOpen?'Close navigation':'Open navigation'));
+  const mobileNavEl=document.getElementById('mobile-nav');
+  if(mobileNavEl)mobileNavEl.setAttribute('aria-label',fa?'ناوبری موبایل':'Mobile navigation');
   localStorage.setItem('roznex-language',fa?'fa':'en');
   if(animate) setTimeout(()=>body.classList.remove('language-switching'),260);
 };

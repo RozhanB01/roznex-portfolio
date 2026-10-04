@@ -1,9 +1,17 @@
 {
   "name": "ROZNEX — Digital Intelligence Studio",
   "short_name": "ROZNEX",
-  "start_url": "./",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#eee7dd",
   "theme_color": "#eee7dd",
-  "icons": []
+  "icons": [
+    {
+      "src": "./assets/roznex-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
 }

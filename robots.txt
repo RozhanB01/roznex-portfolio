@@ -1,6 +1,8 @@
 User-agent: *
 Allow: /
 Disallow: /admin
-Disallow: /api/admin
+Disallow: /admin/
+Disallow: /quote/
+Disallow: /api/
 
 Sitemap: https://roznex-portfolio.vercel.app/sitemap.xml
