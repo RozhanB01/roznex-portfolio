@@ -74,7 +74,7 @@
   <section class="steps">
     <article class="step"><b>01</b><strong>ثبت درخواست</strong><span>اطلاعات اولیه پروژه بدون نمایش قیمت ثبت می‌شود.</span></article>
     <article class="step"><b>02</b><strong>بررسی توسط Roznex</strong><span>نیازها، Scope و تناسب پروژه بررسی می‌شود.</span></article>
-    <article class="step"><b>03</b><strong>دسترسی اختصاصی</strong><span>پس از تأیید، کد SmartQuote برای مشاهده پکیج‌ها و ساخت پیش‌فاکتور ارسال می‌شود.</span></article>
+    <article class="step"><b>03</b><strong>دسترسی اختصاصی</strong><span>پس از تأیید، لینک اختصاصی SmartQuote برای مشاهده پکیج‌ها و ساخت پیش‌فاکتور ارسال می‌شود.</span></article>
   </section>
 </main>
 <script>
@@ -121,8 +121,12 @@ const validateStep=()=>{
 };
 const saveDraft=()=>{
   const draft=Object.fromEntries(fieldIds.map(id=>[id,$(id).value]));
-  localStorage.setItem(draftKey,JSON.stringify(draft));
-  $('saveState').textContent='پیش‌نویس ذخیره شد.';
+  try{
+    localStorage.setItem(draftKey,JSON.stringify(draft));
+    $('saveState').textContent='پیش‌نویس ذخیره شد.';
+  }catch(error){
+    $('saveState').textContent='ذخیره خودکار در این مرورگر در دسترس نیست.';
+  }
 };
 const restoreDraft=()=>{
   try{
@@ -137,7 +141,7 @@ $('nextStep').addEventListener('click',()=>{if(validateStep())showStep(currentSt
 $('prevStep').addEventListener('click',()=>showStep(currentStep-1));
 form.addEventListener('input',saveDraft);
 $('clearDraft').addEventListener('click',()=>{
-  localStorage.removeItem(draftKey);
+  try{localStorage.removeItem(draftKey)}catch(error){}
   form.reset();
   showStep(1);
   $('saveState').textContent='پیش‌نویس پاک شد.';
@@ -176,7 +180,7 @@ form.addEventListener('submit',async e=>{
     const data=await response.json().catch(()=>({}));
     if(!response.ok)throw new Error(data.error||'request_failed');
 
-    localStorage.removeItem(draftKey);
+    try{localStorage.removeItem(draftKey)}catch(error){}
     $('saveState').textContent='درخواست روی سرور ثبت شد.';
     setStatus('درخواست شما با شماره '+data.id+' با موفقیت ثبت شد. Roznex پس از بررسی برای مرحله بعد با شما تماس می‌گیرد.');
     button.textContent='درخواست ثبت شد ✓';

@@ -64,9 +64,19 @@ else ok('SmartQuote signing stays server-side');
 if(!invite.includes('ROZNEX_PUBLIC_ORIGIN'))fail('canonical SmartQuote invitation origin is not enforced');
 else ok('canonical SmartQuote invitation origin enforced');
 
+const requestsApi=fs.readFileSync(path.join(root,'api/requests.js'),'utf8');
+if(!requestsApi.includes('REQUEST_RATE_PREFIX')||!requestsApi.includes('REQUEST_RATE_MAX'))fail('public project request rate limiting is missing');
+else ok('public project request rate limiting enabled');
+
+const storageHealth=fs.readFileSync(path.join(root,'api/storage-health.js'),'utf8');
+const publicLeakCount=(storageHealth.match(/detectedTokenKey:/g)||[]).length;
+if(publicLeakCount>2)fail('storage health may expose environment key names publicly');
+else ok('public storage health does not expose environment key names');
 const admin=fs.readFileSync(path.join(root,'api/admin.js'),'utf8');
 if(/ROZNEX_ADMIN_PASSWORD_HASH\s*\|\|\s*['"][a-f0-9]{64}/i.test(admin))fail('hard-coded admin password hash fallback detected');
 else ok('no hard-coded admin password hash fallback');
+if(!admin.includes('LOGIN_RATE_PREFIX')||!admin.includes('LOGIN_MAX_FAILURES'))fail('admin brute-force rate limiting is missing');
+else ok('admin brute-force rate limiting enabled');
 
 const vercel=JSON.parse(fs.readFileSync(path.join(root,'vercel.json'),'utf8'));
 const rewrites=vercel.rewrites||[];
