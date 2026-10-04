@@ -23,7 +23,12 @@ const required=[
   'insights/fa/professional-corporate-website/index.html',
   'insights/en/professional-corporate-website/index.html',
   'insights/fa/technical-seo-nextjs/index.html',
-  'insights/en/technical-seo-nextjs/index.html'
+  'insights/en/technical-seo-nextjs/index.html',
+  'insights/fa/industrial-website-design/index.html','insights/en/industrial-website-design/index.html',
+  'insights/fa/multilingual-seo-hreflang/index.html','insights/en/multilingual-seo-hreflang/index.html',
+  'insights/fa/3d-web-performance/index.html','insights/en/3d-web-performance/index.html',
+  'insights/fa/ai-agent-security/index.html','insights/en/ai-agent-security/index.html',
+  'about/about.css','about/fa/rozhan-behrouzi/index.html','about/en/rozhan-behrouzi/index.html'
 ];
 for(const file of required){
   if(fs.existsSync(path.join(root,file)))ok('exists '+file);
@@ -159,6 +164,15 @@ for(const rel of servicePages){
 if(!fs.readFileSync(path.join(root,'index.html'),'utf8').includes('/services/'))fail('Homepage does not link to service pages');
 else ok('Homepage links to service pages');
 
+/* Author profile SEO */
+for(const rel of ['about/fa/rozhan-behrouzi/index.html','about/en/rozhan-behrouzi/index.html']){
+  const html=fs.readFileSync(path.join(root,rel),'utf8');
+  if(!html.includes('"@type":"Person"'))fail(rel+' missing Person schema');
+  if(!html.includes('rel="canonical"'))fail(rel+' missing canonical');
+  if(!html.includes('hreflang='))fail(rel+' missing hreflang');
+}
+ok('author profile SEO');
+
 /* SEO article checks */
 const seoArticles=[
   'insights/fa/ai-agent-business/index.html',
@@ -166,7 +180,11 @@ const seoArticles=[
   'insights/fa/professional-corporate-website/index.html',
   'insights/en/professional-corporate-website/index.html',
   'insights/fa/technical-seo-nextjs/index.html',
-  'insights/en/technical-seo-nextjs/index.html'
+  'insights/en/technical-seo-nextjs/index.html',
+  'insights/fa/industrial-website-design/index.html','insights/en/industrial-website-design/index.html',
+  'insights/fa/multilingual-seo-hreflang/index.html','insights/en/multilingual-seo-hreflang/index.html',
+  'insights/fa/3d-web-performance/index.html','insights/en/3d-web-performance/index.html',
+  'insights/fa/ai-agent-security/index.html','insights/en/ai-agent-security/index.html'
 ];
 const sitemap=fs.readFileSync(path.join(root,'sitemap.xml'),'utf8');
 for(const rel of seoArticles){

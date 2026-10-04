@@ -53,6 +53,8 @@ jobs:
           retry_status "$BASE/services/" services.html 200
           retry_status "$BASE/services/fa/ai-agents/" service-fa.html 200
           retry_status "$BASE/services/en/technical-seo/" service-en.html 200
+          retry_status "$BASE/about/en/rozhan-behrouzi/" author.html 200
+          retry_status "$BASE/insights/en/ai-agent-security/" article-extra.html 200
           retry_status "$BASE/insights/" insights.html 200
           retry_status "$BASE/insights/fa/ai-agent-business/" insight-fa.html 200
           retry_status "$BASE/insights/en/technical-seo-nextjs/" insight-en.html 200
@@ -88,6 +90,13 @@ jobs:
           for name,html in [('service-fa',service_fa),('service-en',service_en)]:
               if '"@type":"Service"' not in html or 'hreflang=' not in html or 'rel="canonical"' not in html:
                   raise SystemExit(name+' SEO metadata is incomplete')
+
+          author=open('author.html',encoding='utf-8').read()
+          article_extra=open('article-extra.html',encoding='utf-8').read()
+          if '"@type":"Person"' not in author or 'rel="canonical"' not in author:
+              raise SystemExit('Author page SEO metadata is incomplete')
+          if '"@type":"BlogPosting"' not in article_extra or '/services/en/ai-agents/' not in article_extra:
+              raise SystemExit('Extended topic-cluster article is incomplete')
 
           insights=open('insights.html',encoding='utf-8').read()
           if 'ROZNEX / INSIGHTS' not in insights or '/insights/fa/ai-agent-business/' not in insights:
