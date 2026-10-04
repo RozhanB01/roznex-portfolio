@@ -167,7 +167,8 @@ else ok('Homepage links to service pages');
 /* Author profile SEO */
 for(const rel of ['about/fa/rozhan-behrouzi/index.html','about/en/rozhan-behrouzi/index.html']){
   const html=fs.readFileSync(path.join(root,rel),'utf8');
-  if(!html.includes('"@type":"Person"'))fail(rel+' missing Person schema');
+  if(!html.includes('"@type":"ProfilePage"'))fail(rel+' missing ProfilePage schema');
+  if(!html.includes('"@type":"Person"'))fail(rel+' missing Person entity');
   if(!html.includes('rel="canonical"'))fail(rel+' missing canonical');
   if(!html.includes('hreflang='))fail(rel+' missing hreflang');
 }

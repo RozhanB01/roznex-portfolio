@@ -96,6 +96,20 @@ for(const page of pages){
   }
 }
 
+// hreflang reciprocity
+for(const page of pages){
+  const alternates=[...page.html.matchAll(/<link\b[^>]*rel=["']alternate["'][^>]*hreflang=["']([^"']+)["'][^>]*href=["']([^"']+)["'][^>]*>/gi)].map(m=>({lang:m[1],href:m[2]}));
+  for(const alt of alternates){
+    if(alt.lang==='x-default')continue;
+    if(!alt.href.startsWith(origin))continue;
+    const targetFile=localFileForUrl(alt.href);
+    if(!targetFile||!fs.existsSync(targetFile)){fail(page.rel+' hreflang target missing '+alt.href);continue}
+    const target=fs.readFileSync(targetFile,'utf8');
+    const back=[...target.matchAll(/<link\b[^>]*rel=["']alternate["'][^>]*hreflang=["']([^"']+)["'][^>]*href=["']([^"']+)["'][^>]*>/gi)].some(m=>m[2]===page.url);
+    if(!back)fail(page.rel+' hreflang target does not link back: '+alt.href);
+  }
+}
+console.log('✓ hreflang reciprocity checked');
 const robots=fs.readFileSync(path.join(root,'robots.txt'),'utf8');
 if(!robots.includes('Sitemap: '+origin+'/sitemap.xml'))fail('robots.txt missing canonical sitemap URL');
 for(const rule of ['Disallow: /admin','Disallow: /quote/','Disallow: /api/'])if(!robots.includes(rule))fail('robots.txt missing '+rule);
