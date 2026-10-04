@@ -1,11 +1,20 @@
 {
+  "id": "/",
   "name": "ROZNEX — Digital Intelligence Studio",
   "short_name": "ROZNEX",
+  "description": "Intelligent digital products, premium web experiences, immersive 3D and engineered SEO by Rozhan Behrouzi.",
+  "lang": "en",
+  "dir": "ltr",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#eee7dd",
   "theme_color": "#eee7dd",
+  "categories": [
+    "business",
+    "productivity",
+    "design"
+  ],
   "icons": [
     {
       "src": "./assets/roznex-icon.svg",
