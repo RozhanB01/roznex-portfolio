@@ -238,12 +238,8 @@
       <a class="brand" href="/" aria-label="ROZNEX"><img class="brand-logo" src="../assets/roznex-logo.svg" alt="ROZNEX"></a>
       <span class="eyebrow">PRIVATE CLIENT AREA</span>
       <h1>پیش‌فاکتور فقط با تأیید Roznex</h1>
-      <p>قیمت‌ها و پکیج‌های Roznex عمومی نیستند. ابتدا درخواست پروژه را ثبت کنید؛ پس از بررسی پروژه، کد دسترسی این بخش برای شما ارسال می‌شود.</p>
-      <form class="access-form" id="accessForm">
-        <input id="accessCode" autocomplete="one-time-code" placeholder="RZN-XXXXXXXXXXXX" aria-label="کد دسترسی">
-        <button type="submit">ورود به SmartQuote</button>
-      </form>
-      <p class="access-error" id="accessError"></p>
+      <p>قیمت‌ها و پکیج‌های Roznex عمومی نیستند. ابتدا درخواست پروژه را ثبت کنید؛ پس از بررسی، یک لینک اختصاصی و تاریخ‌دار SmartQuote برای شما ارسال می‌شود.</p>
+      <p class="access-error" id="accessError">برای ورود، همان لینک اختصاصی ارسال‌شده توسط Roznex را باز کنید.</p>
       <div class="access-actions">
         <a class="start-link" href="/start/">ثبت درخواست پروژه ←</a>
         <a href="/">بازگشت به سایت</a>
@@ -423,15 +419,9 @@
   </dialog>
 
 <script>
-const ACCESS_HASH='2a412b952cd39aeeec3e9366c3be27ef9cb7f89e423947aeb4260f819493e916';
 const INVITE_PUBLIC_KEY={kty:'EC',crv:'P-256',x:'hbn-CqwF7e29Wh66s1e-8QD4NnjA5txguShZKXCPC4Q',y:'Uc12_ZofYzimA7PpoZu0fy7sTYzCDr5M0kjX0wx4Dgs',ext:true};
 const b64uToBytes=s=>Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')+'='.repeat((4-s.length%4)%4)),c=>c.charCodeAt(0));
 const b64uToText=s=>new TextDecoder().decode(b64uToBytes(s));
-async function sha256(v){
-  const data=new TextEncoder().encode(v);
-  const digest=await crypto.subtle.digest('SHA-256',data);
-  return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('');
-}
 function unlockQuote(invite=null){
   document.body.classList.remove('quote-locked');
   document.getElementById('accessGate')?.remove();
@@ -460,13 +450,6 @@ async function verifyInvite(token){
   }
   if(sessionStorage.getItem('roznex_quote_access')==='1')unlockQuote();
 })();
-document.getElementById('accessForm')?.addEventListener('submit',async e=>{
-  e.preventDefault();
-  const code=document.getElementById('accessCode').value.trim().toUpperCase();
-  const ok=await sha256(code)===ACCESS_HASH;
-  if(ok){unlockQuote();return}
-  document.getElementById('accessError').textContent='کد دسترسی معتبر نیست. برای دریافت دسترسی ابتدا پروژه را ثبت کنید.';
-});
 const CATALOG={
   personal:{
     label:'سایت شخصی / رزومه',icon:'CV',desc:'برای متخصصان، مدیران، فریلنسرها و برند شخصی',
