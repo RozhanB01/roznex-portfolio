@@ -21,9 +21,7 @@ module.exports = async function handler(req, res) {
       configured: false,
       admin: false,
       canWrite: false,
-      message: 'Blob read-write token is missing',
-      detectedTokenKey: getBlobTokenKey() || null,
-      detectedStoreKey: getBlobStoreIdKey() || null
+      message: 'storage_not_configured'
     });
   }
 
@@ -32,9 +30,7 @@ module.exports = async function handler(req, res) {
       configured: true,
       admin: false,
       canWrite: false,
-      message: 'Admin session is not active',
-      detectedTokenKey: getBlobTokenKey() || null,
-      detectedStoreKey: getBlobStoreIdKey() || null
+      message: 'storage_configured'
     });
   }
 
