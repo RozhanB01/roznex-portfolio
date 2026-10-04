@@ -48,6 +48,9 @@ jobs:
 
           retry_status "$BASE/" home.html 200
           retry_status "$BASE/start/" start.html 200
+          retry_status "$BASE/services/" services.html 200
+          retry_status "$BASE/services/fa/ai-agents/" service-fa.html 200
+          retry_status "$BASE/services/en/technical-seo/" service-en.html 200
           retry_status "$BASE/insights/" insights.html 200
           retry_status "$BASE/insights/fa/ai-agent-business/" insight-fa.html 200
           retry_status "$BASE/insights/en/technical-seo-nextjs/" insight-en.html 200
@@ -66,6 +69,16 @@ jobs:
               raise SystemExit('Homepage does not contain ROZNEX')
           if not re.search(r'script\.js\?v=[^"\']+', home):
               raise SystemExit('Homepage does not reference a versioned script asset')
+
+          services=open('services.html',encoding='utf-8').read()
+          if 'ROZNEX / SERVICES' not in services or '/services/en/ai-agents/' not in services:
+              raise SystemExit('Services hub did not render expected content')
+
+          service_fa=open('service-fa.html',encoding='utf-8').read()
+          service_en=open('service-en.html',encoding='utf-8').read()
+          for name,html in [('service-fa',service_fa),('service-en',service_en)]:
+              if '"@type":"Service"' not in html or 'hreflang=' not in html or 'rel="canonical"' not in html:
+                  raise SystemExit(name+' SEO metadata is incomplete')
 
           insights=open('insights.html',encoding='utf-8').read()
           if 'ROZNEX / INSIGHTS' not in insights or '/insights/fa/ai-agent-business/' not in insights:
