@@ -889,3 +889,79 @@ body.fa .project-card-dark .project-facts span+span{
   .project-detail-block{gap:.95rem}
   .project-case-link{font-size:.64rem}
 }
+
+
+/* Balanced type scale — keep the editorial feel without oversized headings */
+.hero h1{
+  font-size:clamp(2.75rem,4.5vw,5.25rem);
+  line-height:.94;
+  letter-spacing:-.055em
+}
+.section-head h2,
+.about h2{
+  font-size:clamp(2.15rem,4vw,4.45rem);
+  line-height:1;
+  letter-spacing:-.05em
+}
+.contact h2,
+.contact-copy h2{
+  font-size:clamp(2.35rem,4.6vw,5rem);
+  line-height:.98;
+  letter-spacing:-.05em
+}
+.project-meta h3{
+  font-size:clamp(1.8rem,3.15vw,3.45rem);
+  line-height:1
+}
+.project-meta.compact h3{
+  font-size:clamp(1.45rem,2.2vw,2.25rem)
+}
+.process-step h3{
+  font-size:clamp(1.35rem,2vw,2rem);
+  line-height:1.08
+}
+.home-insight-card:first-child h3{
+  font-size:clamp(1.85rem,3.45vw,3.5rem);
+  line-height:1.02
+}
+.section-head::before,
+.about-content[data-index]::before,
+.contact-copy[data-index]::before{
+  font-size:clamp(2.8rem,5vw,5.4rem)
+}
+.about-content h2{
+  font-size:clamp(2.15rem,4vw,4.45rem)
+}
+
+@media(max-width:760px){
+  .hero h1{
+    font-size:clamp(2.45rem,10.5vw,3.65rem);
+    line-height:.96
+  }
+  .section-head h2,
+  .about h2,
+  .about-content h2{
+    font-size:clamp(2rem,8.5vw,3rem)
+  }
+  .contact h2,
+  .contact-copy h2{
+    font-size:clamp(2.15rem,9.5vw,3.35rem)
+  }
+  .project-meta h3{
+    font-size:1.85rem
+  }
+  .project-meta.compact h3{
+    font-size:1.65rem
+  }
+  .process-step h3{
+    font-size:1.45rem
+  }
+  .home-insight-card:first-child h3{
+    font-size:1.9rem
+  }
+  .section-head::before,
+  .about-content[data-index]::before,
+  .contact-copy[data-index]::before{
+    font-size:2.75rem
+  }
+}
