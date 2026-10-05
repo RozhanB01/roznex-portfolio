@@ -8,3 +8,28 @@
 footer{border-top:1px solid var(--line);padding:1.25rem var(--pad);display:flex;justify-content:space-between;gap:1rem;font-size:.64rem;color:#766e66}
 @media(max-width:900px){.hub-grid{grid-template-columns:1fr}.service-hero{grid-template-columns:1fr}.content-grid{grid-template-columns:1fr}.side{position:relative;top:auto;order:-1}.hub-card{grid-template-columns:1fr 1fr}}
 @media(max-width:620px){.wrap{width:calc(100% - 2rem)}.top nav a:not(.cta){display:none}.hub-hero,.service-hero{padding-top:4.2rem}.hub-hero h1,.service-hero h1{font-size:clamp(2.5rem,11vw,4rem)}.hub-card{grid-template-columns:1fr}.hub-card img{aspect-ratio:16/10}.deliverables{grid-template-columns:1fr}.content-grid{padding-bottom:4rem}.content p,.content li{font-size:.9rem}footer{flex-direction:column}}
+
+/* Compact public type scale */
+.hub-hero h1,.case-hero h1,.service-hero h1,.article-hero h1,.insights-hero h1,.hero h1{
+  font-size:clamp(2.15rem,4.4vw,4.35rem)!important;
+  line-height:1!important;
+  letter-spacing:-.045em!important;
+  font-weight:450!important
+}
+.work-body h2,.hub-card h2{
+  font-size:clamp(1.45rem,2.2vw,2.15rem)!important;
+  line-height:1.08!important
+}
+.case h2,.content h2,.prose h2{
+  font-size:clamp(1.45rem,2.4vw,2.15rem)!important;
+  line-height:1.12!important
+}
+.card h2{font-size:1.28rem!important;line-height:1.16!important}
+.related h2{font-size:1.55rem!important}
+@media(max-width:620px){
+  .hub-hero h1,.case-hero h1,.service-hero h1,.article-hero h1,.insights-hero h1,.hero h1{
+    font-size:clamp(1.9rem,8.5vw,2.7rem)!important
+  }
+  .work-body h2,.hub-card h2{font-size:1.55rem!important}
+  .case h2,.content h2,.prose h2{font-size:1.55rem!important}
+}
