@@ -965,3 +965,99 @@ body.fa .project-card-dark .project-facts span+span{
     font-size:2.75rem
   }
 }
+
+
+/* Compact typography — requested smaller, calmer headings */
+.hero h1{
+  font-size:clamp(2.35rem,3.75vw,4.15rem);
+  line-height:.98;
+  letter-spacing:-.045em
+}
+.hero h1 span{font-weight:600}
+.hero h1 .thin{font-weight:350}
+.fa-line{
+  font-size:clamp(.92rem,1.2vw,1.08rem);
+  line-height:1.65
+}
+.section-head h2,
+.about h2,
+.about-content h2{
+  font-size:clamp(1.75rem,3vw,3.15rem);
+  line-height:1.06;
+  letter-spacing:-.04em;
+  font-weight:450
+}
+.contact h2,
+.contact-copy h2{
+  font-size:clamp(1.95rem,3.5vw,3.55rem);
+  line-height:1.04;
+  letter-spacing:-.042em;
+  font-weight:450
+}
+.project-meta h3{
+  font-size:clamp(1.55rem,2.45vw,2.65rem);
+  line-height:1.04;
+  font-weight:480
+}
+.project-meta.compact h3{
+  font-size:clamp(1.35rem,1.85vw,1.9rem)
+}
+.process-step h3{
+  font-size:clamp(1.2rem,1.55vw,1.6rem);
+  font-weight:500
+}
+.home-insight-card:first-child h3{
+  font-size:clamp(1.55rem,2.55vw,2.65rem);
+  line-height:1.06;
+  font-weight:470
+}
+.home-insight-card h3{
+  font-size:clamp(1.15rem,1.55vw,1.55rem);
+  line-height:1.18;
+  font-weight:520
+}
+.service-card h3{
+  font-size:clamp(1rem,1.18vw,1.22rem);
+  font-weight:550
+}
+.proof-band strong{
+  font-size:.72rem;
+  font-weight:560
+}
+.section-head::before,
+.about-content[data-index]::before,
+.contact-copy[data-index]::before{
+  font-size:clamp(2.4rem,4vw,4.25rem)
+}
+body.fa .hero h1,
+body.fa .section-head h2,
+body.fa .about h2,
+body.fa .contact h2,
+body.fa .project-meta h3{
+  letter-spacing:-.02em
+}
+
+@media(max-width:760px){
+  .hero h1{
+    font-size:clamp(2.05rem,8.5vw,2.85rem);
+    line-height:1.02
+  }
+  .section-head h2,
+  .about h2,
+  .about-content h2{
+    font-size:clamp(1.7rem,7vw,2.25rem)
+  }
+  .contact h2,
+  .contact-copy h2{
+    font-size:clamp(1.85rem,7.8vw,2.55rem)
+  }
+  .project-meta h3{font-size:1.65rem}
+  .project-meta.compact h3{font-size:1.45rem}
+  .home-insight-card:first-child h3{font-size:1.7rem}
+  .home-insight-card h3{font-size:1.28rem}
+  .section-head::before,
+  .about-content[data-index]::before,
+  .contact-copy[data-index]::before{
+    font-size:2.25rem
+  }
+}
