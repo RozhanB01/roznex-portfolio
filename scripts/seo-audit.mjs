@@ -114,7 +114,7 @@ const robots=fs.readFileSync(path.join(root,'robots.txt'),'utf8');
 if(!robots.includes('Sitemap: '+origin+'/sitemap.xml'))fail('robots.txt missing canonical sitemap URL');
 for(const rule of ['Disallow: /admin','Disallow: /quote/','Disallow: /api/'])if(!robots.includes(rule))fail('robots.txt missing '+rule);
 
-for(const page of pages.filter(p=>p.rel.startsWith('insights/')&&p.rel!=='insights/index.html')){
+for(const page of pages.filter(p=>p.rel.startsWith('insights/')&&!['insights/index.html','insights/fa/index.html'].includes(p.rel))){
   if(!page.html.includes('BlogPosting'))fail(page.rel+' missing BlogPosting schema');
   const lang=page.rel.includes('/fa/')?'fa':'en';
   if(!page.html.includes('/about/'+lang+'/rozhan-behrouzi/'))fail(page.rel+' missing dedicated author link');
