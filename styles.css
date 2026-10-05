@@ -735,3 +735,18 @@ body.fa .contact-copy h2{max-width:12ch;letter-spacing:-.035em}
   .home-insight-card:first-child{grid-column:auto;min-height:18rem}
   .home-insight-card:first-child h3{font-size:2.2rem;max-width:12ch}
 }
+
+
+/* Original founder portrait — user-provided image, no visual editing */
+.about-visual img{
+  object-fit:cover;
+  object-position:center 38%;
+  filter:none
+}
+.about-visual:hover img{
+  transform:scale(1.045);
+  filter:none
+}
+@media(max-width:760px){
+  .about-visual img{object-position:center 34%}
+}
