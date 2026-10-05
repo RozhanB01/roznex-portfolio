@@ -26,3 +26,41 @@
   .work-body h2,.hub-card h2{font-size:1.55rem!important}
   .case h2,.content h2,.prose h2{font-size:1.55rem!important}
 }
+
+
+/* Persian + mobile refinement */
+body[dir="rtl"]{text-align:right}
+body[dir="rtl"] h1,
+body[dir="rtl"] h2,
+body[dir="rtl"] h3{
+  letter-spacing:0!important;
+  line-height:1.36!important
+}
+body[dir="rtl"] .eyebrow,
+body[dir="rtl"] .links span,
+body[dir="rtl"] .side strong{
+  letter-spacing:0!important
+}
+body[dir="rtl"] .lead,
+body[dir="rtl"] .prose p,
+body[dir="rtl"] .prose li{
+  line-height:2.05
+}
+@media(max-width:620px){
+  .top nav a[href*="/fa/"],
+  .top nav a[href*="/en/"],
+  .top nav .lang-switch{
+    display:inline-flex!important
+  }
+  body[dir="rtl"] .hero{
+    padding-top:3.5rem
+  }
+  body[dir="rtl"] .hero h1{
+    font-size:clamp(1.9rem,8vw,2.6rem)!important;
+    line-height:1.4!important
+  }
+  body[dir="rtl"] .prose h2{
+    font-size:1.45rem!important;
+    line-height:1.45!important
+  }
+}
