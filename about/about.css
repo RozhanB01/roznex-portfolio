@@ -1,3 +1,28 @@
 
 :root{--bg:#eee7dd;--ink:#11141b;--muted:#6c645c;--line:rgba(17,20,27,.14);--pad:clamp(1rem,4vw,4rem)}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Manrope,Arial,sans-serif}body[dir="rtl"]{font-family:Vazirmatn,Manrope,sans-serif}a{color:inherit}.top{position:sticky;top:0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:1rem var(--pad);border-bottom:1px solid var(--line);background:rgba(238,231,221,.92);backdrop-filter:blur(18px)}.brand{font-weight:800;letter-spacing:.16em;text-decoration:none}.top nav{display:flex;gap:1rem;align-items:center}.top a{text-decoration:none;font-size:.72rem}.top .cta{background:var(--ink);color:#fff;padding:.7rem 1rem;border-radius:999px}.wrap{width:min(1100px,calc(100% - 2*var(--pad)));margin:auto}.hero{padding:clamp(5rem,10vw,9rem) 0 3rem;display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(2rem,6vw,6rem);align-items:end}.eyebrow{font-size:.58rem;letter-spacing:.15em;color:#866f56}.hero h1{font-size:clamp(3.2rem,7vw,7rem);line-height:.92;letter-spacing:-.065em;font-weight:500;margin:.8rem 0 1.2rem}.lead{font-size:1rem;line-height:1.85;color:var(--muted);max-width:45rem}.visual{aspect-ratio:4/3;border:1px solid var(--line);border-radius:1.2rem;overflow:hidden;background:#171817}.visual img{width:100%;height:100%;object-fit:cover}.content{display:grid;grid-template-columns:minmax(0,1fr) 17rem;gap:clamp(2rem,6vw,6rem);padding:2rem 0 7rem}.prose h2{font-size:clamp(1.8rem,3.3vw,3rem);line-height:1.08;letter-spacing:-.04em;margin:3rem 0 1rem}.prose p,.prose li{font-size:.94rem;line-height:1.85;color:#393633}.prose ul{padding-inline-start:1.2rem}.chips{display:flex;flex-wrap:wrap;gap:.5rem;margin:1.2rem 0}.chips span{border:1px solid var(--line);border-radius:999px;padding:.55rem .7rem;font-size:.68rem}.links{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin:1.2rem 0}.links a{border:1px solid var(--line);border-radius:1rem;padding:1rem;text-decoration:none;background:rgba(255,255,255,.22)}.links span{display:block;font-size:.52rem;letter-spacing:.1em;color:#866f56}.links strong{display:block;margin-top:.35rem}.side{position:sticky;top:6rem;align-self:start;border:1px solid var(--line);border-radius:1rem;padding:1rem}.side strong{font-size:.62rem;letter-spacing:.12em}.side a{display:block;text-decoration:none;color:var(--muted);font-size:.72rem;padding:.45rem 0}.side .github{margin-top:.7rem;background:var(--ink);color:#fff;border-radius:999px;text-align:center;padding:.7rem}.cta-block{margin-top:3rem;padding:1.4rem;border-radius:1.1rem;background:#171817;color:#f4ede4}.cta-block h2{margin:0 0 .6rem}.cta-block p{color:#c9c0b6}.cta-block a{display:inline-flex;background:#f0e7dc;color:#171817;text-decoration:none;border-radius:999px;padding:.75rem 1rem;font-size:.72rem;font-weight:700}footer{border-top:1px solid var(--line);padding:1.25rem var(--pad);display:flex;justify-content:space-between;gap:1rem;font-size:.64rem;color:#756c63}@media(max-width:850px){.hero,.content{grid-template-columns:1fr}.side{position:relative;top:auto;order:-1}}@media(max-width:620px){.wrap{width:calc(100% - 2rem)}.top nav a:not(.cta){display:none}.hero{padding-top:4.2rem}.hero h1{font-size:clamp(2.8rem,12vw,4.4rem)}.links{grid-template-columns:1fr}.prose p,.prose li{font-size:.9rem}footer{flex-direction:column}}
+
+/* Compact public type scale */
+.hub-hero h1,.case-hero h1,.service-hero h1,.article-hero h1,.insights-hero h1,.hero h1{
+  font-size:clamp(2.15rem,4.4vw,4.35rem)!important;
+  line-height:1!important;
+  letter-spacing:-.045em!important;
+  font-weight:450!important
+}
+.work-body h2,.hub-card h2{
+  font-size:clamp(1.45rem,2.2vw,2.15rem)!important;
+  line-height:1.08!important
+}
+.case h2,.content h2,.prose h2{
+  font-size:clamp(1.45rem,2.4vw,2.15rem)!important;
+  line-height:1.12!important
+}
+.card h2{font-size:1.28rem!important;line-height:1.16!important}
+.related h2{font-size:1.55rem!important}
+@media(max-width:620px){
+  .hub-hero h1,.case-hero h1,.service-hero h1,.article-hero h1,.insights-hero h1,.hero h1{
+    font-size:clamp(1.9rem,8.5vw,2.7rem)!important
+  }
+  .work-body h2,.hub-card h2{font-size:1.55rem!important}
+  .case h2,.content h2,.prose h2{font-size:1.55rem!important}
+}
