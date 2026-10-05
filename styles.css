@@ -598,3 +598,140 @@ body.fa .proof-band>a:last-child{border-left:0}
 }
 
 .contact-next{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.55rem;margin-top:1rem}.contact-next span{display:flex;align-items:center;gap:.55rem;padding:.7rem .8rem;border:1px solid rgba(17,20,27,.13);border-radius:999px;background:rgba(255,255,255,.14)}.contact-next b{font-size:.52rem;letter-spacing:.08em;color:#8a755e}.contact-next em{font-style:normal;font-size:.62rem;color:#615a53}@media(max-width:760px){.contact-next{grid-template-columns:1fr}.contact-next span{border-radius:.8rem;justify-content:flex-start}}
+
+
+/* Editorial typography pass — ROZNEX */
+.section-head{
+  position:relative;
+  padding-top:1.15rem;
+  border-top:1px solid var(--line)
+}
+.section-head::before,
+.about-content[data-index]::before,
+.contact-copy[data-index]::before{
+  content:attr(data-index);
+  position:absolute;
+  right:0;
+  top:-.6rem;
+  font:300 clamp(3.4rem,7vw,7.5rem)/.82 Manrope,Arial,sans-serif;
+  letter-spacing:-.08em;
+  color:rgba(17,20,27,.07);
+  pointer-events:none;
+  user-select:none
+}
+.services .section-head::before{color:rgba(255,255,255,.075)}
+.section-head>div{position:relative;z-index:1}
+.section-head h2{
+  max-width:11.5ch;
+  text-wrap:balance;
+  font-weight:470
+}
+.section-head p{
+  position:relative;
+  z-index:1;
+  max-width:29rem
+}
+.eyebrow{font-weight:650;letter-spacing:.18em}
+body.fa .section-head h2{max-width:15ch;letter-spacing:-.035em}
+
+.about-content[data-index],
+.contact-copy[data-index]{
+  position:relative;
+  padding-top:1.15rem;
+  border-top:1px solid var(--line)
+}
+.about-content[data-index]::before,
+.contact-copy[data-index]::before{
+  color:rgba(17,20,27,.065)
+}
+.about-content h2{
+  max-width:10ch;
+  text-wrap:balance;
+  font-weight:470
+}
+body.fa .about-content h2{max-width:13ch;letter-spacing:-.035em}
+.values span{
+  padding:.6rem .78rem;
+  border:1px solid var(--line);
+  border-radius:999px;
+  line-height:1.25
+}
+
+.process-track{position:relative}
+.process-track::before{
+  content:"";
+  position:absolute;
+  left:0;right:0;
+  top:1.82rem;
+  height:1px;
+  background:linear-gradient(90deg,rgba(17,20,27,.18),rgba(17,20,27,.05))
+}
+.process-step{position:relative}
+.process-step>span{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:2.2rem;
+  height:2.2rem;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:var(--ivory);
+  position:relative;
+  z-index:1
+}
+.process-step h3{
+  margin-top:1.5rem;
+  font-size:clamp(1.55rem,2.6vw,2.65rem);
+  letter-spacing:-.045em
+}
+
+.home-insights-grid{
+  grid-template-columns:1.35fr .825fr .825fr;
+  align-items:stretch
+}
+.home-insight-card:first-child{
+  min-height:27rem;
+  background:linear-gradient(145deg,#e5d8c9,#f8f3ed)
+}
+.home-insight-card:first-child h3{
+  font-size:clamp(2.3rem,4.6vw,4.8rem);
+  max-width:10ch
+}
+.home-insight-card h3{text-wrap:balance}
+.home-insight-card>span{font-weight:700}
+.home-insight-card b{transition:transform .25s ease}
+.home-insight-card:hover b{transform:translate(2px,-2px)}
+
+.contact-copy h2{
+  max-width:9.5ch;
+  text-wrap:balance;
+  font-weight:470
+}
+body.fa .contact-copy h2{max-width:12ch;letter-spacing:-.035em}
+.contact-copy>p{max-width:38rem}
+
+@media(max-width:900px){
+  .home-insights-grid{grid-template-columns:1fr 1fr}
+  .home-insight-card:first-child{grid-column:1/-1;min-height:21rem}
+}
+@media(max-width:760px){
+  .section-head{padding-top:.9rem}
+  .section-head::before,
+  .about-content[data-index]::before,
+  .contact-copy[data-index]::before{
+    top:-.25rem;
+    font-size:3.5rem
+  }
+  .section-head h2{max-width:12ch}
+  body.fa .section-head h2{max-width:16ch}
+  .process-track::before{
+    left:1.05rem;right:auto;top:0;bottom:0;width:1px;height:auto;
+    background:linear-gradient(180deg,rgba(17,20,27,.2),rgba(17,20,27,.04))
+  }
+  body.fa .process-track::before{left:auto;right:1.05rem}
+  .process-step>span{min-width:2rem;height:2rem}
+  .process-step h3{margin-top:.9rem}
+  .home-insights-grid{grid-template-columns:1fr}
+  .home-insight-card:first-child{grid-column:auto;min-height:18rem}
+  .home-insight-card:first-child h3{font-size:2.2rem;max-width:12ch}
+}
