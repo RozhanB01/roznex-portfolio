@@ -20,6 +20,7 @@ const updateScroll=()=>{
   const heroProgress=Math.min(Math.max(scrollY/(innerHeight*.9),0),1);
   body.style.setProperty('--scroll-progress',scrollProgress.toFixed(4));
   body.style.setProperty('--hero-progress',heroProgress.toFixed(4));
+  body.style.setProperty('--hero-copy-y',`${(-heroProgress*24).toFixed(1)}px`);
   if(!reduceMotion&&innerWidth>760&&scrollY<innerHeight*1.2){
     heroMedia.style.transform=`translate3d(0,${Math.min(scrollY*.09,78)}px,0) scale(${1.018+heroProgress*.032})`;
   }
@@ -184,10 +185,15 @@ if(!reduceMotion&&finePointer){
     hero.style.setProperty('--hero-ry',`${(x*4.2).toFixed(2)}deg`);
     hero.style.setProperty('--hero-px',`${(x*18).toFixed(1)}px`);
     hero.style.setProperty('--hero-py',`${(y*14).toFixed(1)}px`);
+    hero.style.setProperty('--hero-image-x',`${(x*-3.2).toFixed(1)}px`);
+    hero.style.setProperty('--hero-image-y',`${(y*-2.2).toFixed(1)}px`);
     glassCards.forEach(card=>{
       const depth=Number(card.dataset.depth||10);
       card.style.setProperty('--mx',`${(x*depth).toFixed(1)}px`);
       card.style.setProperty('--my',`${(y*depth).toFixed(1)}px`);
+      card.style.setProperty('--grx',`${(-y*2.2).toFixed(2)}deg`);
+      card.style.setProperty('--gry',`${(x*2.8).toFixed(2)}deg`);
+      card.style.setProperty('--hover-my',`${(y*depth-8).toFixed(1)}px`);
     });
     if(spatialScene){
       spatialScene.style.setProperty('--scene-x',`${(x*22).toFixed(1)}px`);
@@ -203,7 +209,12 @@ if(!reduceMotion&&finePointer){
     if(heroPointerFrame){cancelAnimationFrame(heroPointerFrame);heroPointerFrame=0}
     hero.style.removeProperty('--hero-rx');hero.style.removeProperty('--hero-ry');
     hero.style.removeProperty('--hero-px');hero.style.removeProperty('--hero-py');
-    glassCards.forEach(card=>{card.style.setProperty('--mx','0px');card.style.setProperty('--my','0px')});
+    hero.style.removeProperty('--hero-image-x');hero.style.removeProperty('--hero-image-y');
+    glassCards.forEach(card=>{
+      card.style.setProperty('--mx','0px');card.style.setProperty('--my','0px');
+      card.style.setProperty('--grx','0deg');card.style.setProperty('--gry','0deg');
+      card.style.setProperty('--hover-my','-8px');
+    });
     if(spatialScene){spatialScene.style.setProperty('--scene-x','0px');spatialScene.style.setProperty('--scene-y','0px')}
   });
 }
