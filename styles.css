@@ -1173,11 +1173,11 @@ body.fa .contact-copy h2{
   height:100%;
   object-fit:cover;
   object-position:center;
-  transform:translate3d(calc(var(--hero-px,0px) * -.16),calc(var(--hero-py,0px) * -.12),0) scale(1.035);
+  transform:translate3d(var(--hero-image-x,0px),var(--hero-image-y,0px),0) scale(1.035);
   transition:transform .55s var(--ease-premium)
 }
 .hero-copy{
-  transform:translate3d(0,calc(var(--hero-progress,0) * -24px),42px);
+  transform:translate3d(0,var(--hero-copy-y,0px),42px);
   transition:transform .55s var(--ease-premium)
 }
 .hero-spatial-scene{
@@ -1239,13 +1239,13 @@ body.fa .contact-copy h2{
 .particle-c{left:44%;bottom:13%;transform:translateZ(150px)}
 
 .glass-card{
-  transform:perspective(900px) translate3d(var(--mx,0px),var(--my,0px),70px) rotateX(calc(var(--my,0px) * -.08)) rotateY(calc(var(--mx,0px) * .08));
+  transform:perspective(900px) translate3d(var(--mx,0px),var(--my,0px),70px) rotateX(var(--grx,0deg)) rotateY(var(--gry,0deg));
   transform-style:preserve-3d;
   transition:transform .5s var(--ease-premium),background .3s ease,border-color .3s ease;
   will-change:transform
 }
 .glass-card:hover{
-  transform:perspective(900px) translate3d(var(--mx,0px),calc(var(--my,0px) - 8px),95px) rotateX(calc(var(--my,0px) * -.1)) rotateY(calc(var(--mx,0px) * .1))
+  transform:perspective(900px) translate3d(var(--mx,0px),var(--hover-my,-8px),95px) rotateX(var(--grx,0deg)) rotateY(var(--gry,0deg))
 }
 .glass-card>span,.glass-card p,.glass-card>b,.glass-card .mesh,.glass-card .bars{
   transform:translateZ(28px)
