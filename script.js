@@ -100,7 +100,7 @@ const LEGACY_CMS_COPY=new Map(Object.entries({
   service_seo_fa_title:'سئوی فنی و سیستم محتوا'
 }));
 function cmsCopy(content,key){
-  const value=cmsCopy(content,key);
+  const value=content&&content[key];
   if(!value)return '';
   return LEGACY_CMS_COPY.get(key)===value?'':value;
 }
@@ -119,7 +119,7 @@ const CMS_BINDINGS={
 };
 async function loadSiteContent(){
   try{
-    const response=await fetch('/api/site-content?fresh='+Date.now(),{headers:{Accept:'application/json'},cache:'no-store'});
+    const response=await fetch('/api/site-content',{headers:{Accept:'application/json'},cache:'no-cache'});
     if(!response.ok)return;
     const data=await response.json();
     const content=data&&data.content||{};
@@ -174,19 +174,38 @@ const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{
 document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
 
 if(!reduceMotion&&finePointer){
-  hero.addEventListener('pointermove',event=>{
-    const x=event.clientX/innerWidth-.5;
-    const y=event.clientY/innerHeight-.5;
+  const spatialScene=document.querySelector('.hero-spatial-scene');
+  let heroPointerFrame=0;
+  let heroPointerX=0,heroPointerY=0;
+  const paintHeroPointer=()=>{
+    const x=heroPointerX/innerWidth-.5;
+    const y=heroPointerY/innerHeight-.5;
+    hero.style.setProperty('--hero-rx',`${(-y*3.2).toFixed(2)}deg`);
+    hero.style.setProperty('--hero-ry',`${(x*4.2).toFixed(2)}deg`);
+    hero.style.setProperty('--hero-px',`${(x*18).toFixed(1)}px`);
+    hero.style.setProperty('--hero-py',`${(y*14).toFixed(1)}px`);
     glassCards.forEach(card=>{
       const depth=Number(card.dataset.depth||10);
-      card.style.setProperty('--mx',`${x*depth}px`);
-      card.style.setProperty('--my',`${y*depth}px`);
+      card.style.setProperty('--mx',`${(x*depth).toFixed(1)}px`);
+      card.style.setProperty('--my',`${(y*depth).toFixed(1)}px`);
     });
+    if(spatialScene){
+      spatialScene.style.setProperty('--scene-x',`${(x*22).toFixed(1)}px`);
+      spatialScene.style.setProperty('--scene-y',`${(y*18).toFixed(1)}px`);
+    }
+    heroPointerFrame=0;
+  };
+  hero.addEventListener('pointermove',event=>{
+    heroPointerX=event.clientX;heroPointerY=event.clientY;
+    if(!heroPointerFrame)heroPointerFrame=requestAnimationFrame(paintHeroPointer);
   },{passive:true});
-  hero.addEventListener('pointerleave',()=>glassCards.forEach(card=>{
-    card.style.setProperty('--mx','0px');
-    card.style.setProperty('--my','0px');
-  }));
+  hero.addEventListener('pointerleave',()=>{
+    if(heroPointerFrame){cancelAnimationFrame(heroPointerFrame);heroPointerFrame=0}
+    hero.style.removeProperty('--hero-rx');hero.style.removeProperty('--hero-ry');
+    hero.style.removeProperty('--hero-px');hero.style.removeProperty('--hero-py');
+    glassCards.forEach(card=>{card.style.setProperty('--mx','0px');card.style.setProperty('--my','0px')});
+    if(spatialScene){spatialScene.style.setProperty('--scene-x','0px');spatialScene.style.setProperty('--scene-y','0px')}
+  });
 }
 
 const navLinks=[...document.querySelectorAll('.main-nav a[href^="#"]')];
@@ -529,3 +548,9 @@ loadPublishedProjects();
   heroMedia.addEventListener('pointercancel',deactivate,{passive:true});
   addEventListener('resize',()=>hero.classList.remove('face-active'),{passive:true});
 })();
+
+const depthSections=[...document.querySelectorAll('.section,.proof-band,.strip')];
+const depthSectionObserver=new IntersectionObserver(entries=>{
+  entries.forEach(entry=>entry.target.classList.toggle('is-in-view',entry.isIntersecting));
+},{rootMargin:'10% 0px -10%',threshold:.05});
+depthSections.forEach(section=>depthSectionObserver.observe(section));
