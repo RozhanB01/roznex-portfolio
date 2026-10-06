@@ -73,6 +73,38 @@ const setLanguage=(fa,animate=false)=>{
 setLanguage(localStorage.getItem('roznex-language')==='fa');
 lang.addEventListener('click',()=>setLanguage(html.lang!=='fa',true));
 
+
+const LEGACY_CMS_COPY=new Map(Object.entries({
+  hero_en_1:'DESIGN.',
+  hero_en_2:'CODE.',
+  hero_en_3:'INTELLIGENCE.',
+  hero_en_4:'BUILT AS ONE.',
+  hero_fa_1:'طراحی.',
+  hero_fa_2:'کد.',
+  hero_fa_3:'هوشمندی.',
+  hero_fa_4:'در یک سیستم.',
+  hero_fa_tagline:'طراحی، کد و هوشمندی؛ در یک سیستم.',
+  hero_en_description:'ROZNEX builds distinctive digital products, websites and interactive experiences — from first idea to working system.',
+  hero_fa_description:'ROZNEX محصول دیجیتال، وب‌سایت و تجربه‌های تعاملی متمایز می‌سازد؛ از اولین ایده تا یک سیستم واقعی و قابل استفاده.',
+  about_en_title:'I design the system before the surface.',
+  about_fa_title:'قبل از ظاهر، سیستم را طراحی می‌کنم.',
+  contact_en_title:'Tell me what needs to exist.',
+  contact_fa_title:'بگو چه چیزی باید ساخته شود.',
+  service_ai_en_title:'AI Agents & Workflow Automation',
+  service_ai_fa_title:'ایجنت هوش مصنوعی و اتوماسیون جریان‌کار',
+  service_web_en_title:'Websites & Digital Products',
+  service_web_fa_title:'وب‌سایت و محصول دیجیتال',
+  service_3d_en_title:'3D Product & Spatial Web',
+  service_3d_fa_title:'وب سه‌بعدی برای محصول و فضا',
+  service_seo_en_title:'Technical SEO & Content Systems',
+  service_seo_fa_title:'سئوی فنی و سیستم محتوا'
+}));
+function cmsCopy(content,key){
+  const value=cmsCopy(content,key);
+  if(!value)return '';
+  return LEGACY_CMS_COPY.get(key)===value?'':value;
+}
+
 const CMS_BINDINGS={
   hero_en_description:['.hero-description','en'],
   hero_fa_description:['.hero-description','fa'],
@@ -94,13 +126,14 @@ async function loadSiteContent(){
     const heroLines=[...document.querySelectorAll('#hero-title>span')];
     for(let i=0;i<4;i++){
       if(heroLines[i]){
-        if(content['hero_en_'+(i+1)])heroLines[i].dataset.en=content['hero_en_'+(i+1)];
-        if(content['hero_fa_'+(i+1)])heroLines[i].dataset.fa=content['hero_fa_'+(i+1)];
+        const enLine=cmsCopy(content,'hero_en_'+(i+1));if(enLine)heroLines[i].dataset.en=enLine;
+        const faLine=cmsCopy(content,'hero_fa_'+(i+1));if(faLine)heroLines[i].dataset.fa=faLine;
       }
     }
-    if(content.hero_fa_tagline){
+    const cmsTagline=cmsCopy(content,'hero_fa_tagline');
+    if(cmsTagline){
       const tagline=document.querySelector('.fa-line');
-      if(tagline){tagline.textContent=content.hero_fa_tagline;tagline.style.whiteSpace='pre-line'}
+      if(tagline){tagline.textContent=cmsTagline;tagline.style.whiteSpace='pre-line'}
     }
     Object.entries(CMS_BINDINGS).forEach(([key,binding])=>{
       const value=content[key];
@@ -114,8 +147,8 @@ async function loadSiteContent(){
       const card=serviceCards[index];if(!card)return;
       const title=card.querySelector('h3'),bodyEl=card.querySelector('p');
       if(title){
-        if(content['service_'+id+'_en_title'])title.dataset.en=content['service_'+id+'_en_title'];
-        if(content['service_'+id+'_fa_title'])title.dataset.fa=content['service_'+id+'_fa_title'];
+        const enTitle=cmsCopy(content,'service_'+id+'_en_title');if(enTitle)title.dataset.en=enTitle;
+        const faTitle=cmsCopy(content,'service_'+id+'_fa_title');if(faTitle)title.dataset.fa=faTitle;
       }
       if(bodyEl){
         if(content['service_'+id+'_en_body'])bodyEl.dataset.en=content['service_'+id+'_en_body'];
