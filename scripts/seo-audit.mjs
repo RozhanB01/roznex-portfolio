@@ -54,6 +54,13 @@ function internalTargets(html){
 const sitemap=fs.readFileSync(path.join(root,'sitemap.xml'),'utf8');
 const urls=[...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>m[1]);
 if(new Set(urls).size!==urls.length)fail('sitemap contains duplicate URLs');
+if(!urls.includes(origin+'/fa/'))fail('Persian homepage missing from sitemap');
+for(const p of ['index.html','fa/index.html']){
+  const html=fs.readFileSync(path.join(root,p),'utf8');
+  for(const language of ['fa','en']){
+    if(!html.includes('hreflang="'+language+'"'))fail(p+' missing '+language+' hreflang');
+  }
+}
 for(const forbidden of ['/admin','/quote','/api/','/start/']){
   if(urls.some(u=>new URL(u).pathname.startsWith(forbidden)))fail('private/noindex route present in sitemap: '+forbidden);
 }

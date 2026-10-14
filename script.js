@@ -71,8 +71,19 @@ const setLanguage=(fa,animate=false)=>{
   localStorage.setItem('roznex-language',fa?'fa':'en');
   if(animate) setTimeout(()=>body.classList.remove('language-switching'),260);
 };
-setLanguage(localStorage.getItem('roznex-language')==='fa');
-lang.addEventListener('click',()=>setLanguage(html.lang!=='fa',true));
+// Distinct, crawlable language URLs keep displayed language in sync with SEO metadata.
+const isPersianHomepage=/^\/fa\/?$/.test(location.pathname);
+const isEnglishHomepage=location.pathname==='/';
+setLanguage(isPersianHomepage);
+lang.addEventListener('click',()=>{
+  if(isPersianHomepage||isEnglishHomepage){
+    const next=isPersianHomepage?'en':'fa';
+    localStorage.setItem('roznex-language',next);
+    location.assign(next==='fa'?'/fa/':'/');
+    return;
+  }
+  setLanguage(html.lang!=='fa',true);
+});
 
 
 const LEGACY_CMS_COPY=new Map(Object.entries({
