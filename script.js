@@ -13,16 +13,30 @@ const finePointer=matchMedia('(pointer:fine)').matches;
 document.getElementById('year').textContent=new Date().getFullYear();
 
 let ticking=false;
+const progressBar=document.querySelector('.scroll-progress i');
+const portfolioCuration=document.querySelector('.portfolio-curation');
+let lastHeroProgress=-1;
 const updateScroll=()=>{
-  header.classList.toggle('scrolled',scrollY>24);
+  // Update the progress bar directly to avoid inherited CSS invalidation on every scroll.
+  const pageY=scrollY;
   const maxScroll=Math.max(document.documentElement.scrollHeight-innerHeight,1);
-  const scrollProgress=Math.min(Math.max(scrollY/maxScroll,0),1);
-  const heroProgress=Math.min(Math.max(scrollY/(innerHeight*.9),0),1);
-  body.style.setProperty('--scroll-progress',scrollProgress.toFixed(4));
-  body.style.setProperty('--hero-progress',heroProgress.toFixed(4));
-  body.style.setProperty('--hero-copy-y',`${(-heroProgress*24).toFixed(1)}px`);
-  if(!reduceMotion&&innerWidth>760&&scrollY<innerHeight*1.2){
-    heroMedia.style.transform=`translate3d(0,${Math.min(scrollY*.09,78)}px,0) scale(${1.018+heroProgress*.032})`;
+  const progress=Math.min(Math.max(pageY/maxScroll,0),1);
+  if(progressBar)progressBar.style.transform=`scaleX(${progress.toFixed(4)})`;
+  header.classList.toggle('scrolled',pageY>24);
+
+  // Hero work ends once the user is below the first viewport.
+  if(pageY<innerHeight*1.2||lastHeroProgress<1){
+    const heroProgress=Math.min(Math.max(pageY/(innerHeight*.9),0),1);
+    if(heroProgress!==lastHeroProgress){
+      const value=heroProgress.toFixed(4);
+      hero.style.setProperty('--hero-progress',value);
+      hero.style.setProperty('--hero-copy-y',`${(-heroProgress*24).toFixed(1)}px`);
+      if(portfolioCuration)portfolioCuration.style.setProperty('--hero-progress',value);
+      lastHeroProgress=heroProgress;
+    }
+    if(!reduceMotion&&innerWidth>760&&pageY<innerHeight*1.2){
+      heroMedia.style.transform=`translate3d(0,${Math.min(pageY*.09,78)}px,0) scale(${1.018+heroProgress*.032})`;
+    }
   }
   ticking=false;
 };
@@ -178,7 +192,12 @@ async function loadSiteContent(){
     setLanguage(html.lang==='fa');
   }catch{}
 }
-loadSiteContent();
+// CMS customization is noncritical to initial rendering; schedule it after first paint.
+const runWhenIdle=callback=>{
+  if('requestIdleCallback' in window)requestIdleCallback(callback,{timeout:1800});
+  else setTimeout(callback,600);
+};
+runWhenIdle(loadSiteContent);
 
 const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{
   if(entry.isIntersecting){entry.target.classList.add('visible');observer.unobserve(entry.target)}
@@ -401,7 +420,19 @@ async function loadPublishedProjects(){
   }
   renderDashboardProjects(projects);
 }
-loadPublishedProjects();
+// Dynamic projects are below the fold; fetch them as visitors approach that section.
+if(dashboardProjectsRoot){
+  const projectArea=dashboardProjectsRoot.closest('.section')||dashboardProjectsRoot;
+  if('IntersectionObserver' in window){
+    const lazyProjectsObserver=new IntersectionObserver(entries=>{
+      if(entries.some(entry=>entry.isIntersecting)){
+        lazyProjectsObserver.disconnect();
+        loadPublishedProjects();
+      }
+    },{rootMargin:'700px 0px',threshold:0});
+    lazyProjectsObserver.observe(projectArea);
+  }else runWhenIdle(loadPublishedProjects);
+}
 
 // Robot face interaction: precise image-relative hotspot with mouse, pen and touch support.
 (()=>{
@@ -498,3 +529,7 @@ const depthSectionObserver=new IntersectionObserver(entries=>{
   entries.forEach(entry=>entry.target.classList.toggle('is-in-view',entry.isIntersecting));
 },{rootMargin:'10% 0px -10%',threshold:.05});
 depthSections.forEach(section=>depthSectionObserver.observe(section));
+const orbitVisibility=new IntersectionObserver(entries=>{
+  hero.classList.toggle('hero-offscreen',!entries[0].isIntersecting);
+},{threshold:0});
+orbitVisibility.observe(hero);
