@@ -216,11 +216,15 @@ const presentation=fs.readFileSync(path.join(root,'styles.css'),'utf8');
 if(!runtime.includes("matchMedia('(min-width:901px)')"))fail('desktop-only pointer motion guard is missing');
 if(!runtime.includes('lastServicePointerEvent<32')||!runtime.includes('lastDepthPointerEvent<32'))fail('pointer motion throttling missing');
 if(!runtime.includes("el.textContent!==text")||!runtime.includes("el.getAttribute('href')!==href"))fail('localized homepage still invalidates unchanged DOM');
+if(!runtime.includes("if(scrollY>0)requestAnimationFrame(updateScroll);"))fail('script forces whole-document layout on first paint');
+if(!runtime.includes('currentHomepageLanguage')||!runtime.includes('html.lang===currentHomepageLanguage'))fail('server-rendered localized homepage is unnecessarily rebuilt on startup');
+const persianLanding=fs.readFileSync(path.join(root,'fa/index.html'),'utf8');
+if(!persianLanding.includes('aria-label="تغییر زبان به انگلیسی"><span class="selected">FA</span>')||!persianLanding.includes('aria-label="باز کردن منو"'))fail('Persian home navigation must be localized in initial HTML');
 for(const img of ['service-ai.svg','service-seo.svg','service-3d.svg','service-web.svg'])if(!runtime.includes("return '/assets/"+img+"'"))fail('dynamic project fallback image must use root absolute URL: '+img);
 if(!presentation.includes('.reveal{filter:none!important;transition-property:opacity,transform!important}'))fail('mobile reveal effect is not optimized');
 for(const landing of ['index.html','fa/index.html']){
   const h=fs.readFileSync(path.join(root,landing),'utf8');
-  if(!h.includes('styles.css?v=performance-20261016-3')||!h.includes('script.js?v=performance-20261016-3'))fail(landing+' has stale asset URLs');
+  if(!h.includes('styles.css?v=performance-20261016-3')||!h.includes('script.js?v=performance-20261016-5'))fail(landing+' has stale asset URLs');
   if(!h.includes('fetchpriority="high"'))fail(landing+' is missing hero image priority');
   if(landing==='fa/index.html'&&!h.includes('rel="stylesheet" media="print" onload="this.media=\'all\'"'))fail('Persian homepage lacks nonblocking Google Fonts CSS');
   if(h.includes('class="hero-copy reveal"')||h.includes('class="glass-panels reveal"'))fail(landing+' delays first-screen content behind scroll reveal');

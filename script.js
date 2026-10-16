@@ -43,7 +43,9 @@ const updateScroll=()=>{
   ticking=false;
 };
 addEventListener('scroll',()=>{if(!ticking){requestAnimationFrame(updateScroll);ticking=true}},{passive:true});
-updateScroll();
+// At top-of-page the progress bar is already zero; avoid forcing layout
+// for the entire document synchronously before first paint.
+if(scrollY>0)requestAnimationFrame(updateScroll);
 
 const setMenuOpen=(open,focusFirst=false)=>{
   menu.setAttribute('aria-expanded',String(open));
@@ -88,7 +90,7 @@ const setLanguage=(fa,animate=false)=>{
     if(href&&el.getAttribute('href')!==href)el.setAttribute('href',href);
   });
   lang.innerHTML=fa?'<span class="selected">FA</span><i></i><span>EN</span>':'<span>FA</span><i></i><span class="selected">EN</span>';
-  lang.setAttribute('aria-label',fa?'Switch language to English':'تغییر زبان به فارسی');
+  lang.setAttribute('aria-label',fa?'تغییر زبان به انگلیسی':'Switch language to Persian');
   const menuOpen=menu.getAttribute('aria-expanded')==='true';
   menu.setAttribute('aria-label',fa?(menuOpen?'بستن منو':'باز کردن منو'):(menuOpen?'Close navigation':'Open navigation'));
   const mobileNavEl=document.getElementById('mobile-nav');
@@ -99,7 +101,14 @@ const setLanguage=(fa,animate=false)=>{
 // Distinct, crawlable language URLs keep displayed language in sync with SEO metadata.
 const isPersianHomepage=/^\/fa\/?$/.test(location.pathname);
 const isEnglishHomepage=location.pathname==='/';
-setLanguage(isPersianHomepage);
+// Both page variants are server-rendered in their correct language.
+// Don't scan/modify ~150 already-localized elements during startup.
+const currentHomepageLanguage=isPersianHomepage?'fa':'en';
+if((isPersianHomepage||isEnglishHomepage)&&html.lang===currentHomepageLanguage&&body.classList.contains('fa')===isPersianHomepage){
+  if(localStorage.getItem('roznex-language')!==currentHomepageLanguage)localStorage.setItem('roznex-language',currentHomepageLanguage);
+}else{
+  setLanguage(isPersianHomepage);
+}
 lang.addEventListener('click',()=>{
   if(isPersianHomepage||isEnglishHomepage){
     const next=isPersianHomepage?'en':'fa';
