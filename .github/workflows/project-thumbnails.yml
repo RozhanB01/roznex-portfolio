@@ -1,0 +1,68 @@
+name: ROZNEX Project Thumbnails
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/project-thumbnails.yml'
+      - 'assets/project-industrial.webp'
+      - 'assets/project-familyos.webp'
+      - 'assets/project-studymed.webp'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: roznex-project-thumbnails
+  cancel-in-progress: true
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install 'Pillow>=11,<12'
+      - name: Recreate responsive copies of existing portfolio images
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image, ImageOps
+
+          for stem in ['industrial','familyos','studymed']:
+              original=Path(f'assets/project-{stem}.webp')
+              assert original.exists(), f'Missing original {original}'
+              original_bytes=original.stat().st_size
+              with Image.open(original) as opened:
+                  artwork=ImageOps.exif_transpose(opened).convert('RGB')
+                  w,h=artwork.size
+                  assert w>=960 and h>=700, (stem, artwork.size)
+                  for width in (480,768,960):
+                      height=round(h*width/w)
+                      output=Path(f'assets/project-{stem}-{width}.webp')
+                      thumb=artwork.resize((width,height),Image.Resampling.LANCZOS)
+                      thumb.save(output,'WEBP',quality=77,method=6)
+                      n=output.stat().st_size
+                      assert n<original_bytes, f'{output} is not smaller than original'
+                      print(f'{output} = {n:,} bytes, {width}x{height}; original {original_bytes:,} bytes')
+          PY
+      - name: Commit new responsive copies
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add assets/project-industrial-{480,768,960}.webp assets/project-familyos-{480,768,960}.webp assets/project-studymed-{480,768,960}.webp
+          if git diff --staged --quiet; then
+            echo 'Portfolio thumbnails unchanged'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'perf: derive responsive portfolio previews from unchanged originals'
+          git push origin HEAD:main
