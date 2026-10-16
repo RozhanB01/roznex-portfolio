@@ -215,11 +215,14 @@ const runtime=fs.readFileSync(path.join(root,'script.js'),'utf8');
 const presentation=fs.readFileSync(path.join(root,'styles.css'),'utf8');
 if(!runtime.includes("matchMedia('(min-width:901px)')"))fail('desktop-only pointer motion guard is missing');
 if(!runtime.includes('lastServicePointerEvent<32')||!runtime.includes('lastDepthPointerEvent<32'))fail('pointer motion throttling missing');
+if(!runtime.includes("el.textContent!==text")||!runtime.includes("el.getAttribute('href')!==href"))fail('localized homepage still invalidates unchanged DOM');
+for(const img of ['service-ai.svg','service-seo.svg','service-3d.svg','service-web.svg'])if(!runtime.includes("return '/assets/"+img+"'"))fail('dynamic project fallback image must use root absolute URL: '+img);
 if(!presentation.includes('.reveal{filter:none!important;transition-property:opacity,transform!important}'))fail('mobile reveal effect is not optimized');
 for(const landing of ['index.html','fa/index.html']){
   const h=fs.readFileSync(path.join(root,landing),'utf8');
-  if(!h.includes('styles.css?v=performance-20261016-2')||!h.includes('script.js?v=performance-20261016-2'))fail(landing+' has stale asset URLs');
+  if(!h.includes('styles.css?v=performance-20261016-3')||!h.includes('script.js?v=performance-20261016-3'))fail(landing+' has stale asset URLs');
   if(!h.includes('fetchpriority="high"'))fail(landing+' is missing hero image priority');
+  if(h.includes('class="hero-copy reveal"')||h.includes('class="glass-panels reveal"'))fail(landing+' delays first-screen content behind scroll reveal');
 }
 const heroBytes=fs.statSync(path.join(root,'assets/roznex-hero-reference.webp')).size;
 if(heroBytes>260000)fail('hero image exceeds 260 KB budget');

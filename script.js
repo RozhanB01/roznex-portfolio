@@ -73,18 +73,27 @@ addEventListener('resize',()=>{
 
 const setLanguage=(fa,animate=false)=>{
   if(animate) body.classList.add('language-switching');
-  html.lang=fa?'fa':'en';
-  html.dir=fa?'rtl':'ltr';
+  const targetLang=fa?'fa':'en';
+  const targetDir=fa?'rtl':'ltr';
+  if(html.lang!==targetLang)html.lang=targetLang;
+  if(html.dir!==targetDir)html.dir=targetDir;
   body.classList.toggle('fa',fa);
-  document.querySelectorAll('[data-en]').forEach(el=>el.textContent=fa?el.dataset.fa:el.dataset.en);
-  document.querySelectorAll('[data-href-en]').forEach(el=>el.setAttribute('href',fa?el.dataset.hrefFa:el.dataset.hrefEn));
+  // Both homepages ship correct localized HTML: don't invalidate hundreds of nodes on load.
+  document.querySelectorAll('[data-en]').forEach(el=>{
+    const text=fa?el.dataset.fa:el.dataset.en;
+    if(text!==undefined&&el.textContent!==text)el.textContent=text;
+  });
+  document.querySelectorAll('[data-href-en]').forEach(el=>{
+    const href=fa?el.dataset.hrefFa:el.dataset.hrefEn;
+    if(href&&el.getAttribute('href')!==href)el.setAttribute('href',href);
+  });
   lang.innerHTML=fa?'<span class="selected">FA</span><i></i><span>EN</span>':'<span>FA</span><i></i><span class="selected">EN</span>';
   lang.setAttribute('aria-label',fa?'Switch language to English':'تغییر زبان به فارسی');
   const menuOpen=menu.getAttribute('aria-expanded')==='true';
   menu.setAttribute('aria-label',fa?(menuOpen?'بستن منو':'باز کردن منو'):(menuOpen?'Close navigation':'Open navigation'));
   const mobileNavEl=document.getElementById('mobile-nav');
   if(mobileNavEl)mobileNavEl.setAttribute('aria-label',fa?'ناوبری موبایل':'Mobile navigation');
-  localStorage.setItem('roznex-language',fa?'fa':'en');
+  if(localStorage.getItem('roznex-language')!==targetLang)localStorage.setItem('roznex-language',targetLang);
   if(animate) setTimeout(()=>body.classList.remove('language-switching'),260);
 };
 // Distinct, crawlable language URLs keep displayed language in sync with SEO metadata.
@@ -337,10 +346,10 @@ function safeProjectText(value=''){
 }
 function projectVisualFor(category=''){
   const c=String(category).toLowerCase();
-  if(c.includes('هوش')||c.includes('ai')) return './assets/service-ai.svg';
-  if(c.includes('سئو')||c.includes('seo')) return './assets/service-seo.svg';
-  if(c.includes('سه')||c.includes('3d')) return './assets/service-3d.svg';
-  return './assets/service-web.svg';
+  if(c.includes('هوش')||c.includes('ai')) return '/assets/service-ai.svg';
+  if(c.includes('سئو')||c.includes('seo')) return '/assets/service-seo.svg';
+  if(c.includes('سه')||c.includes('3d')) return '/assets/service-3d.svg';
+  return '/assets/service-web.svg';
 }
 function safeHttpUrl(value=''){
   try{

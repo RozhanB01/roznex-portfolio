@@ -1,0 +1,62 @@
+name: ROZNEX Lighthouse Performance
+
+on:
+  workflow_run:
+    workflows: ["Production Smoke Test"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: roznex-lighthouse
+  cancel-in-progress: true
+
+jobs:
+  lighthouse:
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Measure mobile Persian homepage
+        run: |
+          npx --yes lighthouse@12 https://roznex-portfolio.vercel.app/fa/ \
+            --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" \
+            --only-categories=performance --output=json --output-path=lighthouse-mobile-fa.json --quiet
+      - name: Measure desktop English homepage
+        run: |
+          npx --yes lighthouse@12 https://roznex-portfolio.vercel.app/ \
+            --preset=desktop --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" \
+            --only-categories=performance --output=json --output-path=lighthouse-desktop-en.json --quiet
+      - name: Report measured results
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          for(const filename of ['lighthouse-mobile-fa.json','lighthouse-desktop-en.json']){
+            const audit=JSON.parse(fs.readFileSync(filename,'utf8'));
+            const a=audit.audits;
+            console.log(filename);
+            console.log(JSON.stringify({
+              url:audit.finalDisplayedUrl,
+              performanceScore:Math.round((audit.categories?.performance?.score||0)*100),
+              FCP:a['first-contentful-paint']?.displayValue,
+              LCP:a['largest-contentful-paint']?.displayValue,
+              TBT:a['total-blocking-time']?.displayValue,
+              CLS:a['cumulative-layout-shift']?.displayValue,
+              speedIndex:a['speed-index']?.displayValue
+            },null,2));
+          }
+          NODE
+      - name: Save Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: roznex-lighthouse-${{ github.run_number }}
+          path: lighthouse-*.json
+          retention-days: 14
+          if-no-files-found: warn
