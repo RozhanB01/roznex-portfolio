@@ -222,6 +222,7 @@ for(const landing of ['index.html','fa/index.html']){
   const h=fs.readFileSync(path.join(root,landing),'utf8');
   if(!h.includes('styles.css?v=performance-20261016-3')||!h.includes('script.js?v=performance-20261016-3'))fail(landing+' has stale asset URLs');
   if(!h.includes('fetchpriority="high"'))fail(landing+' is missing hero image priority');
+  if(landing==='fa/index.html'&&!h.includes('rel="stylesheet" media="print" onload="this.media=\'all\'"'))fail('Persian homepage lacks nonblocking Google Fonts CSS');
   if(h.includes('class="hero-copy reveal"')||h.includes('class="glass-panels reveal"'))fail(landing+' delays first-screen content behind scroll reveal');
 }
 const heroBytes=fs.statSync(path.join(root,'assets/roznex-hero-reference.webp')).size;
