@@ -117,6 +117,12 @@ for(const page of pages){
     if(!back)fail(page.rel+' hreflang target does not link back: '+alt.href);
   }
 }
+// A Persian landing page must not send its logo/home navigation to the English homepage.
+for(const page of pages.filter(p=>/^(services|insights|work|about)\/fa\//.test(p.rel))){
+  if(page.html.includes('<a class="brand" href="/">')||page.html.includes('<a href="/">خانه</a>')){
+    fail(page.rel+' sends Persian home navigation to English /');
+  }
+}
 console.log('✓ hreflang reciprocity checked');
 const robots=fs.readFileSync(path.join(root,'robots.txt'),'utf8');
 if(!robots.includes('Sitemap: '+origin+'/sitemap.xml'))fail('robots.txt missing canonical sitemap URL');
