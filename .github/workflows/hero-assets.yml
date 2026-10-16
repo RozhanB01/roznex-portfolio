@@ -1,0 +1,67 @@
+name: ROZNEX Responsive Hero Assets
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/hero-assets.yml'
+      - 'assets/roznex-hero-reference.webp'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: roznex-hero-assets
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Check out original hero artwork
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install image encoder
+        run: python -m pip install 'Pillow>=11,<12'
+      - name: Create same-artwork responsive WebP images
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image, ImageOps
+
+          source=Path('assets/roznex-hero-reference.webp')
+          assert source.is_file(), 'The source robot artwork is missing'
+          original_bytes=source.stat().st_size
+          with Image.open(source) as artwork:
+              artwork=ImageOps.exif_transpose(artwork).convert('RGB')
+              width,height=artwork.size
+              assert width>=1600 and height>=850, f'Unexpected source dimensions: {artwork.size}'
+              for target_width in [960,1280]:
+                  target_height=round(height*target_width/width)
+                  resized=artwork.resize((target_width,target_height),Image.Resampling.LANCZOS)
+                  dest=Path(f'assets/roznex-hero-{target_width}.webp')
+                  resized.save(dest,format='WEBP',quality=78,method=6)
+                  created=dest.stat().st_size
+                  assert created<original_bytes, f'{dest}: optimized variant was not smaller than source'
+                  print(f'{dest}: {created:,} bytes; dimensions: {target_width} x {target_height}; source: {original_bytes:,} bytes')
+          PY
+      - name: Commit optimized variants if different
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add assets/roznex-hero-960.webp assets/roznex-hero-1280.webp
+          if git diff --staged --quiet; then
+            echo 'Responsive robot assets are already current.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'perf: generate responsive robot image variants from approved artwork'
+          git push origin HEAD:main
