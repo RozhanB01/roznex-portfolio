@@ -25,25 +25,42 @@ jobs:
           node-version: '22'
       - name: Measure mobile Persian homepage
         run: |
-          npx --yes lighthouse@12 https://roznex-portfolio.vercel.app/fa/ \
-            --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" \
-            --only-categories=performance --output=json --output-path=lighthouse-mobile-fa.json --quiet
+          for attempt in 1 2 3; do
+            if npx --yes lighthouse@12 https://roznex-portfolio.vercel.app/fa/ \
+              --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" \
+              --only-categories=performance --output=json --output-path=lighthouse-mobile-fa.json --quiet; then
+              break
+            fi
+            if [ "$attempt" -eq 3 ]; then echo "Mobile Lighthouse failed after three attempts"; exit 1; fi
+            echo "Retrying a transient mobile Chrome trace error"
+            sleep 5
+          done
       - name: Measure desktop English homepage
         run: |
-          npx --yes lighthouse@12 https://roznex-portfolio.vercel.app/ \
-            --preset=desktop --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" \
-            --only-categories=performance --output=json --output-path=lighthouse-desktop-en.json --quiet
+          for attempt in 1 2 3; do
+            if npx --yes lighthouse@12 https://roznex-portfolio.vercel.app/ \
+              --preset=desktop --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" \
+              --only-categories=performance --output=json --output-path=lighthouse-desktop-en.json --quiet; then
+              break
+            fi
+            if [ "$attempt" -eq 3 ]; then echo "Desktop Lighthouse failed after three attempts"; exit 1; fi
+            echo "Retrying a transient desktop Chrome trace error"
+            sleep 5
+          done
       - name: Report measured results
         run: |
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
           for(const filename of ['lighthouse-mobile-fa.json','lighthouse-desktop-en.json']){
             const audit=JSON.parse(fs.readFileSync(filename,'utf8'));
+            if(audit.runtimeError||audit.categories?.performance?.score==null){
+              throw new Error(filename+' has no valid Lighthouse performance score: '+JSON.stringify(audit.runtimeError||{}));
+            }
             const a=audit.audits;
             console.log(filename);
             console.log(JSON.stringify({
               url:audit.finalDisplayedUrl,
-              performanceScore:Math.round((audit.categories?.performance?.score||0)*100),
+              performanceScore:Math.round(audit.categories.performance.score*100),
               FCP:a['first-contentful-paint']?.displayValue,
               LCP:a['largest-contentful-paint']?.displayValue,
               TBT:a['total-blocking-time']?.displayValue,
