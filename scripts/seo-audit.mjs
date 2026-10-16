@@ -65,6 +65,7 @@ for(const forbidden of ['/admin','/quote','/api/','/start/']){
   if(urls.some(u=>new URL(u).pathname.startsWith(forbidden)))fail('private/noindex route present in sitemap: '+forbidden);
 }
 
+if(!urls.includes(origin+'/insights/fa/personal-portfolio-website/'))fail('Personal portfolio guide missing from sitemap');
 const titles=new Map();
 const pages=[];
 for(const url of urls){

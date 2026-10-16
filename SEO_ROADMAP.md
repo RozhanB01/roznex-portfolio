@@ -9,6 +9,7 @@ Do not switch canonical domain until `.ir` DNS and HTTPS are configured.
 | روژان بهروزی / Rozhan Behrouzi / روژان | /about/fa/rozhan-behrouzi/ | Real founder profile and projects |
 | مهندس روژان بهروزی | /about/fa/rozhan-behrouzi/ | Describe actual engineering work; no unverified degree claims |
 | طراحی سایت حرفه‌ای / سایت شرکتی | /services/fa/web-design/ | Technical scope and real project evidence |
+| طراحی سایت شخصی / سایت نمونه‌کار / پورتفولیو | /insights/fa/personal-portfolio-website/ | Practical original article, founder bio and service links |
 | طراحی سایت سه‌بعدی | /services/fa/3d-web/ | Performance-aware 3D case studies |
 | هوش مصنوعی و ایجنت | /services/fa/ai-agents/ | Actual workflows and limitations |
 | سئو و بهینه‌سازی | /services/fa/technical-seo/ | Original technical work |
