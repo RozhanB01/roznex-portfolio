@@ -1370,3 +1370,13 @@ body.fa .contact-copy h2{
   .hero-spatial-scene{transform:translate3d(0,-50%,0)}
 }
 .contact-card img,.project-media img{display:block}
+
+/* Performance: keep original look and robot; avoid blur repaints on mobile. */
+@media(max-width:900px),(hover:none){
+  .reveal{filter:none!important;transition-property:opacity,transform!important}
+  .hero-copy,.reveal.visible,[data-project-card],.about-visual,.contact-visual{will-change:auto!important}
+  .hero-spatial-scene{will-change:auto!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .reveal{filter:none!important;transition:none!important}
+}

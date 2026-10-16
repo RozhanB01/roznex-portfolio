@@ -209,6 +209,22 @@ else ok('Insights RSS discovery');
 if(!fs.readFileSync(path.join(root,'index.html'),'utf8').includes('/insights/'))fail('Homepage does not link to Insights');
 else ok('Homepage links to Insights');
 
+
+/* Performance regression checks for the visitor-facing hero and mobile motion. */
+const runtime=fs.readFileSync(path.join(root,'script.js'),'utf8');
+const presentation=fs.readFileSync(path.join(root,'styles.css'),'utf8');
+if(!runtime.includes("matchMedia('(min-width:901px)')"))fail('desktop-only pointer motion guard is missing');
+if(!runtime.includes('lastServicePointerEvent<32')||!runtime.includes('lastDepthPointerEvent<32'))fail('pointer motion throttling missing');
+if(!presentation.includes('.reveal{filter:none!important;transition-property:opacity,transform!important}'))fail('mobile reveal effect is not optimized');
+for(const landing of ['index.html','fa/index.html']){
+  const h=fs.readFileSync(path.join(root,landing),'utf8');
+  if(!h.includes('styles.css?v=performance-20261016-2')||!h.includes('script.js?v=performance-20261016-2'))fail(landing+' has stale asset URLs');
+  if(!h.includes('fetchpriority="high"'))fail(landing+' is missing hero image priority');
+}
+const heroBytes=fs.statSync(path.join(root,'assets/roznex-hero-reference.webp')).size;
+if(heroBytes>260000)fail('hero image exceeds 260 KB budget');
+else ok('hero image budget ('+Math.round(heroBytes/1024)+' KiB)');
+
 if(failures.length){
   console.error('\nROZNEX audit failed with '+failures.length+' issue(s).');
   process.exit(1);

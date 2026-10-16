@@ -9,6 +9,8 @@ const heroMedia=document.querySelector('.hero-media');
 const glassCards=[...document.querySelectorAll('.glass-card')];
 const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const finePointer=matchMedia('(pointer:fine)').matches;
+// Costly cursor-depth effects only run on desktop/laptop pointers.
+const interactivePointer=!reduceMotion&&finePointer&&matchMedia('(min-width:901px)').matches;
 
 document.getElementById('year').textContent=new Date().getFullYear();
 
@@ -189,7 +191,8 @@ async function loadSiteContent(){
       const meta=document.querySelector('meta[name="description"]');if(meta)meta.setAttribute('content',content.seo_description);
       document.querySelectorAll('meta[property="og:description"],meta[name="twitter:description"]').forEach(el=>el.setAttribute('content',content.seo_description));
     }
-    setLanguage(html.lang==='fa');
+    // Avoid a synchronous full-page text pass when the server has no copy overrides.
+    if(Object.keys(content).some(key=>/^(hero_|about_|contact_|service_)/.test(key)))setLanguage(html.lang==='fa');
   }catch{}
 }
 // CMS customization is noncritical to initial rendering; schedule it after first paint.
@@ -204,10 +207,11 @@ const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{
 }),{threshold:.12,rootMargin:'0px 0px -7%'});
 document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
 
-if(!reduceMotion&&finePointer){
+if(interactivePointer){
   const spatialScene=document.querySelector('.hero-spatial-scene');
   let heroPointerFrame=0;
   let heroPointerX=0,heroPointerY=0;
+  let lastHeroPointerEvent=0;
   const paintHeroPointer=()=>{
     const x=heroPointerX/innerWidth-.5;
     const y=heroPointerY/innerHeight-.5;
@@ -232,6 +236,8 @@ if(!reduceMotion&&finePointer){
     heroPointerFrame=0;
   };
   hero.addEventListener('pointermove',event=>{
+    if(event.timeStamp-lastHeroPointerEvent<32)return;
+    lastHeroPointerEvent=event.timeStamp;
     heroPointerX=event.clientX;heroPointerY=event.clientY;
     if(!heroPointerFrame)heroPointerFrame=requestAnimationFrame(paintHeroPointer);
   },{passive:true});
@@ -265,10 +271,13 @@ sections.forEach(section=>spy.observe(section));
 
 // Service visuals: subtle pointer parallax + mobile active state
 const serviceCards=[...document.querySelectorAll('.service-card')];
-if(!reduceMotion&&finePointer){
+if(interactivePointer){
   serviceCards.forEach(card=>{
     const visual=card.querySelector('.service-visual');
+    let lastServicePointerEvent=0;
     card.addEventListener('pointermove',event=>{
+      if(event.timeStamp-lastServicePointerEvent<32)return;
+      lastServicePointerEvent=event.timeStamp;
       const r=card.getBoundingClientRect();
       const x=(event.clientX-r.left)/r.width;
       const y=(event.clientY-r.top)/r.height;
@@ -292,9 +301,12 @@ serviceCards.forEach(card=>serviceSpy.observe(card));
 
 
 // ROZNEX visual depth: project cards + about + contact collage
-if(!reduceMotion && finePointer){
+if(interactivePointer){
   document.querySelectorAll('[data-project-card], [data-about-visual], .contact-visual').forEach(card=>{
+    let lastDepthPointerEvent=0;
     card.addEventListener('pointermove',event=>{
+      if(event.timeStamp-lastDepthPointerEvent<32)return;
+      lastDepthPointerEvent=event.timeStamp;
       const r=card.getBoundingClientRect();
       const x=(event.clientX-r.left)/r.width-.5;
       const y=(event.clientY-r.top)/r.height-.5;
@@ -350,11 +362,14 @@ function localApprovedFallback(){
   }catch{return []}
 }
 function bindDashboardProjectMotion(){
-  if(reduceMotion||!finePointer||!dashboardProjectsRoot)return;
+  if(!interactivePointer||!dashboardProjectsRoot)return;
   dashboardProjectsRoot.querySelectorAll('[data-project-card]').forEach(card=>{
     if(card.dataset.motionBound==='1')return;
     card.dataset.motionBound='1';
+    let lastDynamicPointerEvent=0;
     card.addEventListener('pointermove',event=>{
+      if(event.timeStamp-lastDynamicPointerEvent<32)return;
+      lastDynamicPointerEvent=event.timeStamp;
       const r=card.getBoundingClientRect();
       const x=(event.clientX-r.left)/r.width-.5;
       const y=(event.clientY-r.top)/r.height-.5;
@@ -477,6 +492,7 @@ if(dashboardProjectsRoot){
   // so the same source-image face lands farther to the right in the visible mobile frame.
   const mobileFace={x:.84,y:.39,rx:.20,ry:.21};
   let holdTimer=0;
+  let lastFacePointerEvent=0;
 
   const faceForViewport=()=>innerWidth<=760?mobileFace:desktopFace;
   const isOverFace=(clientX,clientY)=>{
@@ -505,6 +521,8 @@ if(dashboardProjectsRoot){
   };
 
   heroMedia.addEventListener('pointermove',event=>{
+    if(event.timeStamp-lastFacePointerEvent<32)return;
+    lastFacePointerEvent=event.timeStamp;
     if(event.pointerType==='touch'){
       if(event.buttons&&isOverFace(event.clientX,event.clientY))flash();
       return;
