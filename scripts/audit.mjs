@@ -229,6 +229,22 @@ const heroBytes=fs.statSync(path.join(root,'assets/roznex-hero-reference.webp'))
 if(heroBytes>260000)fail('hero image exceeds 260 KB budget');
 else ok('hero image budget ('+Math.round(heroBytes/1024)+' KiB)');
 
+
+/* Responsive hero is non-negotiable: mobile should not download the 1920px hero. */
+for(const homepage of ['index.html','fa/index.html']){
+  const page=fs.readFileSync(path.join(root,homepage),'utf8');
+  const prefix=homepage==='fa/index.html'?'../':'./';
+  if(!page.includes(prefix+'assets/roznex-hero-960.webp 960w')||
+     !page.includes(prefix+'assets/roznex-hero-1280.webp 1280w')||
+     !page.includes('imagesizes="100vw"')||
+     !page.includes('sizes="100vw"'))fail(homepage+' missing responsive hero image and matching preload');
+}
+for(const [name,budget] of [['roznex-hero-960.webp',75000],['roznex-hero-1280.webp',100000]]){
+  const size=fs.statSync(path.join(root,'assets',name)).size;
+  if(size>budget)fail(name+' exceeds responsive hero image budget: '+size);
+  else ok(name+' is '+Math.round(size/1024)+' KiB');
+}
+
 if(failures.length){
   console.error('\nROZNEX audit failed with '+failures.length+' issue(s).');
   process.exit(1);

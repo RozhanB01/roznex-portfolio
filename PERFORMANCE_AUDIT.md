@@ -24,3 +24,15 @@ Next measurements:
 2. Check real-user LCP, INP and CLS after enabling analytics/Speed Insights, with privacy disclosure as appropriate.
 3. Consider responsive image derivatives for hero/project imagery while keeping the *exact same source artwork* and without compromising the mobile crop.
 4. Confirm the `.ir` domain/HTTPS before updating SEO origin; it was not configured at the time of this report.
+
+## Responsive robot hero images — 2026-10-16
+
+The approved robot artwork was **not replaced**. `.github/workflows/hero-assets.yml` generates visually matching downsampled WebP images directly from `assets/roznex-hero-reference.webp`:
+
+| File | Actual bytes | Intended usage |
+| --- | ---: | --- |
+| `roznex-hero-reference.webp` | 178,248 | 1920px / full-size reference |
+| `roznex-hero-1280.webp` | 58,746 | 1280px screens or high-DPR phones |
+| `roznex-hero-960.webp` | 40,552 | smaller devices |
+
+Both `/` and `/fa/` now use matching `srcset` and `imagesrcset` preload attributes so a browser can fetch one right-sized image for the responsive hero. The CSS crop, appearance, accessible label and face-hotspot motion remain the same. Image files carry no upscaling and have been committed by an audited GitHub Actions generation workflow. Measure in Lighthouse after deployment before asserting an LCP gain. The desktop image and other images are unchanged.
