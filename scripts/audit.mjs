@@ -249,6 +249,24 @@ for(const [name,budget] of [['roznex-hero-960.webp',75000],['roznex-hero-1280.we
   else ok(name+' is '+Math.round(size/1024)+' KiB');
 }
 
+
+/* Portfolio image budget and responsive markup checks. */
+for(const homePath of ['index.html','fa/index.html']){
+  const markup=fs.readFileSync(path.join(root,homePath),'utf8');
+  for(const stem of ['industrial','familyos','studymed']){
+    const tags=[...markup.matchAll(/<img[^>]*>/g)].map(m=>m[0]).filter(tag=>tag.includes('project-'+stem+'.webp"'));
+    if(tags.length!==2||tags.some(tag=>!tag.includes(' srcset=')||!tag.includes('project-'+stem+'-480.webp 480w')||!tag.includes('loading="lazy"')))fail(homePath+' missing responsive project previews: '+stem);
+  }
+}
+for(const stem of ['industrial','familyos','studymed']){
+  for(const width of [480,768,960]){
+    const filename='project-'+stem+'-'+width+'.webp';
+    const bytes=fs.statSync(path.join(root,'assets',filename)).size;
+    if(bytes>100000)fail(filename+' is too large for preview');
+    else ok(filename+' '+Math.round(bytes/1024)+' KiB');
+  }
+}
+
 if(failures.length){
   console.error('\nROZNEX audit failed with '+failures.length+' issue(s).');
   process.exit(1);

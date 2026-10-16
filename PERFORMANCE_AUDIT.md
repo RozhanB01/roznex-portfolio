@@ -36,3 +36,15 @@ The approved robot artwork was **not replaced**. `.github/workflows/hero-assets.
 | `roznex-hero-960.webp` | 40,552 | smaller devices |
 
 Both `/` and `/fa/` now use matching `srcset` and `imagesrcset` preload attributes so a browser can fetch one right-sized image for the responsive hero. The CSS crop, appearance, accessible label and face-hotspot motion remain the same. Image files carry no upscaling and have been committed by an audited GitHub Actions generation workflow. Measure in Lighthouse after deployment before asserting an LCP gain. The desktop image and other images are unchanged.
+
+## Responsive portfolio image previews — October 16, 2026
+
+Lighthouse mobile identified nonresponsive project preview images as an avoidable data transfer. Generated derivatives are made from the **unchanged original project artwork**, using Pillow, in `.github/workflows/project-thumbnails.yml`.
+
+| Image | Original bytes | 480px bytes | 768px bytes | 960px bytes |
+| --- | ---: | ---: | ---: | ---: |
+| Industrial | 199,416 | 27,998 | 61,762 | 88,710 |
+| FamilyOS | 88,868 | 16,392 | 30,936 | 40,522 |
+| Studymed | 94,284 | 18,322 | 33,578 | 44,850 |
+
+Both homepages use responsive `srcset` on the project tiles and contact previews. The device chooses resolution based on CSS size and pixel ratio. CSS, visual crop and original files remain unchanged. Do not treat smaller transfer sizes as proof of a specific Lighthouse score; compare multiple runs.
