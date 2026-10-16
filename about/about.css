@@ -106,3 +106,8 @@ body[dir="rtl"] .prose li{
     font-size:1.42rem!important
   }
 }
+
+/* Readable profile editorial and FAQ content */
+.prose h3{font-size:clamp(1.04rem,1.4vw,1.27rem);font-weight:650;line-height:1.6;margin:1.7rem 0 .4rem}
+.prose p a{text-underline-offset:.22em;text-decoration-thickness:1px}
+.prose a:focus-visible,.side a:focus-visible{outline:2px solid currentColor;outline-offset:4px}
