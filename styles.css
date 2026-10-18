@@ -1604,3 +1604,21 @@ a:focus-visible,button:focus-visible{outline:3px solid #a77a45;outline-offset:4p
 @media(prefers-reduced-motion:reduce){
   body.fa .hero-media img,body.fa .glass-card,body.fa .project-feature,body.fa .project-tile{transition:none!important;animation:none!important}
 }
+
+
+/* Conversion-first mobile hierarchy: web design first, clear service scanning */
+@media(max-width:760px){
+  body.fa .glass-panels .card-web{order:1}
+  body.fa .glass-panels .card-seo{order:2}
+  body.fa .glass-panels .card-ai{order:3}
+  body.fa .glass-panels .card-3d{order:4}
+  body.fa .glass-card{min-height:9.2rem}
+  body.fa .glass-card>span{display:block;max-width:100%;text-wrap:balance}
+  body.fa .glass-card p{max-width:100%}
+  body.fa .hero-buttons .button:active,body.fa .glass-card:active{transform:scale(.985)!important}
+}
+@media(max-width:420px){
+  body.fa .glass-panels{grid-template-columns:1fr 1fr}
+  body.fa .glass-card{min-height:9.4rem}
+  body.fa .glass-card p{font-size:.71rem}
+}
