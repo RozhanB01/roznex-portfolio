@@ -1512,3 +1512,26 @@ body.fa .section-head h2{text-wrap:balance}
   body.fa .glass-panels{grid-template-columns:1fr 1fr}
   body.fa .glass-card{min-height:10.2rem}
 }
+
+
+/* Persian mobile usability and editorial finish */
+@media(max-width:760px){
+  body.fa .glass-card>span{font-family:Vazirmatn,sans-serif;font-size:.94rem;font-weight:700;line-height:1.8}
+  body.fa .glass-card p{font-size:.74rem;line-height:1.95}
+  body.fa .hero-copy .micro-label{max-width:100%;overflow-wrap:anywhere}
+  body.fa .hero-description{overflow-wrap:break-word}
+  body.fa .hero-buttons .button{line-height:1.7}
+  body.fa .topbar{gap:.5rem}
+  body.fa .logo{letter-spacing:.12em;white-space:nowrap}
+  body.fa .lang{white-space:nowrap}
+  body.fa .mobile-nav a{font-family:Vazirmatn,sans-serif;font-size:.9rem}
+  body.fa .project-meta,body.fa .project-meta-editorial{min-width:0}
+  body.fa .project-meta h3{overflow-wrap:anywhere}
+  body.fa .contact-actions .button{min-height:3rem}
+}
+@media(max-width:380px){
+  body.fa .topbar{padding-inline:.9rem}
+  body.fa .top-actions{gap:.2rem}
+  body.fa .glass-card>span{font-size:.86rem}
+  body.fa .glass-card p{font-size:.7rem}
+}
