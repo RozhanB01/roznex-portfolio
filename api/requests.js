@@ -292,7 +292,15 @@ module.exports = async function handler(req, res) {
         providerId: notification.id || null,
         reason: notification.sent ? null : notification.reason || 'email_delivery_failed'
       };
-      await saveRequests(blob, requests);
+      try {
+        await saveRequests(blob, requests);
+      } catch (error) {
+        // The request was already persisted before attempting email delivery.
+        // Do not return 500 and encourage a duplicate customer submission.
+        console.error('ROZNEX request notification metadata write error', {
+          name: error?.name, message: error?.message
+        });
+      }
 
       return json(res, 201, { ok: true, id: request.id, notified: Boolean(notification.sent) });
     }
