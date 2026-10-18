@@ -1414,3 +1414,73 @@ body.fa .contact-copy h2{
   .glass-card>span{font-size:1.2rem}
   .glass-card p{font-size:.74rem;line-height:1.8}
 }
+
+
+/* 2026-10: Persian-first agency layout — deliberate responsive hero */
+body.fa .hero h1{line-height:1.28!important;letter-spacing:0!important}
+body.fa .hero h1 span{font-weight:700}
+body.fa .hero h1 .thin{font-weight:500}
+body.fa .hero-description{font-size:clamp(.85rem,1.1vw,1rem);line-height:2;color:#514b44;max-width:38rem}
+body.fa .fa-line{font-size:clamp(.92rem,1.3vw,1.12rem);line-height:1.9;color:#342e28}
+body.fa .hero-buttons .button{font-family:Vazirmatn,sans-serif;font-size:.8rem;min-height:3.15rem}
+@media(min-width:761px){
+  body.fa .hero-copy{width:min(43rem,56vw);padding:clamp(2rem,6vh,5rem) 0 0}
+  body.fa .hero h1{font-size:clamp(2.25rem,3.4vw,4.1rem)!important}
+  body.fa .hero:after{background:linear-gradient(270deg,rgba(239,232,223,.97) 0%,rgba(239,232,223,.9) 36%,rgba(239,232,223,.24) 69%,transparent 100%)}
+}
+@media(max-width:760px){
+  body.fa .hero{
+    display:flex;flex-direction:column;min-height:0;
+    padding:6.3rem var(--pad) 2.2rem;
+    background:#f2ebe2;perspective:none
+  }
+  body.fa .hero:after{display:none}
+  body.fa .hero-copy,body.fa .hero-copy.reveal.visible{
+    order:1;width:100%;max-width:40rem;margin-inline:auto;
+    position:relative;padding:0;text-align:right;
+    transform:none!important;opacity:1!important
+  }
+  body.fa .hero-copy:before{display:none!important}
+  body.fa .micro-label{font-size:.68rem;line-height:1.7;margin-bottom:1.05rem}
+  body.fa .hero h1{font-size:clamp(1.7rem,6.9vw,2.55rem)!important;line-height:1.48!important;max-width:100%;overflow-wrap:normal}
+  body.fa .hero h1 span{display:block}
+  body.fa .fa-line{margin:1.2rem 0 .6rem;font-size:.92rem;line-height:1.9}
+  body.fa .hero-description{max-width:38rem;font-size:.85rem;line-height:2.05}
+  body.fa .hero-buttons{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin:1.4rem 0 1.7rem}
+  body.fa .hero-buttons .button{min-width:0;min-height:3rem;padding:.7rem .5rem;gap:.4rem;font-size:.73rem;white-space:normal;text-align:center}
+  body.fa .hero-media{
+    order:2;position:relative;inset:auto;
+    width:100%;height:auto;aspect-ratio:1.45;
+    margin:0 auto 1rem;max-width:44rem;
+    border-radius:1.2rem;overflow:hidden;
+    box-shadow:0 18px 50px rgba(75,54,32,.1);
+    transform:none!important
+  }
+  body.fa .hero-media img{width:100%;height:100%;object-fit:cover;object-position:48% 45%;transform:none!important}
+  body.fa .hero-spatial-scene{display:none}
+  body.fa .glass-panels{order:3;position:relative;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem;inset:auto;max-width:44rem;width:100%;margin-inline:auto}
+  body.fa .glass-card{
+    position:relative!important;inset:auto!important;transform:none!important;
+    width:100%;min-width:0;min-height:9.6rem;padding:1.05rem;
+    border-radius:1rem;border:1px solid rgba(83,67,49,.13);
+    background:#faf7f2;box-shadow:0 8px 28px rgba(61,43,25,.035);
+    color:#27231e;display:flex;flex-direction:column;align-items:flex-start
+  }
+  body.fa .glass-card>span{font-size:1.06rem;font-weight:650;line-height:1.5}
+  body.fa .glass-card p{font-size:.74rem;line-height:1.85;margin:.55rem 0 .7rem;color:#61574d;overflow-wrap:anywhere}
+  body.fa .glass-card>b{margin-top:auto;margin-right:auto;margin-left:0}
+  body.fa .glass-card .mesh,body.fa .glass-card .bars{display:none}
+  body.fa .scroll-cue,body.fa .hero-pages{display:none}
+  body.fa .strip{flex-direction:column;align-items:flex-start;gap:.9rem;padding-block:1.35rem}
+  body.fa .strip p{font-size:.84rem;line-height:1.9}
+  body.fa .strip>div{display:flex;flex-wrap:wrap;gap:.6rem 1rem}
+  body.fa .strip>div span{font-size:.72rem}
+  body.fa .section{overflow-wrap:break-word}
+  body.fa .section-head{gap:1rem}
+}
+@media(max-width:380px){
+  body.fa .hero h1{font-size:1.65rem!important}
+  body.fa .hero-buttons{grid-template-columns:1fr}
+  body.fa .glass-panels{gap:.5rem}
+  body.fa .glass-card{padding:.8rem;min-height:9rem}
+}
