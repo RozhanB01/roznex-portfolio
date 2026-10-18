@@ -5,4 +5,4 @@ Disallow: /admin/
 Disallow: /quote/
 Disallow: /api/
 
-Sitemap: https://roznex-portfolio.vercel.app/sitemap.xml
+Sitemap: https://roznexstudio.ir/sitemap.xml
