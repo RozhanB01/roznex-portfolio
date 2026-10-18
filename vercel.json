@@ -151,5 +151,12 @@
         }
       ]
     }
+  ],
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/fa/",
+      "permanent": false
+    }
   ]
 }
