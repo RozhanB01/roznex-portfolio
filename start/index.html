@@ -153,6 +153,7 @@ form.addEventListener('submit',async e=>{
 
   const button=$('submitRequest');
   button.disabled=true;
+  $('emailFallback')?.remove();
   setStatus('در حال ثبت امن درخواست…');
 
   const payload={
@@ -182,7 +183,7 @@ form.addEventListener('submit',async e=>{
 
     try{localStorage.removeItem(draftKey)}catch(error){}
     $('saveState').textContent='درخواست روی سرور ثبت شد.';
-    setStatus('درخواست شما با شماره '+data.id+' با موفقیت ثبت شد. Roznex پس از بررسی برای مرحله بعد با شما تماس می‌گیرد.');
+    setStatus('درخواست شما با شماره '+data.id+' با موفقیت ثبت شد. '+(data.notified===false?'اعلان ایمیلی خودکار هنوز ارسال نشده، اما درخواست روی سرور ثبت شده است.':'Roznex پس از بررسی برای مرحله بعد با شما تماس می‌گیرد.'));
     button.textContent='درخواست ثبت شد ✓';
   }catch(error){
     const id=requestId();
@@ -203,7 +204,6 @@ form.addEventListener('submit',async e=>{
       'توضیحات: '+(payload.notes||'—')
     ];
     const body=lines.join('\n');
-    try{await navigator.clipboard.writeText(body)}catch(err){}
     const subject='درخواست پروژه ROZNEX — '+id+' — '+payload.project;
     setStatus('ثبت درخواست روی سرور انجام نشد. برای ارسال جایگزین، روی «ارسال با ایمیل» بزنید و پیام را در برنامه ایمیل خود ارسال کنید؛ باز شدن برنامه ایمیل به معنی ارسال موفق نیست.',true);
     const mailto='mailto:rozhanbehrouzi79@gmail.com?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
