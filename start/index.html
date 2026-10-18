@@ -180,7 +180,12 @@ form.addEventListener('submit',async e=>{
       body:JSON.stringify(payload)
     });
     const data=await response.json().catch(()=>({}));
-    if(!response.ok)throw new Error(data.error||'request_failed');
+    if(!response.ok){
+      const failure=new Error(data.error||'request_failed');
+      failure.status=response.status;
+      failure.retryAfter=Number(data.retryAfter||response.headers.get('Retry-After')||0);
+      throw failure;
+    }
 
     try{localStorage.removeItem(draftKey)}catch(error){}
     $('saveState').textContent='درخواست روی سرور ثبت شد.';
@@ -206,7 +211,11 @@ form.addEventListener('submit',async e=>{
     ];
     const body=lines.join('\n');
     const subject='درخواست پروژه ROZNEX — '+id+' — '+payload.project;
-    setStatus('ثبت درخواست روی سرور انجام نشد. برای ارسال جایگزین، روی «ارسال با ایمیل» بزنید و پیام را در برنامه ایمیل خود ارسال کنید؛ باز شدن برنامه ایمیل به معنی ارسال موفق نیست.',true);
+    const rateLimited=error.status===429;
+    const waitMinutes=error.retryAfter>0?Math.ceil(error.retryAfter/60):null;
+    setStatus(rateLimited
+      ? 'تعداد تلاش‌ها بیش از حد مجاز است. '+(waitMinutes?'حدود '+waitMinutes+' دقیقه دیگر دوباره امتحان کنید. ':'کمی بعد دوباره امتحان کنید. ')+'در صورت نیاز می‌توانید از گزینه ارسال با ایمیل استفاده کنید.'
+      : 'تأیید ثبت درخواست روی سرور انجام نشد. ممکن است درخواست قبلاً ذخیره شده باشد؛ قبل از ارسال دوباره، با ما هماهنگ کنید. برای ارسال جایگزین روی «ارسال با ایمیل» بزنید و پیام را در برنامه ایمیل خود ارسال کنید؛ باز شدن برنامه ایمیل به معنی ارسال موفق نیست.',true);
     const mailto='mailto:rozhanbehrouzi79@gmail.com?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
     let fallback=$('emailFallback');
     if(!fallback){
