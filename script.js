@@ -100,7 +100,7 @@ const setLanguage=(fa,animate=false)=>{
 };
 // Distinct, crawlable language URLs keep displayed language in sync with SEO metadata.
 const isPersianHomepage=/^\/fa\/?$/.test(location.pathname);
-const isEnglishHomepage=location.pathname==='/';
+const isEnglishHomepage=/^\/en\/?$/.test(location.pathname);
 // Both page variants are server-rendered in their correct language.
 // Don't scan/modify ~150 already-localized elements during startup.
 const currentHomepageLanguage=isPersianHomepage?'fa':'en';
@@ -113,7 +113,7 @@ lang.addEventListener('click',()=>{
   if(isPersianHomepage||isEnglishHomepage){
     const next=isPersianHomepage?'en':'fa';
     localStorage.setItem('roznex-language',next);
-    location.assign(next==='fa'?'/fa/':'/');
+    location.assign(next==='fa'?'/fa/':'/en/');
     return;
   }
   setLanguage(html.lang!=='fa',true);
