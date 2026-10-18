@@ -242,7 +242,10 @@ module.exports = async function handler(req, res) {
     }
 
     if (req.method !== 'POST') return json(res, 405, { error: 'method_not_allowed' });
+    const contentType = String(req.headers['content-type'] || '').toLowerCase();
+    if (!contentType.startsWith('application/json')) return json(res, 415, { error: 'unsupported_media_type' });
     const body = await readBody(req);
+    if (!body || typeof body !== 'object' || Array.isArray(body)) return json(res, 400, { error: 'invalid_body' });
     const action = clean(body.action, 40);
 
     if (!action) {
