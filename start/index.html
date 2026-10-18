@@ -152,6 +152,7 @@ form.addEventListener('submit',async e=>{
   if(!form.reportValidity())return;
 
   const button=$('submitRequest');
+  if(button.disabled)return;
   button.disabled=true;
   $('emailFallback')?.remove();
   setStatus('در حال ثبت امن درخواست…');
