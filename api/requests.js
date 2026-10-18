@@ -159,9 +159,20 @@ async function recordAcceptedRequest(blob, req, current) {
 async function readBody(req) {
   if (req.body && typeof req.body === 'object') return req.body;
   const chunks = [];
-  for await (const chunk of req) chunks.push(Buffer.from(chunk));
+  let totalBytes = 0;
+  for await (const chunk of req) {
+    const part = Buffer.from(chunk);
+    totalBytes += part.length;
+    if (totalBytes > 65536) {
+      const error = new Error('request_too_large');
+      error.status = 413;
+      throw error;
+    }
+    chunks.push(part);
+  }
   const raw = Buffer.concat(chunks).toString('utf8');
-  return raw ? JSON.parse(raw) : {};
+  try { return raw ? JSON.parse(raw) : {}; }
+  catch { const error = new Error('invalid_json'); error.status = 400; throw error; }
 }
 
 async function loadRequests(blob) {
@@ -330,6 +341,8 @@ module.exports = async function handler(req, res) {
 
     return json(res, 400, { error: 'unknown_action' });
   } catch (error) {
+    if (error?.status === 413) return json(res, 413, { error: 'request_too_large' });
+    if (error?.status === 400) return json(res, 400, { error: 'invalid_json' });
     console.error('ROZNEX requests API error', { name: error?.name, message: error?.message });
     return json(res, 500, { error: 'server_error' });
   }
