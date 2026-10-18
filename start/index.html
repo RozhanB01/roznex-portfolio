@@ -205,8 +205,18 @@ form.addEventListener('submit',async e=>{
     const body=lines.join('\n');
     try{await navigator.clipboard.writeText(body)}catch(err){}
     const subject='درخواست پروژه ROZNEX — '+id+' — '+payload.project;
-    setStatus('ثبت مستقیم سرور در دسترس نبود؛ نسخه پشتیبان ایمیل آماده شده تا درخواست شما از دست نرود.',true);
-    setTimeout(()=>{location.href='mailto:rozhanbehrouzi79@gmail.com?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body)},350);
+    setStatus('ثبت درخواست روی سرور انجام نشد. برای ارسال جایگزین، روی «ارسال با ایمیل» بزنید و پیام را در برنامه ایمیل خود ارسال کنید؛ باز شدن برنامه ایمیل به معنی ارسال موفق نیست.',true);
+    const mailto='mailto:rozhanbehrouzi79@gmail.com?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+    let fallback=$('emailFallback');
+    if(!fallback){
+      fallback=document.createElement('a');
+      fallback.id='emailFallback';
+      fallback.className='secondary';
+      fallback.style.cssText='display:inline-block;margin-top:.6rem;text-decoration:none';
+      fallback.textContent='ارسال با ایمیل ←';
+      $('status').insertAdjacentElement('afterend',fallback);
+    }
+    fallback.href=mailto;
     button.disabled=false;
   }
 });
