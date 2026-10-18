@@ -65,7 +65,7 @@ async function sendProjectRequestEmail(request) {
           </div>`).join('')}
       </div>
       <p style="margin:22px 0 0;font-size:12px;color:#796f66">برای مدیریت درخواست وارد پنل ROZNEX شو.</p>
-      <a href="https://roznex-portfolio.vercel.app/admin" style="display:inline-block;margin-top:10px;padding:10px 16px;border-radius:999px;background:#171817;color:#fff;text-decoration:none;font-size:13px">باز کردن پنل مدیریت</a>
+      <a href="https://roznexstudio.ir/admin" style="display:inline-block;margin-top:10px;padding:10px 16px;border-radius:999px;background:#171817;color:#fff;text-decoration:none;font-size:13px">باز کردن پنل مدیریت</a>
     </div>
   </body></html>`;
 
