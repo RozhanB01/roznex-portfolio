@@ -1380,3 +1380,37 @@ body.fa .contact-copy h2{
 @media(prefers-reduced-motion:reduce){
   .reveal{filter:none!important;transition:none!important}
 }
+
+
+/* ROZNEX mobile refinement: quiet typographic arrows and compact proof links */
+.glass-card>b,.proof-band b,.project-open{
+  font-family:Arial,Helvetica,sans-serif!important;
+  font-variant-emoji:text;
+  font-weight:400;
+}
+.glass-card>b{
+  width:2rem;height:2rem;border-radius:50%;
+  border:1px solid rgba(40,36,31,.2);
+  background:rgba(255,253,248,.82);
+  color:#27231f;font-size:1.15rem;
+  box-shadow:none;
+  transition:background .2s,transform .2s;
+}
+.glass-card:hover>b{background:#fff;transform:translateX(3px)}
+.proof-band b{display:inline-grid;place-items:center;width:2rem;height:2rem;border:1px solid rgba(36,32,27,.16);border-radius:50%;background:rgba(255,255,255,.6);font-size:1.1rem}
+@media(max-width:560px){
+  .proof-band{display:grid;grid-template-columns:1fr 1fr;gap:1px;padding:1px;background:rgba(39,34,28,.12);border:0}
+  .proof-band>a,.proof-band>a:nth-child(2n){
+    min-height:9.25rem;padding:1.1rem;
+    border:0!important;border-radius:0;
+    background:#f4eee6;
+    gap:.55rem;
+  }
+  .proof-band>a:hover{background:#faf6f0}
+  .proof-band span{font-size:.64rem;letter-spacing:0;line-height:1.6}
+  .proof-band strong{font-size:.82rem;line-height:1.75;max-width:none}
+  .proof-band b{margin-top:auto;width:1.8rem;height:1.8rem;font-size:1rem}
+  .glass-card{border-radius:1.15rem}
+  .glass-card>span{font-size:1.2rem}
+  .glass-card p{font-size:.74rem;line-height:1.8}
+}
