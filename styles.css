@@ -1728,3 +1728,80 @@ a:focus-visible,button:focus-visible{outline:3px solid #a77a45;outline-offset:4p
     mask-image:linear-gradient(to bottom,transparent 0%,#000 12%,#000 82%,transparent 100%);
   }
 }
+
+
+/* ROZNEX hero v3 — approved open-canvas reference, desktop + mobile */
+@media(min-width:1025px){
+  body.fa .hero{
+    direction:ltr;display:grid!important;grid-template-columns:minmax(0,43%) minmax(0,57%);
+    grid-template-rows:minmax(0,1fr) auto;align-items:center;
+    min-height:clamp(760px,94svh,970px);padding:7.5rem clamp(2.25rem,5.4vw,6.5rem) 6.5rem;
+    column-gap:0!important;isolation:isolate;overflow:hidden;
+    background:radial-gradient(ellipse at 75% 36%,#fff8ee 0%,#efe7dc 58%,#e9dfd3 100%)!important;
+  }
+  body.fa .hero-media{
+    position:absolute!important;inset:0 0 0 auto!important;z-index:0!important;
+    width:69%;height:100%!important;grid-column:auto;grid-row:auto;
+    overflow:hidden!important;border:0!important;border-radius:0!important;
+    -webkit-mask-image:linear-gradient(to right,transparent 0%,rgba(0,0,0,.55) 13%,#000 35%),linear-gradient(to bottom,#000 0%,#000 83%,transparent 100%);
+    -webkit-mask-composite:source-in;
+    mask-image:linear-gradient(to right,transparent 0%,#000 32%),linear-gradient(to bottom,#000 0%,#000 82%,transparent 100%);
+    mask-composite:intersect;
+    box-shadow:none!important;pointer-events:none;
+  }
+  body.fa .hero-media img{object-fit:cover!important;object-position:49% 47%!important;transform:none!important}
+  body.fa .hero-copy,body.fa .hero-copy.reveal.visible{
+    grid-column:1;grid-row:1;z-index:5;width:100%!important;max-width:650px;
+    padding:0!important;margin:0!important;align-self:center;
+    text-align:right;direction:rtl;transform:none!important;opacity:1!important;
+  }
+  body.fa .hero h1{font-size:clamp(2.45rem,3.75vw,4.65rem)!important;line-height:1.36!important}
+  body.fa .hero .fa-line{font-size:clamp(.94rem,1.2vw,1.14rem)}
+  body.fa .hero .hero-description{font-size:clamp(.83rem,.97vw,.96rem)}
+  body.fa .hero .glass-panels{
+    display:grid!important;position:relative!important;inset:auto!important;
+    grid-column:1 / -1;grid-row:2;z-index:8;
+    grid-template-columns:repeat(4,minmax(0,1fr));gap:.8rem;
+    width:min(800px,65%);margin:2.2rem auto 0 0;
+    pointer-events:auto;direction:rtl;
+  }
+  body.fa .hero .glass-card{
+    display:flex;flex-direction:column;align-items:flex-start;
+    position:relative!important;inset:auto!important;width:100%!important;
+    min-width:0;min-height:142px;padding:1.15rem;
+    color:#24201d;background:rgba(255,252,248,.82)!important;
+    border:1px solid rgba(255,255,255,.9);border-radius:1.15rem;
+    box-shadow:0 14px 35px rgba(69,47,25,.065);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    transform:none!important;
+  }
+  body.fa .hero .glass-card>span{font:700 .96rem/1.6 Vazirmatn,sans-serif}
+  body.fa .hero .glass-card p{color:#756b61;font-size:.72rem;line-height:1.8;margin:.4rem 0 .6rem}
+  body.fa .hero .glass-card>b{margin-top:auto;margin-right:auto;margin-left:0}
+  body.fa .hero .glass-card .mesh,body.fa .hero .glass-card .bars{display:none}
+  body.fa .hero .signature{display:none!important}
+  body.fa .hero .hero-spatial-scene{display:none!important}
+}
+@media(min-width:761px) and (max-width:1024px){
+  body.fa .hero{min-height:700px;padding:7rem 2rem 3rem}
+  body.fa .hero .glass-panels{
+    display:grid!important;position:relative!important;inset:auto!important;
+    grid-column:1 / -1;grid-row:2;z-index:8;
+    grid-template-columns:repeat(4,minmax(0,1fr));gap:.65rem;margin-top:2rem
+  }
+  body.fa .hero .glass-card{
+    position:relative!important;inset:auto!important;min-width:0;width:100%;
+    min-height:8rem;background:rgba(255,251,246,.88)!important;color:#27221e;
+    padding:.8rem;border-radius:1rem;transform:none!important
+  }
+  body.fa .hero .glass-card p{color:#61564d;line-height:1.8}
+  body.fa .hero .glass-card .mesh,body.fa .hero .glass-card .bars{display:none}
+}
+@media(max-width:760px){
+  body.fa .hero{background:linear-gradient(#f2eae0,#ede4d9)!important}
+  body.fa .hero-media{
+    -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 10%,#000 86%,transparent 100%)!important;
+    mask-image:linear-gradient(to bottom,transparent 0%,#000 10%,#000 86%,transparent 100%)!important;
+  }
+  body.fa .hero .glass-card{background:rgba(255,252,248,.92)!important;border-color:rgba(125,99,71,.12)}
+}
