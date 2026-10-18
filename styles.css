@@ -1805,3 +1805,40 @@ a:focus-visible,button:focus-visible{outline:3px solid #a77a45;outline-offset:4p
   }
   body.fa .hero .glass-card{background:rgba(255,252,248,.92)!important;border-color:rgba(125,99,71,.12)}
 }
+
+
+/* Approved hero refinements: balanced editorial composition and safe responsive fallbacks */
+@media(min-width:1025px){
+  body.fa .hero{
+    grid-template-columns:minmax(0,44%) minmax(0,56%);
+    padding-bottom:clamp(2rem,5vh,4rem);
+  }
+  body.fa .hero:before{
+    content:"";position:absolute;z-index:2;pointer-events:none;
+    inset:0 auto 0 0;width:51%;
+    background:linear-gradient(90deg,rgba(241,233,223,.93) 0%,rgba(241,233,223,.73) 52%,transparent 100%);
+  }
+  body.fa .hero .hero-copy{z-index:6}
+  body.fa .hero .glass-panels{
+    width:min(960px,79%);gap:.85rem;margin-top:1rem;z-index:9;
+  }
+  body.fa .hero .glass-card{min-height:132px}
+  body.fa .hero .glass-card:hover{
+    background:rgba(255,253,249,.96)!important;
+    box-shadow:0 20px 46px rgba(69,47,25,.12);
+  }
+  body.fa .hero .hero-buttons .button{min-height:3.3rem}
+  body.fa .hero .hero-description{max-width:35rem}
+}
+@media(min-width:761px) and (max-width:1024px){
+  body.fa .hero{grid-template-rows:minmax(0,1fr) auto;min-height:720px}
+  body.fa .hero .glass-panels{direction:rtl}
+  body.fa .hero .glass-card>span{font:700 .82rem/1.6 Vazirmatn,sans-serif}
+  body.fa .hero .glass-card p{font-size:.7rem}
+}
+@media(max-width:760px){
+  body.fa .hero{padding-bottom:2.6rem}
+  body.fa .hero .glass-panels{margin-top:.25rem}
+  body.fa .hero .glass-card>span{font-family:Vazirmatn,sans-serif}
+  body.fa .hero .glass-card:focus-visible{outline-offset:2px}
+}
