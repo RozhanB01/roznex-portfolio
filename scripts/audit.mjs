@@ -418,6 +418,22 @@ if(styles.includes('roznex-cinematic-poster.webp')||
    !styles.includes('roznex-cinematic-stream-poster.webp'))
  fail('Duplicate or mismatched cinematic poster causes unnecessary transfer');
 
+
+/* Mobile improvements are isolated to mobile breakpoints and must preserve desktop. */
+const responsiveCss=fs.readFileSync(path.join(root,'styles.css'),'utf8');
+if(!responsiveCss.includes('ROZNEX mobile art direction v1')||
+   !responsiveCss.includes('max-width:540px')||
+   !responsiveCss.includes('.topbar:not(.scrolled) .logo')||
+   !responsiveCss.includes('.glass-panels,body.fa .glass-panels{grid-template-columns:minmax(0,1fr)!important}')||
+   !responsiveCss.includes('.cinema-entry .cinema-atmosphere')){
+  fail('Missing mobile visual correction or brand-safe responsive rules');
+}
+const qaWorkflow=fs.readFileSync(path.join(root,'.github/workflows/hero-browser-qa.yml'),'utf8');
+if(!qaWorkflow.includes('node scripts/mobile-visual-audit.mjs')||
+   !fs.existsSync(path.join(root,'scripts/mobile-visual-audit.mjs'))){
+  fail('Mobile visual browser regression tests must be present');
+}
+
 if(failures.length){
   console.error('\nROZNEX audit failed with '+failures.length+' issue(s).');
   process.exit(1);

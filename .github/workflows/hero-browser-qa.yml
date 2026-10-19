@@ -39,3 +39,14 @@ jobs:
           done
       - name: Check mobile and desktop video playback, sound activation and scroll continuation
         run: node scripts/hero-browser-audit.mjs
+      - name: Audit mobile responsive layout, menu and section flow
+        if: always()
+        run: node scripts/mobile-visual-audit.mjs
+      - name: Upload mobile layout screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: roznex-mobile-layout-${{ github.run_number }}
+          path: reports/mobile-visual/*.png
+          retention-days: 14
+          if-no-files-found: warn
