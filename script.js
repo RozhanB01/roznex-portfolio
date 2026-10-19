@@ -578,24 +578,35 @@ if(cinemaEntry){
  const play=cinemaEntry.querySelector('[data-cinema-pause]');
  const sound=cinemaEntry.querySelector('[data-cinema-audio]');
  const playIcon=cinemaEntry.querySelector('[data-cinema-play-icon]');
- const soundIcon=cinemaEntry.querySelector('[data-cinema-audio-icon]');
+ const soundLabel=cinemaEntry.querySelector('[data-cinema-sound-label]');
  let manuallyPaused=false;
- video.muted=true;video.defaultMuted=true;
+ video.muted=true;
  const sync=()=>{
   play.setAttribute('aria-label',video.paused?play.dataset.playLabel:play.dataset.pauseLabel);
   play.setAttribute('aria-pressed',String(!video.paused));
   playIcon.textContent=video.paused?'▶':'Ⅱ';
   sound.setAttribute('aria-label',video.muted?sound.dataset.muteLabel:sound.dataset.unmuteLabel);
   sound.setAttribute('aria-pressed',String(!video.muted));
-  soundIcon.textContent=video.muted?'♪':'♫';
+  soundLabel.textContent=video.muted?sound.dataset.muteLabel:sound.dataset.unmuteLabel;
  };
  play.addEventListener('click',()=>{
   if(video.paused){manuallyPaused=false;video.play().catch(sync)}
   else{manuallyPaused=true;video.pause()}sync();
  });
  sound.addEventListener('click',()=>{
-  video.muted=!video.muted;
-  if(!video.muted&&video.paused&&!manuallyPaused)video.play().catch(()=>{});
+  if(video.muted){
+   // Browsers permit audible playback only after this direct user gesture.
+   video.defaultMuted=false;
+   video.muted=false;
+   try{video.volume=1}catch{}
+   manuallyPaused=false;
+   const started=video.play();
+   if(started&&typeof started.catch==='function')started.catch(()=>{
+    video.muted=true;video.defaultMuted=true;sync();
+   });
+  }else{
+   video.muted=true;video.defaultMuted=true;
+  }
   sync();
  });
  video.addEventListener('play',sync);

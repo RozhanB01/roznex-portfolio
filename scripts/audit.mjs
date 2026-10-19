@@ -250,7 +250,7 @@ for(const homepage of ['index.html','fa/index.html','en/index.html']){
   const prefix=homepage==='index.html'?'./':'../';
   if(!page.includes(prefix+'assets/roznex-hero-960.webp 960w')||
      !page.includes(prefix+'assets/roznex-hero-1280.webp 1280w')||
-     !page.includes('roznex-cinematic-hero-mobile.mp4')||
+     !page.includes('roznex-cinematic-hero-mobile-hq.mp4')||
      !page.includes('rel="preload" as="image" href="'+prefix+'assets/roznex-cinematic-poster.webp"')){
     fail(homepage+' must retain responsive original hero and preload cinematic poster');
   }
@@ -386,18 +386,24 @@ for(const page of ['index.html','fa/index.html','en/index.html']){
  const main=html.split('<main id="main-content">')[1]||'';
  if(!main.trimStart().startsWith('<section class="cinema-entry"'))fail(page+' cinematic entry not first');
  if(main.indexOf('class="hero" id="studio-experience"')<main.indexOf('class="cinema-entry"'))fail(page+' old hero not preserved below video');
- if(!html.includes('roznex-cinematic-hero-mobile.mp4')||!html.includes('roznex-cinematic-hero.mp4')||!html.includes('roznex-cinematic-poster.webp'))fail(page+' missing video sources');
+ if(!html.includes('roznex-cinematic-hero-mobile-hq.mp4')||!html.includes('roznex-cinematic-hero-audiofix.mp4')||!html.includes('roznex-cinematic-poster.webp'))fail(page+' missing video sources');
  if(!html.includes('autoplay muted playsinline loop')||!html.includes('href="#studio-experience"'))fail(page+' video playback and continuation broken');
  if((html.match(/<h1\b/g)||[]).length!==1)fail(page+' duplicate H1');
 }
-for(const [name,max] of [['roznex-cinematic-hero.mp4',12500000],['roznex-cinematic-hero-mobile.mp4',4200000],['roznex-cinematic-poster.webp',160000]]){
+for(const [name,max] of [['roznex-cinematic-hero-audiofix.mp4',12500000],['roznex-cinematic-hero-mobile-hq.mp4',6500000],['roznex-cinematic-poster.webp',160000]]){
  const p=path.join(root,'assets',name);
  if(!fs.existsSync(p)){fail('missing hero asset '+name);continue}
  const n=fs.statSync(p).size;
  if(n>max)fail(name+' exceeds budget '+n);else ok(name+' '+Math.round(n/1024)+' KiB');
 }
-if(!runtime.includes('video.defaultMuted=true')||!runtime.includes('IntersectionObserver(entries=>'))fail('cinema player controls missing');
+if(!runtime.includes('video.defaultMuted=false')||!runtime.includes('const started=video.play();')||!runtime.includes('IntersectionObserver(entries=>'))fail('cinema sound unlock controls missing');
 
+for(const page of ['index.html','fa/index.html','en/index.html']){
+ const html=fs.readFileSync(path.join(root,page),'utf8');
+ if(!html.includes('data-cinema-sound-label')||!html.includes('cinema-sound-control')||
+    !html.includes('styles.css?v=cinematic-hq-sound-2')||
+    !html.includes('script.js?v=cinematic-hq-sound-2'))fail(page+' lacks sound control and matching asset version');
+}
 if(failures.length){
   console.error('\nROZNEX audit failed with '+failures.length+' issue(s).');
   process.exit(1);

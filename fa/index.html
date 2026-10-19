@@ -40,7 +40,7 @@
   <!-- Keep ROZNEX typography without putting a third-party stylesheet on the first-paint critical path. -->
   <link href="https://fonts.googleapis.com/css2?family=Allura&family=Manrope:wght@300..800&family=Vazirmatn:wght@300..700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <noscript><link href="https://fonts.googleapis.com/css2?family=Allura&family=Manrope:wght@300..800&family=Vazirmatn:wght@300..700&display=swap" rel="stylesheet"></noscript>
-  <link rel="stylesheet" href="../styles.css?v=cinema-20261019">
+  <link rel="stylesheet" href="../styles.css?v=cinematic-hq-sound-2">
   <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Person","@id":"https://roznexstudio.ir/#rozhan","name":"Rozhan Behrouzi","jobTitle":"Web designer and developer, founder of ROZNEX","url":"https://roznexstudio.ir/about/fa/rozhan-behrouzi/","sameAs":["https://github.com/RozhanB01"],"worksFor":{"@id":"https://roznexstudio.ir/#studio"},"alternateName":["روژان بهروزی","Rozhan Behrouzi","روژان"],"image":"https://roznexstudio.ir/assets/rozhan-about-original.png","knowsAbout":["Web design","Web engineering","AI agents","3D web","Technical SEO"]},{"@type":"ProfessionalService","@id":"https://roznexstudio.ir/#studio","name":"ROZNEX","url":"https://roznexstudio.ir/","founder":{"@id":"https://roznexstudio.ir/#rozhan"},"description":"Digital studio connecting design, web engineering, AI systems, immersive 3D and technical SEO.","areaServed":"Worldwide","knowsAbout":["Artificial intelligence","Web development","3D web experiences","Technical SEO"]},{"@type":"WebSite","@id":"https://roznexstudio.ir/#website","url":"https://roznexstudio.ir/","name":"ROZNEX","inLanguage":["en","fa"]}]}</script>
 </head>
 <body class="fa">
@@ -79,8 +79,8 @@
     <section class="cinema-entry" data-cinema-entry aria-label="ورود سینمایی به ROZNEX">
       <div class="cinema-video-layer" aria-hidden="true">
         <video data-cinema-video autoplay muted playsinline loop preload="auto" poster="../assets/roznex-cinematic-poster.webp">
-          <source src="../assets/roznex-cinematic-hero-mobile.mp4" media="(max-width:760px)" type="video/mp4">
-          <source src="../assets/roznex-cinematic-hero.mp4" type="video/mp4">
+          <source src="../assets/roznex-cinematic-hero-mobile-hq.mp4" media="(max-width:760px)" type="video/mp4">
+          <source src="../assets/roznex-cinematic-hero-audiofix.mp4" type="video/mp4">
         </video>
       </div>
       <div class="cinema-atmosphere" aria-hidden="true"></div>
@@ -93,7 +93,7 @@
         </div>
         <div class="cinema-controls" role="group" aria-label="کنترل‌های ویدیو">
           <button type="button" class="cinema-control" data-cinema-pause data-play-label="پخش ویدیو" data-pause-label="توقف ویدیو" aria-label="توقف ویدیو"><span data-cinema-play-icon aria-hidden="true">Ⅱ</span></button>
-          <button type="button" class="cinema-control" data-cinema-audio data-mute-label="پخش صدا" data-unmute-label="بی‌صدا کردن" aria-label="پخش صدا" aria-pressed="false"><span data-cinema-audio-icon aria-hidden="true">♪</span></button>
+          <button type="button" class="cinema-control cinema-sound-control" data-cinema-audio data-mute-label="فعال‌کردن صدا" data-unmute-label="قطع صدا" aria-label="فعال‌کردن صدا" aria-pressed="false" title="برای شنیدن صدای ربات لمس کنید"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path data-cinema-sound-waves d="M16 9a4 4 0 0 1 0 6m3-9a8 8 0 0 1 0 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span data-cinema-sound-label>فعال‌کردن صدا</span></button>
         </div>
       </div>
       <a class="cinema-enter" href="#studio-experience"><span>ادامه تجربه ROZNEX</span><span aria-hidden="true">↓</span></a>
@@ -355,6 +355,6 @@
     </section>
     </main>
 
-  <script src="../script.js?v=cinema-20261019"></script>
+  <script src="../script.js?v=cinematic-hq-sound-2"></script>
 </body>
 </html>

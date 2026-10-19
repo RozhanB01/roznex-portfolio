@@ -1892,3 +1892,11 @@ body.fa .cinema-intro{text-align:right}body.fa .cinema-bottom{direction:rtl}
   .cinema-enter{bottom:.85rem;font-size:.61rem}
 }
 @media(prefers-reduced-motion:reduce){.cinema-video-layer video{display:none}.cinema-depth{transform:none!important;transition:none}.cinema-enter span:last-child{animation:none}}
+
+/* Clear opt-in audio control for Safari/Chrome autoplay restrictions. */
+.cinema-sound-control{display:inline-flex;align-items:center;justify-content:center;gap:.55rem;width:auto;min-width:9.5rem;padding:0 .95rem;border-radius:999px;background:rgba(12,20,23,.77);font:600 .75rem/1.4 Vazirmatn,Manrope,sans-serif;white-space:nowrap}
+.cinema-sound-control svg{width:1.2rem;height:1.2rem;flex:none}
+.cinema-sound-control [data-cinema-sound-waves]{opacity:.22;transition:opacity .2s}
+.cinema-sound-control[aria-pressed="true"] [data-cinema-sound-waves]{opacity:1}
+.cinema-sound-control:hover{background:rgba(9,16,20,.92)}
+@media(max-width:760px){.cinema-bottom{flex-direction:column;align-items:flex-start;gap:.75rem}.cinema-intro{max-width:100%}.cinema-controls{align-self:flex-start}.cinema-sound-control{height:2.6rem;width:auto;min-width:9rem;font-size:.73rem;padding:0 .85rem}}
