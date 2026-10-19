@@ -1855,7 +1855,7 @@ body.fa .about .about-visual .about-visual-overlay strong{text-align:end}
 @media(max-width:760px){.about .about-visual{order:2;width:min(100%,27rem);min-height:0!important;aspect-ratio:auto!important}.about .about-visual .about-visual-overlay{flex-wrap:wrap}.about .about-visual img{aspect-ratio:1/1}}
 
 /* User-approved cinematic entrance — standalone full-screen video BEFORE the old hero. */
-.cinema-entry{position:relative;isolation:isolate;overflow:hidden;width:100%;height:100svh;min-height:0;background:#e9e0d3 url('/assets/roznex-cinematic-poster.webp') center/cover no-repeat;color:#fff;perspective:1400px}
+.cinema-entry{position:relative;isolation:isolate;overflow:hidden;width:100%;height:100svh;min-height:0;background:#e9e0d3 url('/assets/roznex-cinematic-stream-poster.webp') center/cover no-repeat;color:#fff;perspective:1400px}
 .cinema-video-layer,.cinema-video-layer video,.cinema-atmosphere,.cinema-depth{position:absolute;inset:0;width:100%;height:100%}
 .cinema-video-layer{z-index:0;overflow:hidden;pointer-events:none}
 .cinema-video-layer video{object-fit:cover;object-position:50% 48%;display:block;background:#ded5ca}
