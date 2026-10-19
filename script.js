@@ -591,14 +591,24 @@ if(cinemaEntry){
      if(!video.muted&&!userEnabledSound){autoSoundAllowed=false;silentPlay();}
    });
  };
- // Browsers that grant audible autoplay will play with sound immediately.
- // Otherwise resume instantly muted; first real pointer/key gesture unmutes.
- video.muted=false;
- const initial=video.play();
- if(initial&&typeof initial.then==='function'){
-   initial.then(()=>{autoSoundAllowed=!video.muted;}).catch(()=>{
-     autoSoundAllowed=false;silentPlay();
-   });
+ // Prefer the immediate poster paint to decoding a heavy video during first render.
+ // Playback remains fully automatic as soon as the first frame is painted.
+ const beginAfterPaint=()=>{
+   if(reduceMotion||document.hidden)return;
+   const policy=typeof navigator.getAutoplayPolicy==='function'?navigator.getAutoplayPolicy(video):'allowed-muted';
+   video.muted=policy!=='allowed';
+   const initial=video.play();
+   if(initial&&typeof initial.then==='function'){
+     initial.then(()=>{autoSoundAllowed=!video.muted;}).catch(()=>{
+       autoSoundAllowed=false;silentPlay();
+     });
+   }
+ };
+ requestAnimationFrame(()=>requestAnimationFrame(beginAfterPaint));
+ if(typeof video.requestVideoFrameCallback==='function'){
+   video.requestVideoFrameCallback(()=>cinemaEntry.classList.add('cinema-live'));
+ }else{
+   video.addEventListener('playing',()=>cinemaEntry.classList.add('cinema-live'),{once:true});
  }
  video.addEventListener('pause',()=>{
    // Safari may pause an autoplay video when script unmutes it.

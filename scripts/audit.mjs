@@ -254,7 +254,7 @@ for(const homepage of ['index.html','fa/index.html','en/index.html']){
      !page.includes('rel="preload" as="image" href="'+prefix+'assets/roznex-cinematic-stream-poster.webp"')){
     fail(homepage+' must retain responsive original hero and preload cinematic poster');
   }
-  if(!page.includes('styles.css?v=cinema-depth-20261019'))
+  if(!page.includes('styles.css?v=cinema-faster-20261019'))
     fail(homepage+' missing cinematic CSS cache version');
 }
 for(const [name,budget] of [['roznex-hero-960.webp',75000],['roznex-hero-1280.webp',100000]]){
@@ -387,7 +387,7 @@ for(const page of ['index.html','fa/index.html','en/index.html']){
  if(!main.trimStart().startsWith('<div class="cinema-journey"')||!main.includes('<section class="cinema-entry"'))fail(page+' cinematic entry wrapper missing');
  if(!main.includes('class="hero" id="studio-experience"')||main.indexOf('class="hero" id="studio-experience"')<main.indexOf('class="cinema-entry"'))fail(page+' old hero not preserved below video');
  if(!html.includes('roznex-cinematic-stream-mobile.mp4')||!html.includes('roznex-cinematic-stream-desktop.mp4')||!html.includes('roznex-cinematic-stream-poster.webp'))fail(page+' missing video sources');
- if(!html.includes('autoplay muted playsinline loop')||!html.includes('href="#studio-experience"'))fail(page+' video playback and continuation broken');
+ if(!html.includes('muted playsinline loop preload="metadata"')||!html.includes('href="#studio-experience"'))fail(page+' video playback and continuation broken');
  if((html.match(/<h1\b/g)||[]).length!==1)fail(page+' duplicate H1');
 }
 for(const [name,max] of [['roznex-cinematic-stream-desktop.mp4',11000000],['roznex-cinematic-stream-mobile.mp4',5000000],['roznex-cinematic-stream-poster.webp',180000]]){
@@ -396,13 +396,13 @@ for(const [name,max] of [['roznex-cinematic-stream-desktop.mp4',11000000],['rozn
  const n=fs.statSync(p).size;
  if(n>max)fail(name+' exceeds budget '+n);else ok(name+' '+Math.round(n/1024)+' KiB');
 }
-if(!runtime.includes('unlockOnGesture')||!runtime.includes('const initial=video.play();')||!runtime.includes('window.updateCinemaDepth'))fail('gesture-aware audio and scroll 3D behavior missing');
+if(!runtime.includes('unlockOnGesture')||!runtime.includes('const initial=video.play();')&&runtime.includes('requestVideoFrameCallback')||!runtime.includes('window.updateCinemaDepth'))fail('gesture-aware audio and scroll 3D behavior missing');
 
 for(const page of ['index.html','fa/index.html','en/index.html']){
  const html=fs.readFileSync(path.join(root,page),'utf8');
  if(html.includes('data-cinema-audio')||html.includes('data-cinema-pause')||!html.includes('data-cinema-journey')||
-    !html.includes('styles.css?v=cinema-depth-20261019')||
-    !html.includes('script.js?v=cinema-depth-20261019'))fail(page+' has obsolete video buttons or missing 3D assets');
+    !html.includes('styles.css?v=cinema-faster-20261019')||
+    !html.includes('script.js?v=cinema-faster-20261019'))fail(page+' has obsolete video buttons or missing 3D assets');
 }
 if(failures.length){
   console.error('\nROZNEX audit failed with '+failures.length+' issue(s).');

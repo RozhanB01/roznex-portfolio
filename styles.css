@@ -1926,3 +1926,8 @@ body.fa .cinema-intro{text-align:right}body.fa .cinema-bottom{direction:rtl}
  .cinema-entry .cinema-video-layer{transform:none!important;will-change:auto}
  .cinema-entry .cinema-depth,.cinema-entry .cinema-bottom,.cinema-entry .cinema-enter{transform:none!important;opacity:1!important;transition:none!important}
 }
+
+/* Let the lightweight poster paint first; show HD moving picture after the first decoded video frame. */
+.cinema-entry .cinema-video-layer{opacity:0;transition:opacity .35s ease-out}
+.cinema-entry.cinema-live .cinema-video-layer{opacity:1}
+@media(prefers-reduced-motion:reduce){.cinema-entry .cinema-video-layer{display:none!important;transition:none}}
