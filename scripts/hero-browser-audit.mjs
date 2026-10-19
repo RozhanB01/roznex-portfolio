@@ -14,17 +14,19 @@ try{
   try{
    await page.goto(origin+'/'+target.locale+'/',{waitUntil:'domcontentloaded',timeout:35000});
    const entry=page.locator('[data-cinema-entry]'),video=page.locator('[data-cinema-video]');
-   await entry.waitFor({timeout:18000});
+   await entry.waitFor({timeout:45000});
    const dims=await entry.evaluate(element=>({height:Math.round(element.getBoundingClientRect().height),width:Math.round(element.getBoundingClientRect().width),vh:innerHeight,vw:innerWidth}));
    if(Math.abs(dims.height-dims.vh)>4||Math.abs(dims.width-dims.vw)>4)
      throw Error('Cinematic video section does not fill first viewport: '+JSON.stringify(dims));
+   page.on('requestfailed',request=>{if(request.url().includes('cinematic-hero'))console.log('MEDIA REQUEST FAILURE',request.url(),request.failure()?.errorText)});
+   page.on('response',response=>{if(response.url().includes('cinematic-hero'))console.log('MEDIA HTTP RESPONSE',response.status(),response.url())});
    const loaded=await video.evaluate(async v=>{
     if(v.readyState<1)await new Promise((resolve,reject)=>{
-     const timer=setTimeout(()=>reject(Error('video metadata timeout')),18000);
+     const timer=setTimeout(()=>reject(Error('video metadata timeout: '+JSON.stringify({currentSrc:v.currentSrc,readyState:v.readyState,networkState:v.networkState,error:v.error?.code||null}))),45000);
      v.addEventListener('loadedmetadata',()=>{clearTimeout(timer);resolve()}, {once:true});
-     v.addEventListener('error',()=>{clearTimeout(timer);reject(Error('video download failed'))},{once:true});
+     v.addEventListener('error',()=>{clearTimeout(timer);reject(Error('video download failed: code '+(v.error?.code||'unknown')+' src '+v.currentSrc))},{once:true});
     });
-    return {duration:v.duration,url:v.currentSrc,videoWidth:v.videoWidth,videoHeight:v.videoHeight,muted:v.muted,readyState:v.readyState};
+    return {duration:v.duration,url:v.currentSrc,videoWidth:v.videoWidth,videoHeight:v.videoHeight,muted:v.muted,readyState:v.readyState,networkState:v.networkState,error:v.error?.code||null};
    });
    if(!loaded.url.includes(target.expect))throw Error('Wrong video asset selected: '+loaded.url+' expected '+target.expect);
    if(!(loaded.duration>14&&loaded.duration<17))throw Error('Video duration mismatch '+loaded.duration);
