@@ -290,6 +290,24 @@ for(const service of ['services/fa/web-design/index.html','services/fa/industria
   if(!page.includes('تصویر آرشیوی / Unsplash'))fail(service+' must disclose illustrative third-party photo');
 }
 
+
+/* Visual identity: reserve the hero robot image for the actual homepage hero only. */
+for(const page of ["services/index.html","services/fa/index.html","services/fa/3d-web/index.html","services/en/3d-web/index.html","services/fa/ai-agents/index.html","services/en/ai-agents/index.html","services/fa/technical-seo/index.html","services/en/technical-seo/index.html","insights/fa/index.html","insights/index.html","insights/fa/3d-web-performance/index.html","insights/en/3d-web-performance/index.html","insights/fa/ai-agent-security/index.html","insights/en/ai-agent-security/index.html","insights/fa/ai-agent-business/index.html","insights/en/ai-agents-for-business/index.html","insights/fa/multilingual-seo-hreflang/index.html","insights/en/multilingual-seo-hreflang/index.html","insights/fa/technical-seo-nextjs/index.html","insights/en/technical-seo-nextjs/index.html"]){
+  const html=fs.readFileSync(path.join(root,page),'utf8');
+  if(/roznex-hero-(?:reference|960|1280)\.webp|roznex-robot-poster(?:-hd|-fullhd)?\.webp/i.test(html))
+    fail(page+' reuses the flagship hero robot image outside the hero');
+}
+for(const home of ['index.html','fa/index.html','en/index.html']){
+  const html=fs.readFileSync(path.join(root,home),'utf8');
+  const tile=html.split('class="project-tile reveal project-tile-roznex"')[1]?.split('</article>')[0]||'';
+  if(!tile.includes('roznex-studio-editorial.svg')||tile.includes('roznex-hero-reference.webp'))
+    fail(home+' studio project card must not repeat the hero image');
+  if(!html.includes('roznex-hero-reference.webp" srcset='))
+    fail(home+' flagship hero image must be preserved');
+}
+if(!fs.existsSync(path.join(root,'assets/roznex-studio-editorial.svg')))
+  fail('Distinct studio identity graphic is missing');
+
 if(failures.length){
   console.error('\nROZNEX audit failed with '+failures.length+' issue(s).');
   process.exit(1);
