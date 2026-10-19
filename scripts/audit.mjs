@@ -250,11 +250,11 @@ for(const homepage of ['index.html','fa/index.html','en/index.html']){
   const prefix=homepage==='index.html'?'./':'../';
   if(!page.includes(prefix+'assets/roznex-hero-960.webp 960w')||
      !page.includes(prefix+'assets/roznex-hero-1280.webp 1280w')||
-     !page.includes('roznex-cinematic-hero-enhanced-mobile.mp4')||
-     !page.includes('rel="preload" as="image" href="'+prefix+'assets/roznex-cinematic-poster.webp"')){
+     !page.includes('roznex-cinematic-stream-mobile.mp4')||
+     !page.includes('rel="preload" as="image" href="'+prefix+'assets/roznex-cinematic-stream-poster.webp"')){
     fail(homepage+' must retain responsive original hero and preload cinematic poster');
   }
-  if(!page.includes('styles.css?v=cinematic-hq-sound-2'))
+  if(!page.includes('styles.css?v=cinema-depth-20261019'))
     fail(homepage+' missing cinematic CSS cache version');
 }
 for(const [name,budget] of [['roznex-hero-960.webp',75000],['roznex-hero-1280.webp',100000]]){
@@ -384,13 +384,13 @@ if(!portfolioCover.startsWith('<svg ')||!portfolioCover.includes('viewBox="0 0 1
 for(const page of ['index.html','fa/index.html','en/index.html']){
  const html=fs.readFileSync(path.join(root,page),'utf8');
  const main=html.split('<main id="main-content">')[1]||'';
- if(!main.trimStart().startsWith('<section class="cinema-entry"'))fail(page+' cinematic entry not first');
- if(main.indexOf('class="hero" id="studio-experience"')<main.indexOf('class="cinema-entry"'))fail(page+' old hero not preserved below video');
- if(!html.includes('roznex-cinematic-hero-enhanced-mobile.mp4')||!html.includes('roznex-cinematic-hero-enhanced.mp4')||!html.includes('roznex-cinematic-poster.webp'))fail(page+' missing video sources');
+ if(!main.trimStart().startsWith('<div class="cinema-journey"')||!main.includes('<section class="cinema-entry"'))fail(page+' cinematic entry wrapper missing');
+ if(!main.includes('class="hero" id="studio-experience"')||main.indexOf('class="hero" id="studio-experience"')<main.indexOf('class="cinema-entry"'))fail(page+' old hero not preserved below video');
+ if(!html.includes('roznex-cinematic-stream-mobile.mp4')||!html.includes('roznex-cinematic-stream-desktop.mp4')||!html.includes('roznex-cinematic-stream-poster.webp'))fail(page+' missing video sources');
  if(!html.includes('autoplay muted playsinline loop')||!html.includes('href="#studio-experience"'))fail(page+' video playback and continuation broken');
  if((html.match(/<h1\b/g)||[]).length!==1)fail(page+' duplicate H1');
 }
-for(const [name,max] of [['roznex-cinematic-hero-enhanced.mp4',23000000],['roznex-cinematic-hero-enhanced-mobile.mp4',11000000],['roznex-cinematic-poster.webp',160000]]){
+for(const [name,max] of [['roznex-cinematic-stream-desktop.mp4',11000000],['roznex-cinematic-stream-mobile.mp4',5000000],['roznex-cinematic-stream-poster.webp',180000]]){
  const p=path.join(root,'assets',name);
  if(!fs.existsSync(p)){fail('missing hero asset '+name);continue}
  const n=fs.statSync(p).size;

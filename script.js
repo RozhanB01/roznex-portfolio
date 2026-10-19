@@ -577,7 +577,7 @@ orbitVisibility.observe(hero);
 if(cinemaEntry){
  const video=cinemaEntry.querySelector('[data-cinema-video]');
  const journey=cinemaEntry.closest('[data-cinema-journey]');
- const audioHint=cinemaEntry.querySelector('[data-cinema-audio-hint]');
+ const audioHint=cinemaEntry.querySelector('[data-cinema-voice-hint]');
  let inViewport=true, userEnabledSound=false, autoSoundAllowed=false;
  const silentPlay=()=>{
    video.muted=true;
