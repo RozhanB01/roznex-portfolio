@@ -25,8 +25,8 @@ jobs:
           node-version: '22'
       - name: Install browser test dependency
         run: npm install --no-save playwright@1.56.1
-      - name: Install headless Chromium
-        run: npx playwright install --with-deps chromium
+      - name: Verify full Google Chrome with H.264 and AAC support
+        run: google-chrome --version
       - name: Check video delivery headers including browser range requests
         shell: bash
         run: |

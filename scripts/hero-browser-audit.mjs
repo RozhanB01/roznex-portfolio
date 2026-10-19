@@ -1,7 +1,7 @@
 import { chromium } from 'playwright';
 
 const origin='https://roznexstudio.ir';
-const browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
+const browser=await chromium.launch({channel:'chrome',headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
 const report=[];
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 try{
