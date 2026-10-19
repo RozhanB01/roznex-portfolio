@@ -6,3 +6,6 @@ Use these only as **licensed editorial images**, never as evidence of client wor
 - \`assets/service-web-luxe.webp\`: Michael Proctor, [desk and computer in front of a window](https://unsplash.com/photos/a-desk-with-a-computer-on-it-in-front-of-a-window-V-Ud8EmUP_M) (free Unsplash License).
 
 Images are downloaded from their image CDN originals and locally optimized as WebP (1440×960 max, 83% quality). Original robot hero is unchanged. Reference: https://unsplash.com/license.
+
+## Implementation
+The service hub, industrial service detail, Persian/English web-design service, social OG images and the image-budget audit now point at the two new asset paths. No production hero robot image was changed. Both images are descriptive archival photography, not representations of completed client projects.

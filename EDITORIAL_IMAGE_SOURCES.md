@@ -15,3 +15,6 @@ Source photos were downloaded from images.unsplash.com and resized/compressed to
 The files in this license ledger are deployed as editorial illustrations for the service catalog, the general web-design service, and the industrial web-design service. Visible captions on the two service hero images identify them as third-party archive photos. The actual project case-study imagery and ROZNEX robot hero are not changed.
 
 The English services hub and web-design detail page use the same licensed, optimized imagery and explicitly identify the photo as editorial rather than client work.
+
+## Superseded — 19 October 2026
+Earlier `service-industrial-editorial.webp` and `service-web-studio-editorial.webp` photos have been removed from the live service pages after a quality review and visitor feedback. New replacements are documented in `PREMIUM_IMAGE_SOURCES.md`. Older assets remain in Git history for rollback only.

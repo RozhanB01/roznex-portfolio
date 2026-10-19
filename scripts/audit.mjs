@@ -280,7 +280,7 @@ for(const stem of ['industrial','familyos','studymed']){
 
 /* Editorial photos must stay small and be used as service illustrations, not client proof. */
 const hub=fs.readFileSync(path.join(root,'services/fa/index.html'),'utf8');
-for(const name of ['service-industrial-editorial.webp','service-web-studio-editorial.webp']){
+for(const name of ['service-industrial-luxe.webp','service-web-luxe.webp']){
   const stat=fs.statSync(path.join(root,'assets',name));
   if(stat.size>220000)fail(name+' exceeds premium service image budget');
   if(!hub.includes('src="/assets/'+name+'"'))fail('Service hub does not use approved licensed image '+name);
