@@ -1,0 +1,53 @@
+name: ROZNEX Import Approved Hero Video
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/import-user-hero-video.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: roznex-approved-hero-video
+  cancel-in-progress: false
+
+jobs:
+  import-media:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Retrieve the approved uploaded master and create mobile source
+        shell: bash
+        env:
+          USER_VIDEO_URL: 'https://d2jqrm6oza8nb6.cloudfront.net/datasets/41c769e6-46cf-4ac5-b360-6a2c34f53667.mp4?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiNzBhOTBjYjA4ZTcwZjlhMiIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MjU4MTQyNH0.HclU6DwWCieTFOFmbXhHuBLItUdHQhP5bUmsBw6PUes'
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 --connect-timeout 20 --max-time 140 -sS \
+            "$USER_VIDEO_URL" --output assets/roznex-cinematic-hero.mp4
+          test "$(stat -c %s assets/roznex-cinematic-hero.mp4)" -gt 4000000
+          ffprobe -v error -select_streams v:0 -show_entries stream=width,height,r_frame_rate \
+            -of default=noprint_wrappers=1 assets/roznex-cinematic-hero.mp4
+          ffmpeg -hide_banner -loglevel error -y -i assets/roznex-cinematic-hero.mp4 \
+            -vf 'scale=640:-2:flags=lanczos' -c:v libx264 -preset slow -crf 22 \
+            -pix_fmt yuv420p -movflags +faststart -c:a aac -b:a 112k \
+            assets/roznex-cinematic-hero-mobile.mp4
+          ffmpeg -hide_banner -loglevel error -y -ss 2.0 \
+            -i assets/roznex-cinematic-hero.mp4 -frames:v 1 -c:v libwebp -q:v 86 \
+            assets/roznex-cinematic-poster.webp
+          test "$(stat -c %s assets/roznex-cinematic-hero-mobile.mp4)" -lt "$(stat -c %s assets/roznex-cinematic-hero.mp4)"
+          echo 'Assets ready:'
+          ls -lh assets/roznex-cinematic-hero*.mp4 assets/roznex-cinematic-poster.webp
+      - name: Commit hero source, mobile video and poster
+        run: |
+          set -euo pipefail
+          git add assets/roznex-cinematic-hero.mp4 assets/roznex-cinematic-hero-mobile.mp4 assets/roznex-cinematic-poster.webp
+          if git diff --staged --quiet; then echo 'Files already available'; exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'media: add approved ROZNEX hero video, mobile variant and poster'
+          git push origin HEAD:main
