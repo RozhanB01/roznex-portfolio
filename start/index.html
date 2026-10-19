@@ -23,17 +23,20 @@
     .notice{margin:1rem 0 0;padding:.85rem 1rem;border:1px solid #dec9ac;background:#f3e7d7;border-radius:1rem;font-size:.63rem;line-height:1.9;color:#6f5d48}.actions{display:flex;justify-content:space-between;align-items:center;gap:.65rem;margin-top:1.2rem}.action-group{display:flex;gap:.65rem}.primary{border:0;background:#17181a;color:#fff;border-radius:999px;padding:.85rem 1.25rem;font-weight:700;min-width:12rem}.secondary{border:1px solid var(--line);background:transparent;border-radius:999px;padding:.85rem 1.1rem}.secondary:disabled{opacity:.35;cursor:not-allowed}.save-state{font-size:.6rem;color:#827a71}.status{font-size:.68rem;color:#6e655c;line-height:1.8;margin-top:.8rem;min-height:1.2rem}.status.error{color:#963f36}.review{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:1rem}.review div{border:1px solid var(--line);border-radius:.85rem;background:#faf6f0;padding:.75rem}.review span{display:block;color:#81786f;font-size:.58rem;margin-bottom:.25rem}.review strong{display:block;font-size:.7rem;overflow-wrap:anywhere}.review .wide{grid-column:1/-1}
     .privacy-note{margin:.9rem 0 0;font-size:.64rem;line-height:1.8;color:var(--muted)}.privacy-note a{color:inherit;text-underline-offset:3px}.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin-top:1rem}.step{border:1px solid var(--line);border-radius:1rem;padding:1rem;background:#f8f2ea}.step b{display:block;font:600 .65rem Manrope;color:var(--gold);margin-bottom:.5rem}.step strong{display:block;font-size:.76rem;margin-bottom:.25rem}.step span{font-size:.6rem;line-height:1.8;color:var(--muted)}
     @media(max-width:760px){.hero h1{font-size:clamp(1.85rem,8vw,2.5rem);line-height:1.35;letter-spacing:0}.hero,.fields,.steps,.review{grid-template-columns:1fr}.hero{padding-top:2rem}.full,.review .wide{grid-column:auto}.actions{align-items:stretch;flex-direction:column}.action-group{display:grid;grid-template-columns:1fr 1fr}.primary,.secondary{width:100%;min-width:0}.save-state{text-align:center}.wizard-progress{grid-template-columns:1fr}.progress-step{display:none;border:0}.progress-step.active{display:block}}
+    .direct-contact{margin:0 0 1.4rem;padding:1rem 1.1rem;border:1px solid rgba(17,20,27,.14);border-radius:1rem;background:rgba(255,255,255,.3);font-size:.84rem;line-height:1.9}
+    .direct-contact a{font-weight:700;text-underline-offset:4px}
   </style>
 </head>
 <body>
 <main class="shell">
   <header class="topbar">
-    <a href="/" aria-label="ROZNEX"><img class="brand-logo" src="../assets/roznex-logo.svg" alt="ROZNEX"></a>
-    <a class="back" href="/">بازگشت به سایت ←</a>
+    <a href="/fa/" aria-label="ROZNEX"><img class="brand-logo" src="../assets/roznex-logo.svg" alt="ROZNEX"></a>
+    <a class="back" href="/fa/">بازگشت به سایت ←</a>
   </header>
   <section class="hero">
     <div><span class="eyebrow">ROZNEX / ثبت پروژه</span><h1>پروژه‌ات را ثبت کن.</h1></div>
     <p>این مرحله فقط برای شناخت اولیه پروژه است و هیچ قیمت عمومی نمایش داده نمی‌شود. پس از بررسی درخواست، در صورت مناسب بودن پروژه، ROZNEX دسترسی اختصاصی برآورد و پیش‌فاکتور را برای شما ارسال می‌کند.</p>
+  <p class="direct-contact">برای پیگیری یا پرسش پیش از ثبت درخواست، می‌توانید <a href="mailto:rozhanbehrouzi79@gmail.com?subject=ROZNEX%20-%20Project%20Inquiry">مستقیماً ایمیل بزنید</a>. ثبت فرم فقط به معنی دریافت درخواست برای بررسی است، نه تأیید قرارداد یا تضمین زمان پاسخ.</p>
   </section>
 
   <div class="wizard-progress" aria-label="مراحل ثبت پروژه">
