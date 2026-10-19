@@ -224,7 +224,17 @@ for(const img of ['service-ai.svg','service-seo.svg','service-3d.svg','service-w
 if(!presentation.includes('.reveal{filter:none!important;transition-property:opacity,transform!important}'))fail('mobile reveal effect is not optimized');
 for(const landing of ['index.html','fa/index.html']){
   const h=fs.readFileSync(path.join(root,landing),'utf8');
-  if(!h.includes('styles.css?v=performance-20261016-3')||!h.includes('script.js?v=performance-20261016-5'))fail(landing+' has stale asset URLs');
+  // Confirm versioned asset URLs without freezing a historic query string.
+  // Persian approved design revisions intentionally have their own CSS cache key.
+  const prefix=landing==='fa/index.html'?'../':'./';
+  if(!h.includes('href="'+prefix+'styles.css?v=')||!h.includes('src="'+prefix+'script.js?v=')){
+    fail(landing+' must reference versioned shared CSS and JavaScript assets');
+  }
+  const stylesVersion=(h.match(/href="(?:\.\.\/|\.\/)styles\.css\?v=([^"]+)"/)||[])[1];
+  const scriptVersion=(h.match(/src="(?:\.\.\/|\.\/)script\.js\?v=([^"]+)"/)||[])[1];
+  if(!stylesVersion||!scriptVersion||!/^[\w.-]+$/.test(stylesVersion)||!/^[\w.-]+$/.test(scriptVersion)){
+    fail(landing+' has a malformed static asset cache key');
+  }
   if(!h.includes('fetchpriority="high"'))fail(landing+' is missing hero image priority');
   if(landing==='fa/index.html'&&!h.includes('rel="stylesheet" media="print" onload="this.media=\'all\'"'))fail('Persian homepage lacks nonblocking Google Fonts CSS');
   if(h.includes('class="hero-copy reveal"')||h.includes('class="glass-panels reveal"'))fail(landing+' delays first-screen content behind scroll reveal');

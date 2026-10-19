@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const root=process.cwd();
-const origin='https://roznex-portfolio.vercel.app';
+const origin='https://roznexstudio.ir';
 const failures=[];
 const warnings=[];
 const fail=m=>{failures.push(m);console.error('✗',m)};
@@ -66,6 +66,12 @@ for(const forbidden of ['/admin','/quote','/api/','/start/']){
 }
 
 if(!urls.includes(origin+'/insights/fa/personal-portfolio-website/'))fail('Personal portfolio guide missing from sitemap');
+
+const englishLanding=fs.readFileSync(path.join(root,'en/index.html'),'utf8');
+if(!englishLanding.includes('<html lang="en"')||!englishLanding.includes('href="https://roznexstudio.ir/en/"'))fail('English homepage lang or canonical missing');
+if(/<title>[^<]*[آ-ی]/.test(englishLanding))fail('English page title must be written in English');
+if(!sitemap.includes('https://roznexstudio.ir/en/'))fail('English homepage is missing from canonical sitemap');
+
 const titles=new Map();
 const pages=[];
 for(const url of urls){
