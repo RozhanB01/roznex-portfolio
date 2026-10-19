@@ -32,7 +32,16 @@ try{
   await page.screenshot({path:dir+'/'+test.name+'-menu.png',fullPage:false});
   await page.keyboard.press('Escape');
   if(!(await page.locator('.mobile-nav').evaluate(el=>el.hidden)))throw Error(test.name+' navigation did not close');
-  await page.locator('#studio-experience').scrollIntoViewIfNeeded();
+  await page.locator('#studio-experience').evaluate(el=>window.scrollTo({top:el.offsetTop,behavior:'instant'}));
+  const heroImage=page.locator('#studio-experience .hero-media img');
+  await heroImage.evaluate(async img=>{
+   if(img.complete&&img.naturalWidth>0)return;
+   await new Promise((resolve,reject)=>{
+    const timer=setTimeout(()=>reject(new Error('Responsive robot image timed out')),15000);
+    img.addEventListener('load',()=>{clearTimeout(timer);resolve()},{once:true});
+    img.addEventListener('error',()=>{clearTimeout(timer);reject(new Error('Robot image failed'))},{once:true});
+   });
+  });
   await page.screenshot({path:dir+'/'+test.name+'-hero.png',fullPage:false});
   await page.locator('.service-grid').scrollIntoViewIfNeeded();
   await page.screenshot({path:dir+'/'+test.name+'-services.png',fullPage:false});

@@ -254,7 +254,7 @@ for(const homepage of ['index.html','fa/index.html','en/index.html']){
      !page.includes('rel="preload" as="image" href="'+prefix+'assets/roznex-cinematic-stream-poster.webp"')){
     fail(homepage+' must retain responsive original hero and preload cinematic poster');
   }
-  if(!page.includes('styles.css?v=cinema-poster-cleanup-20261019'))
+  if(!page.includes('styles.css?v=cinema-mobile-polish-20261019'))
     fail(homepage+' missing cinematic CSS cache version');
 }
 for(const [name,budget] of [['roznex-hero-960.webp',75000],['roznex-hero-1280.webp',100000]]){
@@ -401,7 +401,7 @@ if(!runtime.includes('unlockOnGesture')||!runtime.includes('const initial=video.
 for(const page of ['index.html','fa/index.html','en/index.html']){
  const html=fs.readFileSync(path.join(root,page),'utf8');
  if(html.includes('data-cinema-audio')||html.includes('data-cinema-pause')||!html.includes('data-cinema-journey')||
-    !html.includes('styles.css?v=cinema-poster-cleanup-20261019')||
+    !html.includes('styles.css?v=cinema-mobile-polish-20261019')||
     !html.includes('script.js?v=cinema-smooth-20261019'))fail(page+' has obsolete video buttons or missing 3D assets');
 }
 if(!runtime.includes("document.addEventListener('touchend',unlockOnGesture")||
@@ -421,7 +421,10 @@ if(styles.includes('roznex-cinematic-poster.webp')||
 
 /* Mobile improvements are isolated to mobile breakpoints and must preserve desktop. */
 const responsiveCss=fs.readFileSync(path.join(root,'styles.css'),'utf8');
-if(!responsiveCss.includes('ROZNEX mobile art direction v1')||
+if(!responsiveCss.includes('Final touch affordances')||
+   !responsiveCss.includes('roznex-hero-960.webp')||
+   !responsiveCss.includes('border-radius:12px!important')||
+   !responsiveCss.includes('ROZNEX mobile art direction v1')||
    !responsiveCss.includes('max-width:540px')||
    !responsiveCss.includes('.topbar:not(.scrolled) .logo')||
    !responsiveCss.includes('.glass-panels,body.fa .glass-panels{grid-template-columns:minmax(0,1fr)!important}')||

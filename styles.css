@@ -2053,3 +2053,17 @@ body.fa .cinema-intro{text-align:right}body.fa .cinema-bottom{direction:rtl}
  .service-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
  .hero-buttons .button{min-height:44px}
 }
+
+/* Final touch affordances and immediate next-hero visual for small phones. */
+@media(max-width:760px){
+ .topbar .menu-toggle{
+  width:44px;height:44px;border:1px solid rgba(75,57,38,.23)!important;
+  border-radius:12px!important;box-shadow:none!important;padding:10px!important;
+  -webkit-tap-highlight-color:transparent;transition:background-color .18s,border-color .18s
+ }
+ .topbar .menu-toggle i{width:20px;height:2px;margin:3px 0;border-radius:2px}
+ .topbar:not(.scrolled) .menu-toggle{border-color:rgba(255,255,255,.55)!important;background:rgba(10,17,19,.17)}
+ .topbar.scrolled .menu-toggle{background:rgba(255,255,255,.38)}
+ .topbar .menu-toggle:focus-visible{outline:2px solid #a77a45;outline-offset:3px}
+ .hero-media,body.fa .hero-media{background:#ebe0d4 url('/assets/roznex-hero-960.webp') center 43% / cover no-repeat}
+}
