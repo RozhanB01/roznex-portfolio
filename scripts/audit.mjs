@@ -396,13 +396,13 @@ for(const [name,max] of [['roznex-cinematic-hero-enhanced.mp4',23000000],['rozne
  const n=fs.statSync(p).size;
  if(n>max)fail(name+' exceeds budget '+n);else ok(name+' '+Math.round(n/1024)+' KiB');
 }
-if(!runtime.includes('video.defaultMuted=false')||!runtime.includes('const started=video.play();')||!runtime.includes('IntersectionObserver(entries=>'))fail('cinema sound unlock controls missing');
+if(!runtime.includes('unlockOnGesture')||!runtime.includes('const initial=video.play();')||!runtime.includes('window.updateCinemaDepth'))fail('gesture-aware audio and scroll 3D behavior missing');
 
 for(const page of ['index.html','fa/index.html','en/index.html']){
  const html=fs.readFileSync(path.join(root,page),'utf8');
- if(!html.includes('data-cinema-sound-label')||!html.includes('cinema-sound-control')||
-    !html.includes('styles.css?v=cinematic-hq-sound-2')||
-    !html.includes('script.js?v=cinematic-hq-sound-2'))fail(page+' lacks sound control and matching asset version');
+ if(html.includes('data-cinema-audio')||html.includes('data-cinema-pause')||!html.includes('data-cinema-journey')||
+    !html.includes('styles.css?v=cinema-depth-20261019')||
+    !html.includes('script.js?v=cinema-depth-20261019'))fail(page+' has obsolete video buttons or missing 3D assets');
 }
 if(failures.length){
   console.error('\nROZNEX audit failed with '+failures.length+' issue(s).');

@@ -40,7 +40,7 @@
   <!-- Keep ROZNEX typography without putting a third-party stylesheet on the first-paint critical path. -->
   <link href="https://fonts.googleapis.com/css2?family=Allura&family=Manrope:wght@300..800&family=Vazirmatn:wght@300..700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <noscript><link href="https://fonts.googleapis.com/css2?family=Allura&family=Manrope:wght@300..800&family=Vazirmatn:wght@300..700&display=swap" rel="stylesheet"></noscript>
-  <link rel="stylesheet" href="../styles.css?v=cinematic-hq-sound-2">
+  <link rel="stylesheet" href="../styles.css?v=cinema-depth-20261019">
   <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Person","@id":"https://roznexstudio.ir/#rozhan","name":"Rozhan Behrouzi","jobTitle":"Web designer and developer, founder of ROZNEX","url":"https://roznexstudio.ir/about/fa/rozhan-behrouzi/","sameAs":["https://github.com/RozhanB01"],"worksFor":{"@id":"https://roznexstudio.ir/#studio"},"alternateName":["روژان بهروزی","Rozhan Behrouzi","روژان"],"image":"https://roznexstudio.ir/assets/rozhan-about-original.png","knowsAbout":["Web design","Web engineering","AI agents","3D web","Technical SEO"]},{"@type":"ProfessionalService","@id":"https://roznexstudio.ir/#studio","name":"ROZNEX","url":"https://roznexstudio.ir/","founder":{"@id":"https://roznexstudio.ir/#rozhan"},"description":"Digital studio connecting design, web engineering, AI systems, immersive 3D and technical SEO.","areaServed":"Worldwide","knowsAbout":["Artificial intelligence","Web development","3D web experiences","Technical SEO"]},{"@type":"WebSite","@id":"https://roznexstudio.ir/#website","url":"https://roznexstudio.ir/","name":"ROZNEX","inLanguage":["en","fa"]}]}</script>
 </head>
 <body class="fa">
@@ -76,6 +76,7 @@
   </nav>
 
   <main id="main-content">
+    <div class="cinema-journey" data-cinema-journey>
     <section class="cinema-entry" data-cinema-entry aria-label="ورود سینمایی به ROZNEX">
       <div class="cinema-video-layer" aria-hidden="true">
         <video data-cinema-video autoplay muted playsinline loop preload="auto" poster="../assets/roznex-cinematic-poster.webp">
@@ -91,13 +92,11 @@
           <p class="cinema-caption">ورود به دنیای دیجیتال</p>
           <span class="cinema-subtitle">هوش مصنوعی، طراحی وب و تجربه‌های تعاملی</span>
         </div>
-        <div class="cinema-controls" role="group" aria-label="کنترل‌های ویدیو">
-          <button type="button" class="cinema-control" data-cinema-pause data-play-label="پخش ویدیو" data-pause-label="توقف ویدیو" aria-label="توقف ویدیو"><span data-cinema-play-icon aria-hidden="true">Ⅱ</span></button>
-          <button type="button" class="cinema-control cinema-sound-control" data-cinema-audio data-mute-label="فعال‌کردن صدا" data-unmute-label="قطع صدا" aria-label="فعال‌کردن صدا" aria-pressed="false" title="برای شنیدن صدای ربات لمس کنید"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path data-cinema-sound-waves d="M16 9a4 4 0 0 1 0 6m3-9a8 8 0 0 1 0 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span data-cinema-sound-label>فعال‌کردن صدا</span></button>
-        </div>
       </div>
+      <span class="sr-only" data-cinema-audio-hint>برای شنیدن صدا صفحه را لمس کنید</span>
       <a class="cinema-enter" href="#studio-experience"><span>ادامه تجربه ROZNEX</span><span aria-hidden="true">↓</span></a>
     </section>
+    </div>
     <section class="hero" id="studio-experience" aria-labelledby="hero-title">
       <div class="hero-media" aria-hidden="true">
         <img src="../assets/roznex-hero-reference.webp" srcset="../assets/roznex-hero-960.webp 960w, ../assets/roznex-hero-1280.webp 1280w, ../assets/roznex-hero-reference.webp 1920w" sizes="(max-width: 760px) 100vw, 70vw" alt="" width="1920" height="1080" loading="lazy" fetchpriority="low" decoding="async">
@@ -355,6 +354,6 @@
     </section>
     </main>
 
-  <script src="../script.js?v=cinematic-hq-sound-2"></script>
+  <script src="../script.js?v=cinema-depth-20261019"></script>
 </body>
 </html>

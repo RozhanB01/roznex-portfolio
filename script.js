@@ -26,6 +26,7 @@ const updateScroll=()=>{
   const progress=Math.min(Math.max(pageY/maxScroll,0),1);
   if(progressBar)progressBar.style.transform=`scaleX(${progress.toFixed(4)})`;
   header.classList.toggle('scrolled',pageY>24);
+  if(pageY<(cinemaEntry?.parentElement?.offsetHeight||0)+100 && typeof window.updateCinemaDepth==='function')window.updateCinemaDepth();
 
   // The old hero starts after the full-screen video; its scroll progress is local.
   const heroLocalScroll=Math.max(0,pageY-(cinemaEntry?.offsetHeight||0));
@@ -572,63 +573,83 @@ const orbitVisibility=new IntersectionObserver(entries=>{
 },{threshold:0});
 orbitVisibility.observe(hero);
 
-/* Full-screen video controls, 3D pointer depth and offscreen power saving. */
+/* No visible sound/play controls. Fast autoplay with browser-policy-aware audio. */
 if(cinemaEntry){
  const video=cinemaEntry.querySelector('[data-cinema-video]');
- const play=cinemaEntry.querySelector('[data-cinema-pause]');
- const sound=cinemaEntry.querySelector('[data-cinema-audio]');
- const playIcon=cinemaEntry.querySelector('[data-cinema-play-icon]');
- const soundLabel=cinemaEntry.querySelector('[data-cinema-sound-label]');
- let manuallyPaused=false;
- video.muted=true;
- const sync=()=>{
-  play.setAttribute('aria-label',video.paused?play.dataset.playLabel:play.dataset.pauseLabel);
-  play.setAttribute('aria-pressed',String(!video.paused));
-  playIcon.textContent=video.paused?'▶':'Ⅱ';
-  sound.setAttribute('aria-label',video.muted?sound.dataset.muteLabel:sound.dataset.unmuteLabel);
-  sound.setAttribute('aria-pressed',String(!video.muted));
-  soundLabel.textContent=video.muted?sound.dataset.muteLabel:sound.dataset.unmuteLabel;
+ const journey=cinemaEntry.closest('[data-cinema-journey]');
+ const audioHint=cinemaEntry.querySelector('[data-cinema-audio-hint]');
+ let inViewport=true, userEnabledSound=false, autoSoundAllowed=false;
+ const silentPlay=()=>{
+   video.muted=true;
+   const p=video.play();
+   if(p&&typeof p.catch==='function')p.catch(()=>{});
  };
- play.addEventListener('click',()=>{
-  if(video.paused){manuallyPaused=false;video.play().catch(sync)}
-  else{manuallyPaused=true;video.pause()}sync();
+ const playIfVisible=()=>{
+   if(reduceMotion||document.hidden||!inViewport)return;
+   const p=video.play();
+   if(p&&typeof p.catch==='function')p.catch(()=>{
+     if(!video.muted&&!userEnabledSound){autoSoundAllowed=false;silentPlay();}
+   });
+ };
+ // Browsers that grant audible autoplay will play with sound immediately.
+ // Otherwise resume instantly muted; first real pointer/key gesture unmutes.
+ video.muted=false;
+ const initial=video.play();
+ if(initial&&typeof initial.then==='function'){
+   initial.then(()=>{autoSoundAllowed=!video.muted;}).catch(()=>{
+     autoSoundAllowed=false;silentPlay();
+   });
+ }
+ video.addEventListener('pause',()=>{
+   // Safari may pause an autoplay video when script unmutes it.
+   if(!document.hidden&&inViewport&&!reduceMotion&&!userEnabledSound&&!autoSoundAllowed&&!video.muted){
+     silentPlay();
+   }
  });
- sound.addEventListener('click',()=>{
-  if(video.muted){
-   // Browsers permit audible playback only after this direct user gesture.
-   video.defaultMuted=false;
+ const unlockOnGesture=()=>{
+   if(reduceMotion||userEnabledSound||autoSoundAllowed||!inViewport||document.hidden)return;
    video.muted=false;
    try{video.volume=1}catch{}
-   manuallyPaused=false;
-   const started=video.play();
-   if(started&&typeof started.catch==='function')started.catch(()=>{
-    video.muted=true;video.defaultMuted=true;sync();
-   });
-  }else{
-   video.muted=true;video.defaultMuted=true;
-  }
-  sync();
- });
- video.addEventListener('play',sync);
- video.addEventListener('pause',sync);
- video.addEventListener('volumechange',sync);
- if(reduceMotion)video.pause();
- else video.play().catch(sync);
- sync();
+   // Must be called synchronously inside the native user gesture.
+   const p=video.play();
+   if(p&&typeof p.then==='function'){
+     p.then(()=>{
+       if(!video.muted){userEnabledSound=true;if(audioHint)audioHint.textContent='';}
+     }).catch(()=>{silentPlay();});
+   }else{userEnabledSound=true;}
+ };
+ document.addEventListener('pointerdown',unlockOnGesture,{capture:true,passive:true});
+ document.addEventListener('keydown',unlockOnGesture,{capture:true});
  new IntersectionObserver(entries=>{
-  if(!entries[0].isIntersecting){video.pause();return}
-  if(!reduceMotion&&!manuallyPaused)video.play().catch(sync);
- },{threshold:.1}).observe(cinemaEntry);
+   inViewport=entries[0].isIntersecting;
+   if(!inViewport){video.pause();return;}
+   if(!reduceMotion)playIfVisible();
+ },{threshold:.08}).observe(cinemaEntry);
+ document.addEventListener('visibilitychange',()=>{
+   if(document.hidden){video.pause();return;}
+   playIfVisible();
+ });
+ if(reduceMotion)video.pause();
  if(interactivePointer){
-  let lastPointer=0;
-  cinemaEntry.addEventListener('pointermove',e=>{
-   if(e.timeStamp-lastPointer<32)return;
-   lastPointer=e.timeStamp;
-   cinemaEntry.style.setProperty('--cinema-ry',((e.clientX/innerWidth-.5)*5).toFixed(2)+'deg');
-   cinemaEntry.style.setProperty('--cinema-rx',((.5-e.clientY/innerHeight)*4).toFixed(2)+'deg');
-  },{passive:true});
-  cinemaEntry.addEventListener('pointerleave',()=>{
-   cinemaEntry.style.setProperty('--cinema-ry','0deg');cinemaEntry.style.setProperty('--cinema-rx','0deg');
-  },{passive:true});
+   let lastPointer=0;
+   cinemaEntry.addEventListener('pointermove',e=>{
+     if(e.timeStamp-lastPointer<32)return;
+     lastPointer=e.timeStamp;
+     cinemaEntry.style.setProperty('--cinema-ry',((e.clientX/innerWidth-.5)*5).toFixed(2)+'deg');
+     cinemaEntry.style.setProperty('--cinema-rx',((.5-e.clientY/innerHeight)*4).toFixed(2)+'deg');
+   },{passive:true});
+   cinemaEntry.addEventListener('pointerleave',()=>{
+     cinemaEntry.style.setProperty('--cinema-ry','0deg');
+     cinemaEntry.style.setProperty('--cinema-rx','0deg');
+   },{passive:true});
  }
+ // Scroll changes depth continuously, without re-layout or new paint effects.
+ // This uses the existing RAF-throttled document scroll listener.
+ window.updateCinemaDepth=()=>{
+   if(reduceMotion||!journey)return;
+   const journeyRange=Math.max(1,journey.offsetHeight-cinemaEntry.clientHeight);
+   const progress=Math.min(1,Math.max(0,scrollY/journeyRange));
+   cinemaEntry.style.setProperty('--cinema-scroll',progress.toFixed(4));
+ };
+ if(scrollY>0)requestAnimationFrame(window.updateCinemaDepth);
 }
