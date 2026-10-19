@@ -1,0 +1,40 @@
+name: ROZNEX SEO Agent
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '21 6 * * 1'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/seo-agent.mjs'
+      - '.github/workflows/seo-agent.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: roznex-seo-agent
+  cancel-in-progress: true
+
+jobs:
+  weekly-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit the live site without changing content
+        run: node scripts/seo-agent.mjs
+        env:
+          SEO_REPORT_DIR: reports/seo-agent
+      - name: Store actionable SEO report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: roznex-seo-audit
+          path: reports/seo-agent/
+          retention-days: 60
+          if-no-files-found: warn
