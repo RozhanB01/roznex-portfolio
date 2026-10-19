@@ -1842,3 +1842,14 @@ a:focus-visible,button:focus-visible{outline:3px solid #a77a45;outline-offset:4p
   body.fa .hero .glass-card>span{font-family:Vazirmatn,sans-serif}
   body.fa .hero .glass-card:focus-visible{outline-offset:2px}
 }
+
+/* Dedicated About portrait: preserve the full approved photo with no face crop or overlay. */
+.about .about-visual{display:flex;flex-direction:column;align-self:center;justify-self:center;width:min(100%,32rem);max-width:100%;min-height:0!important;height:auto;aspect-ratio:auto!important;margin:0;padding:clamp(.5rem,1.2vw,.85rem);border-radius:1.15rem;background:#f8f3eb;border:1px solid rgba(66,53,38,.17);box-shadow:0 24px 55px rgba(59,44,28,.075);overflow:hidden}
+.about .about-visual::after{display:none!important}
+.about .about-visual img{position:relative;inset:auto;display:block;width:100%;height:auto;aspect-ratio:1/1;max-height:none;object-fit:contain;object-position:center;background:#e7ded3;border-radius:.7rem;transform:none!important;filter:none!important;transition:none!important}
+.about .about-visual:hover img{transform:none!important;filter:none!important}
+.about .about-visual .about-visual-overlay{display:flex;position:relative;inset:auto;flex-direction:row;align-items:baseline;justify-content:space-between;gap:.5rem 1rem;width:100%;margin:.7rem 0 0;padding:.75rem .3rem .25rem;border:0;border-top:1px solid rgba(70,55,37,.13);background:transparent;color:#332e29;text-align:start;direction:inherit}
+.about .about-visual .about-visual-overlay span{font-size:.72rem;letter-spacing:0;font-weight:650}
+.about .about-visual .about-visual-overlay strong{max-width:none;font-size:.7rem;line-height:1.6;font-weight:450;text-align:end;color:#6f665c}
+body.fa .about .about-visual .about-visual-overlay strong{text-align:end}
+@media(max-width:760px){.about .about-visual{order:2;width:min(100%,27rem);min-height:0!important;aspect-ratio:auto!important}.about .about-visual .about-visual-overlay{flex-wrap:wrap}.about .about-visual img{aspect-ratio:1/1}}

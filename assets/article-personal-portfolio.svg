@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc">
+<title id="title">Personal portfolio website design</title>
+<desc id="desc">A polished minimalist web portfolio shown as layered editorial browser layouts; no personal portraits.</desc>
+<defs>
+<linearGradient id="canvas" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e5d6c4"/><stop offset=".55" stop-color="#f4ece1"/><stop offset="1" stop-color="#bca78d"/></linearGradient>
+<linearGradient id="dark" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#363a3c"/><stop offset="1" stop-color="#141d22"/></linearGradient>
+<linearGradient id="warm" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#c6a77e"/><stop offset="1" stop-color="#7e6044"/></linearGradient>
+<filter id="shadow" x="-25%" y="-25%" width="150%" height="170%"><feDropShadow dx="0" dy="26" stdDeviation="30" flood-color="#40352b" flood-opacity=".2"/></filter>
+<pattern id="lines" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M100 0H0V100" fill="none" stroke="#827768" stroke-opacity=".08" stroke-width="2"/></pattern>
+</defs>
+<rect width="1200" height="900" fill="url(#canvas)"/><rect width="1200" height="900" fill="url(#lines)"/>
+<circle cx="1008" cy="144" r="298" fill="#fbf5eb" opacity=".35"/>
+<g transform="translate(115 115) rotate(-5 475 330)" filter="url(#shadow)">
+<rect x="40" y="10" width="914" height="674" rx="24" fill="#f9f5ef" stroke="#ffffff" stroke-width="3"/>
+<rect x="40" y="10" width="914" height="64" rx="24" fill="#ede5da"/><rect x="40" y="51" width="914" height="23" fill="#ede5da"/>
+<g fill="#aa967b"><circle cx="78" cy="43" r="6"/><circle cx="100" cy="43" r="6" opacity=".6"/><circle cx="122" cy="43" r="6" opacity=".32"/></g>
+<path d="M80 111H918" stroke="#cbb9a1" stroke-opacity=".5"/>
+<rect x="88" y="127" width="355" height="425" rx="14" fill="url(#dark)"/>
+<path d="M127 184h165M127 217h233M127 250h190" stroke="#f0e6d7" stroke-width="11" stroke-opacity=".75" stroke-linecap="round"/>
+<path d="M130 313h139M130 335h172M130 357h149" stroke="#c4ad91" stroke-width="6" stroke-opacity=".65" stroke-linecap="round"/>
+<rect x="130" y="414" width="131" height="42" rx="21" fill="#c6aa83"/>
+<g stroke="#b4a18b" stroke-linecap="round"><path d="M498 155H683" stroke-width="12"/><path d="M498 188H866" stroke-opacity=".65" stroke-width="7"/><path d="M498 210H839" stroke-opacity=".4" stroke-width="7"/></g>
+<rect x="498" y="258" width="371" height="182" rx="11" fill="#e6d9c9"/>
+<g fill="#c3ae92"><rect x="518" y="284" width="160" height="128" rx="7"/><rect x="696" y="284" width="152" height="128" rx="7" opacity=".65"/></g>
+<g stroke="#92816c" stroke-width="6" stroke-linecap="round" opacity=".5"><path d="M516 482H833M516 504H777M516 526H812"/></g>
+<rect x="90" y="592" width="780" height="34" rx="8" fill="#eee7dc"/>
+</g>
+<g transform="translate(759 455) rotate(8 118 173)" filter="url(#shadow)">
+<rect width="236" height="345" rx="29" fill="#2d3638"/><rect x="12" y="14" width="212" height="317" rx="20" fill="#f3ede4"/>
+<rect x="29" y="48" width="178" height="104" rx="11" fill="#bba184"/>
+<path d="M41 186h144M41 207h124M41 228h153" stroke="#3c4141" stroke-width="9" stroke-linecap="round"/>
+<path d="M41 259h110M41 273h92" stroke="#c6b49e" stroke-width="6" stroke-linecap="round"/>
+<rect x="41" y="296" width="87" height="13" rx="7" fill="#ad8b60"/>
+</g>
+<path d="M98 805H571" stroke="#736c60" stroke-opacity=".33" stroke-width="2"/>
+<circle cx="101" cy="804" r="8" fill="#806449"/>
+</svg>

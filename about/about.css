@@ -111,3 +111,13 @@ body[dir="rtl"] .prose li{
 .prose h3{font-size:clamp(1.04rem,1.4vw,1.27rem);font-weight:650;line-height:1.6;margin:1.7rem 0 .4rem}
 .prose p a{text-underline-offset:.22em;text-decoration-thickness:1px}
 .prose a:focus-visible,.side a:focus-visible{outline:2px solid currentColor;outline-offset:4px}
+
+/* Founder portrait — a complete square photograph, not a cropped article banner. */
+.hero{align-items:center}
+.founder-portrait{width:min(100%,31rem);max-width:100%;justify-self:end;align-self:center;aspect-ratio:auto;margin:0;padding:clamp(.55rem,1.4vw,.9rem);border-radius:1.15rem;border:1px solid rgba(78,66,54,.18);background:#f9f5ef;box-shadow:0 18px 48px rgba(49,36,22,.07)}
+.founder-portrait img{display:block;width:100%;height:auto;aspect-ratio:1/1;object-fit:contain;object-position:center;border-radius:.65rem;background:#e8ded2}
+.founder-portrait figcaption{display:flex;align-items:baseline;justify-content:space-between;gap:.65rem 1rem;flex-wrap:wrap;padding:.95rem .35rem .3rem;border-top:1px solid rgba(64,51,39,.09);margin-top:.7rem}
+.founder-portrait figcaption span{font:600 .78rem/1.5 Vazirmatn,Manrope,sans-serif;color:#252321}
+.founder-portrait figcaption strong{font:500 .69rem/1.55 Vazirmatn,Manrope,sans-serif;color:#756c61}
+@media(max-width:850px){.founder-portrait{justify-self:center;width:min(100%,27rem)}}
+@media(max-width:620px){.founder-portrait{width:min(100%,26rem);border-radius:1rem}.founder-portrait figcaption{padding:.8rem .25rem .2rem}}

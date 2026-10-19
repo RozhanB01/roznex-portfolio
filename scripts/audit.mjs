@@ -341,6 +341,40 @@ for(const name of [
   fail(name+' is malformed');
 }
 
+
+/* A personal portrait belongs only to a genuine About section or About profile page. */
+const permittedPortraitPages=new Set([
+ 'index.html','fa/index.html','en/index.html',
+ 'about/fa/rozhan-behrouzi/index.html','about/en/rozhan-behrouzi/index.html'
+]);
+for(const file of all.filter(p=>p.endsWith('.html'))){
+ const relative=path.relative(root,file).replaceAll('\\','/');
+ const html=fs.readFileSync(file,'utf8');
+ const portraitImages=[...html.matchAll(/<img\b[^>]*\brozhan-about-original\.png[^>]*>/gi)];
+ if(portraitImages.length && !permittedPortraitPages.has(relative))
+   fail(relative+' reuses the founder portrait outside About');
+ if(['index.html','fa/index.html','en/index.html'].includes(relative)){
+   const about=html.split('<section class="about section"')[1]?.split('</section>')[0]||'';
+   if(portraitImages.length!==1||!about.includes('rozhan-about-original.png'))
+     fail(relative+' founder photo must appear once, inside About only');
+   if(!about.includes('<figcaption class="about-visual-overlay">'))
+     fail(relative+' founder photo caption must be outside the photo');
+ }
+ if(relative.startsWith('about/')&&relative.endsWith('/index.html')){
+   if(!html.includes('class="visual founder-portrait"')||!html.includes('width="1254" height="1254"'))
+     fail(relative+' About photo must preserve full square proportions');
+ }
+}
+const portfolioGuide=fs.readFileSync(path.join(root,'insights/fa/personal-portfolio-website/index.html'),'utf8');
+const portfolioIndex=fs.readFileSync(path.join(root,'insights/fa/index.html'),'utf8');
+for(const [name,markup] of [['portfolio guide',portfolioGuide],['Persian insights hub',portfolioIndex]]){
+ if(markup.includes('rozhan-about-original.png'))fail(name+' must not show the owner portrait');
+ if(!markup.includes('/assets/article-personal-portfolio.svg'))fail(name+' is missing its separate editorial graphic');
+}
+const portfolioCover=fs.readFileSync(path.join(root,'assets/article-personal-portfolio.svg'),'utf8');
+if(!portfolioCover.startsWith('<svg ')||!portfolioCover.includes('viewBox="0 0 1200 900"')||!portfolioCover.endsWith('</svg>'))
+ fail('Portfolio editorial cover has invalid markup');
+
 if(failures.length){
   console.error('\nROZNEX audit failed with '+failures.length+' issue(s).');
   process.exit(1);
