@@ -232,6 +232,12 @@ form.addEventListener('submit',async e=>{
   }
 });
 restoreDraft();
+// Explicit, allowlisted service context from ROZNEX CTA links; never trust arbitrary query text.
+const serviceTypes=Object.freeze({industrial:'سایت صنعتی',corporate:'سایت شرکتی',web:'سایت اختصاصی / پریمیوم',ai:'هوش مصنوعی / اتوماسیون',seo:'سئو / رشد'});
+const serviceCode=new URLSearchParams(location.search).get('type');
+if(Object.prototype.hasOwnProperty.call(serviceTypes,serviceCode)){
+  $('type').value=serviceTypes[serviceCode];
+}
 showStep(1);
 </script>
 </body>

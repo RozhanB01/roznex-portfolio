@@ -66,6 +66,13 @@ for(const forbidden of ['/admin','/quote','/api/','/start/']){
 }
 
 if(!urls.includes(origin+'/insights/fa/personal-portfolio-website/'))fail('Personal portfolio guide missing from sitemap');
+if(!urls.includes(origin+'/services/fa/industrial-web-design/'))fail('Industrial service landing missing from sitemap');
+const industrialPage=fs.readFileSync(path.join(root,'services/fa/industrial-web-design/index.html'),'utf8');
+if(!industrialPage.includes('href="/start/?type=industrial"')||
+   !industrialPage.includes('href="/insights/fa/industrial-website-design/"')||
+   !industrialPage.includes('href="/work/fa/industrial-intelligence/"'))fail('Industrial service landing needs lead form, article and honest case links');
+const requestForm=fs.readFileSync(path.join(root,'start/index.html'),'utf8');
+if(!requestForm.includes('industrial:\'سایت صنعتی\'')||!requestForm.includes("new URLSearchParams(location.search).get('type')"))fail('Project intake missing allowlisted industrial preselection');
 
 const englishLanding=fs.readFileSync(path.join(root,'en/index.html'),'utf8');
 if(!englishLanding.includes('<html lang="en"')||!englishLanding.includes('href="https://roznexstudio.ir/en/"'))fail('English homepage lang or canonical missing');
