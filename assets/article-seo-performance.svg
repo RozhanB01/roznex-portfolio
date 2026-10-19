@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-labelledby="t d"><title id="t">Technical performance</title><desc id="d">Minimal editor window showing analytics, performance signals and geometry</desc><defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#faf6ee"/><stop offset=".54" stop-color="#e8e0d4"/><stop offset="1" stop-color="#d1c3b1"/></linearGradient>
+<linearGradient id="ink" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#2e3437"/><stop offset="1" stop-color="#12191c"/></linearGradient>
+<linearGradient id="metal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ead6b0"/><stop offset=".42" stop-color="#b7986d"/><stop offset="1" stop-color="#826747"/></linearGradient>
+<linearGradient id="ivory" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fffdf9"/><stop offset="1" stop-color="#ece3d4"/></linearGradient>
+<filter id="shadow" x="-25%" y="-25%" width="160%" height="180%"><feDropShadow dx="0" dy="28" stdDeviation="28" flood-color="#342d23" flood-opacity=".16"/></filter>
+<pattern id="grid" width="75" height="75" patternUnits="userSpaceOnUse"><path d="M75 0H0V75" stroke="#8f816c" stroke-opacity=".08" fill="none"/></pattern>
+</defs><rect width="1200" height="900" fill="url(#bg)"/><rect width="1200" height="900" fill="url(#grid)"/>
+<g filter="url(#shadow)">
+<rect x="130" y="126" width="940" height="650" rx="24" fill="url(#ink)"/>
+<rect x="130" y="126" width="940" height="89" rx="24" fill="#373b3c"/>
+<rect x="130" y="194" width="940" height="20" fill="#373b3c"/>
+</g>
+<g fill="#d1b491"><circle cx="189" cy="170" r="9"/><circle cx="223" cy="170" r="9" opacity=".56"/><circle cx="257" cy="170" r="9" opacity=".33"/></g>
+<g fill="none" stroke="#c5c1b6" stroke-width="2" opacity=".22"><path d="M190 315H1010M190 425H1010M190 535H1010M190 645H1010"/><path d="M340 280V695M495 280V695M650 280V695M805 280V695M960 280V695"/></g>
+<path d="M200 598C300 580 333 594 420 513S573 498 640 424S830 408 1000 308" fill="none" stroke="#dfc49a" stroke-width="11" stroke-linecap="round"/>
+<path d="M200 642C325 628 378 625 475 596S700 562 1000 505" fill="none" stroke="#f5f0e5" stroke-opacity=".4" stroke-width="5" stroke-linecap="round"/>
+<g fill="#dfc49a" stroke="#303739" stroke-width="9"><circle cx="421" cy="514" r="17"/><circle cx="642" cy="426" r="17"/><circle cx="1000" cy="310" r="17"/></g>
+<rect x="197" y="252" width="258" height="16" rx="8" fill="#f3e5d0" opacity=".8"/><rect x="197" y="285" width="165" height="9" rx="4" fill="#f3e5d0" opacity=".28"/></svg>

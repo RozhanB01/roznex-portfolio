@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-labelledby="t d"><title id="t">Interactive spatial systems</title><desc id="d">Sculptural architecture with floating 3D geometric blocks</desc><defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#faf6ee"/><stop offset=".54" stop-color="#e8e0d4"/><stop offset="1" stop-color="#d1c3b1"/></linearGradient>
+<linearGradient id="ink" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#2e3437"/><stop offset="1" stop-color="#12191c"/></linearGradient>
+<linearGradient id="metal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ead6b0"/><stop offset=".42" stop-color="#b7986d"/><stop offset="1" stop-color="#826747"/></linearGradient>
+<linearGradient id="ivory" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fffdf9"/><stop offset="1" stop-color="#ece3d4"/></linearGradient>
+<filter id="shadow" x="-25%" y="-25%" width="160%" height="180%"><feDropShadow dx="0" dy="28" stdDeviation="28" flood-color="#342d23" flood-opacity=".16"/></filter>
+<pattern id="grid" width="75" height="75" patternUnits="userSpaceOnUse"><path d="M75 0H0V75" stroke="#8f816c" stroke-opacity=".08" fill="none"/></pattern>
+</defs><rect width="1200" height="900" fill="url(#bg)"/><rect width="1200" height="900" fill="url(#grid)"/>
+<path d="M150 754L614 850L1061 681" fill="none" stroke="#9b8a73" stroke-opacity=".24" stroke-width="3"/>
+<ellipse cx="608" cy="715" rx="377" ry="103" fill="#635849" opacity=".12"/>
+<g filter="url(#shadow)">
+<path d="M354 286L599 140L866 266L614 415Z" fill="#e6d9c4" stroke="#ad9677" stroke-width="3"/>
+<path d="M354 286L614 415V681L354 547Z" fill="#baa484" stroke="#8d775d" stroke-width="3"/>
+<path d="M614 415L866 266V538L614 681Z" fill="#f6e9d5" stroke="#b39c80" stroke-width="3"/>
+<path d="M463 329L603 254L760 328L611 405Z" fill="#293536"/>
+<path d="M463 329L611 405V559L463 474Z" fill="#435254"/>
+<path d="M611 405L760 328V473L611 559Z" fill="#1d2b2d"/>
+<path d="M530 364L610 322L698 362L609 411Z" fill="#c6a879"/>
+<path d="M530 364L609 411V500L530 455Z" fill="#957954"/>
+<path d="M609 411L698 362V452L609 500Z" fill="#e7d1ad"/>
+</g>
+<g fill="none" stroke="#8c775c" stroke-opacity=".25" stroke-width="2"><path d="M213 645L603 844L1010 646M213 545L603 743L1010 545M213 445L603 644L1010 445"/></g>
+<circle cx="610" cy="320" r="250" fill="none" stroke="#b5a38b" stroke-width="2" opacity=".15"/></svg>

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-labelledby="t d"><title id="t">Secure agent architecture</title><desc id="d">Architectural shield-like secure access gateway with concentric boundary system</desc><defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#faf6ee"/><stop offset=".54" stop-color="#e8e0d4"/><stop offset="1" stop-color="#d1c3b1"/></linearGradient>
+<linearGradient id="ink" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#2e3437"/><stop offset="1" stop-color="#12191c"/></linearGradient>
+<linearGradient id="metal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ead6b0"/><stop offset=".42" stop-color="#b7986d"/><stop offset="1" stop-color="#826747"/></linearGradient>
+<linearGradient id="ivory" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fffdf9"/><stop offset="1" stop-color="#ece3d4"/></linearGradient>
+<filter id="shadow" x="-25%" y="-25%" width="160%" height="180%"><feDropShadow dx="0" dy="28" stdDeviation="28" flood-color="#342d23" flood-opacity=".16"/></filter>
+<pattern id="grid" width="75" height="75" patternUnits="userSpaceOnUse"><path d="M75 0H0V75" stroke="#8f816c" stroke-opacity=".08" fill="none"/></pattern>
+</defs><rect width="1200" height="900" fill="#171e21"/>
+<rect width="1200" height="900" fill="#171e21"/>
+<g stroke="#a68e6c" opacity=".17" fill="none"><circle cx="600" cy="445" r="390"/><circle cx="600" cy="445" r="305"/><circle cx="600" cy="445" r="225"/><path d="M0 446H1200M600 0V900"/></g>
+<g filter="url(#shadow)"><rect x="345" y="140" width="510" height="618" rx="255" fill="#303b3c" stroke="#bba17d" stroke-width="3"/><rect x="398" y="193" width="404" height="512" rx="202" fill="#202b2c" stroke="#bba17d" stroke-opacity=".65" stroke-width="2"/></g>
+<path d="M600 276L748 335V468C748 559 700 624 600 670C500 624 452 559 452 468V335Z" fill="url(#metal)" stroke="#f1e1c2" stroke-width="3"/>
+<path d="M600 318L708 360V468C708 532 674 579 600 617C526 579 492 532 492 468V360Z" fill="#223035" stroke="#d6bea0" stroke-width="2"/>
+<rect x="551" y="453" width="98" height="98" rx="17" fill="#e9d6b9"/><path d="M571 453v-39c0-39 20-61 50-61s50 22 50 61v39" fill="none" stroke="#e9d6b9" stroke-width="16" stroke-linecap="round"/><circle cx="600" cy="495" r="10" fill="#334044"/><path d="M600 495v28" stroke="#334044" stroke-width="9" stroke-linecap="round"/>
+<g fill="#d3b98d"><circle cx="190" cy="449" r="11"/><circle cx="1008" cy="449" r="11"/><circle cx="600" cy="75" r="11"/><circle cx="600" cy="820" r="11"/></g>
+<g fill="none" stroke="#cfb88f" stroke-opacity=".56" stroke-width="2"><path d="M212 449H345M855 449H985M600 86V140M600 758v50"/></g></svg>
