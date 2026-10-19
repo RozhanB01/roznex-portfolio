@@ -277,6 +277,19 @@ for(const stem of ['industrial','familyos','studymed']){
   }
 }
 
+
+/* Editorial photos must stay small and be used as service illustrations, not client proof. */
+const hub=fs.readFileSync(path.join(root,'services/fa/index.html'),'utf8');
+for(const name of ['service-industrial-editorial.webp','service-web-studio-editorial.webp']){
+  const stat=fs.statSync(path.join(root,'assets',name));
+  if(stat.size>220000)fail(name+' exceeds premium service image budget');
+  if(!hub.includes('src="/assets/'+name+'"'))fail('Service hub does not use approved licensed image '+name);
+}
+for(const service of ['services/fa/web-design/index.html','services/fa/industrial-web-design/index.html']){
+  const page=fs.readFileSync(path.join(root,service),'utf8');
+  if(!page.includes('تصویر آرشیوی / Unsplash'))fail(service+' must disclose illustrative third-party photo');
+}
+
 if(failures.length){
   console.error('\nROZNEX audit failed with '+failures.length+' issue(s).');
   process.exit(1);

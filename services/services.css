@@ -114,3 +114,21 @@ body[dir="rtl"] .content li{
     font-size:1.42rem!important
   }
 }
+
+/* ROZNEX Editorial Luxury — refined service presentation with calm premium motion. */
+.hub-card{border-color:rgba(39,35,30,.12);background:linear-gradient(140deg,#faf5ed 0%,#eee5da 100%);box-shadow:0 16px 42px rgba(32,25,18,.045);transition:transform .38s cubic-bezier(.2,.7,.25,1),box-shadow .38s ease,border-color .38s ease}
+.hub-card img{display:block;min-width:0;filter:saturate(.86) contrast(1.055);transition:transform .7s cubic-bezier(.2,.7,.25,1),filter .7s ease}
+.hub-card div{position:relative;isolation:isolate;padding:clamp(1.3rem,2.7vw,2.4rem);background:linear-gradient(145deg,rgba(253,250,244,.75),rgba(236,225,211,.72))}
+.hub-card span{color:#876947;font-weight:700}
+.hub-card h2{margin:1.1rem 0 .75rem;font-weight:570!important;line-height:1.24!important}
+.hub-card b{font-size:.75rem;letter-spacing:0;color:#6c5335;margin-top:1.6rem}
+.hub-card:focus-visible{outline:2px solid #a77a45;outline-offset:4px}
+.hero-art{position:relative;isolation:isolate;background:#c4b5a3}
+.hero-art img{filter:saturate(.87) contrast(1.035)}
+.photo-label{position:absolute;bottom:.85rem;inset-inline-start:.85rem;display:inline-flex;background:rgba(20,21,23,.78);color:#f1eadd;border:1px solid rgba(255,255,255,.16);border-radius:999px;font-family:Vazirmatn,Manrope,sans-serif;font-size:.58rem;line-height:1.7;padding:.3rem .7rem;pointer-events:none;backdrop-filter:blur(6px)}
+@media(hover:hover) and (prefers-reduced-motion:no-preference){
+  .hub-card:hover{transform:translateY(-4px);box-shadow:0 24px 55px rgba(32,25,18,.095);border-color:rgba(125,93,55,.35)}
+  .hub-card:hover img{transform:scale(1.035);filter:saturate(.97) contrast(1.07)}
+}
+@media(max-width:620px){.hub-card div{padding:1.4rem}.hub-card img{max-height:17rem;object-fit:cover}.photo-label{font-size:.53rem}}
+@media(prefers-reduced-motion:reduce){.hub-card,.hub-card img{transition:none!important;transform:none!important}}
