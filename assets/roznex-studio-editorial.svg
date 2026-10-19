@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+<title id="title">ROZNEX — Studio identity</title>
+<desc id="desc">Minimal architectural editorial composition with geometric linework and ROZNEX lettering, no robot imagery.</desc>
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#111619"/><stop offset=".58" stop-color="#252728"/><stop offset="1" stop-color="#423c34"/></linearGradient>
+<radialGradient id="warm" cx=".68" cy=".48" r=".65"><stop stop-color="#a08c72" stop-opacity=".45"/><stop offset="1" stop-color="#bba586" stop-opacity="0"/></radialGradient>
+<linearGradient id="line" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f7ecd8"/><stop offset=".54" stop-color="#bd9b69"/><stop offset="1" stop-color="#6b5d4a"/></linearGradient>
+<pattern id="grid" width="90" height="90" patternUnits="userSpaceOnUse"><path d="M90 0H0V90" fill="none" stroke="#c8b99f" stroke-opacity=".075" stroke-width="1"/></pattern>
+</defs>
+<rect width="1600" height="1000" fill="url(#bg)"/><rect width="1600" height="1000" fill="url(#warm)"/><rect width="1600" height="1000" fill="url(#grid)"/>
+<g fill="none" stroke="url(#line)" stroke-linejoin="miter" stroke-width="2">
+<path d="M987 111L1380 302V740L987 907L601 716V291Z" opacity=".56"/>
+<path d="M987 111V543L601 716M987 543L1380 302M987 543V907M601 291L987 481L1380 302" opacity=".48"/>
+<path d="M838 339L986 273L1131 339V485L986 558L838 485Z" stroke-width="5" opacity=".85"/>
+<path d="M838 339L986 411L1131 339M986 411V558" opacity=".85"/>
+<path d="M763 719L987 831L1211 719M763 261L987 152L1211 261" stroke-width="1.5" opacity=".32"/>
+<circle cx="987" cy="543" r="275" stroke-width="1" opacity=".13"/>
+<circle cx="987" cy="543" r="354" stroke-width="1" opacity=".1"/>
+</g>
+<path d="M0 828H1600M98 0V1000M1502 0V1000" stroke="#e7d7bc" stroke-opacity=".18" stroke-width="1"/>
+<g fill="#eee8df">
+<text x="144" y="168" font-family="Arial, Helvetica, sans-serif" font-weight="600" letter-spacing="9" font-size="24">INDEPENDENT DIGITAL STUDIO</text>
+<text x="142" y="522" font-family="Arial, Helvetica, sans-serif" font-weight="600" letter-spacing="-5" font-size="128">ROZNEX</text>
+<text x="147" y="584" font-family="Arial, Helvetica, sans-serif" font-weight="400" letter-spacing="6" font-size="22" opacity=".76">DESIGN  /  SYSTEMS  /  ENGINEERING</text>
+</g>
+<path d="M144 618H518" stroke="#d2b58a" stroke-width="2" opacity=".7"/>
+<g fill="#d2b58a" font-family="Arial, Helvetica, sans-serif" font-size="17" letter-spacing="4"><text x="145" y="869">SELECTED WORK</text><text x="1378" y="872" text-anchor="end">2026 — STUDIO</text></g>
+</svg>
