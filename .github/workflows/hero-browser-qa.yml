@@ -31,7 +31,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for file in roznex-cinematic-hero-audiofix.mp4 roznex-cinematic-hero-mobile-hq.mp4; do
+          for file in roznex-cinematic-hero-enhanced.mp4 roznex-cinematic-hero-enhanced-mobile.mp4; do
             echo "Checking $file"
             curl --retry 2 --retry-delay 3 --max-time 45 --fail -sSL -D /tmp/media-headers -H 'Range: bytes=0-1023' "https://roznexstudio.ir/assets/$file" -o /tmp/media-head.bin
             sed -n '1,22p' /tmp/media-headers

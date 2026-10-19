@@ -250,7 +250,7 @@ for(const homepage of ['index.html','fa/index.html','en/index.html']){
   const prefix=homepage==='index.html'?'./':'../';
   if(!page.includes(prefix+'assets/roznex-hero-960.webp 960w')||
      !page.includes(prefix+'assets/roznex-hero-1280.webp 1280w')||
-     !page.includes('roznex-cinematic-hero-mobile-hq.mp4')||
+     !page.includes('roznex-cinematic-hero-enhanced-mobile.mp4')||
      !page.includes('rel="preload" as="image" href="'+prefix+'assets/roznex-cinematic-poster.webp"')){
     fail(homepage+' must retain responsive original hero and preload cinematic poster');
   }
@@ -386,11 +386,11 @@ for(const page of ['index.html','fa/index.html','en/index.html']){
  const main=html.split('<main id="main-content">')[1]||'';
  if(!main.trimStart().startsWith('<section class="cinema-entry"'))fail(page+' cinematic entry not first');
  if(main.indexOf('class="hero" id="studio-experience"')<main.indexOf('class="cinema-entry"'))fail(page+' old hero not preserved below video');
- if(!html.includes('roznex-cinematic-hero-mobile-hq.mp4')||!html.includes('roznex-cinematic-hero-audiofix.mp4')||!html.includes('roznex-cinematic-poster.webp'))fail(page+' missing video sources');
+ if(!html.includes('roznex-cinematic-hero-enhanced-mobile.mp4')||!html.includes('roznex-cinematic-hero-enhanced.mp4')||!html.includes('roznex-cinematic-poster.webp'))fail(page+' missing video sources');
  if(!html.includes('autoplay muted playsinline loop')||!html.includes('href="#studio-experience"'))fail(page+' video playback and continuation broken');
  if((html.match(/<h1\b/g)||[]).length!==1)fail(page+' duplicate H1');
 }
-for(const [name,max] of [['roznex-cinematic-hero-audiofix.mp4',12500000],['roznex-cinematic-hero-mobile-hq.mp4',6500000],['roznex-cinematic-poster.webp',160000]]){
+for(const [name,max] of [['roznex-cinematic-hero-enhanced.mp4',23000000],['roznex-cinematic-hero-enhanced-mobile.mp4',11000000],['roznex-cinematic-poster.webp',160000]]){
  const p=path.join(root,'assets',name);
  if(!fs.existsSync(p)){fail('missing hero asset '+name);continue}
  const n=fs.statSync(p).size;

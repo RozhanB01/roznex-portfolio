@@ -6,8 +6,8 @@ const report=[];
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 try{
  for(const target of [
-  {locale:'fa',mobile:true,width:390,height:844,expect:'roznex-cinematic-hero-mobile-hq.mp4'},
-  {locale:'en',mobile:false,width:1440,height:900,expect:'roznex-cinematic-hero-audiofix.mp4'}
+  {locale:'fa',mobile:true,width:390,height:844,expect:'roznex-cinematic-hero-enhanced-mobile.mp4',expectedWidth:1152},
+  {locale:'en',mobile:false,width:1440,height:900,expect:'roznex-cinematic-hero-enhanced.mp4',expectedWidth:1920}
  ]){
   const ctx=await browser.newContext({viewport:{width:target.width,height:target.height},isMobile:target.mobile,hasTouch:target.mobile,deviceScaleFactor:target.mobile?2:1});
   const page=await ctx.newPage();
@@ -30,7 +30,7 @@ try{
    });
    if(!loaded.url.includes(target.expect))throw Error('Wrong video asset selected: '+loaded.url+' expected '+target.expect);
    if(!(loaded.duration>14&&loaded.duration<17))throw Error('Video duration mismatch '+loaded.duration);
-   if(loaded.videoWidth!==764||loaded.videoHeight!==512)throw Error('Resolution is not original 764x512: '+loaded.videoWidth+'x'+loaded.videoHeight);
+   if(loaded.videoWidth!==target.expectedWidth||loaded.videoHeight<700)throw Error('Enhanced video is not served in intended resolution: '+loaded.videoWidth+'x'+loaded.videoHeight+' expected width '+target.expectedWidth);
    if(!loaded.muted)throw Error('Autoplay must begin muted');
    const sound=page.locator('[data-cinema-audio]');
    if(!await sound.isVisible())throw Error('Audible activation button not visible');
