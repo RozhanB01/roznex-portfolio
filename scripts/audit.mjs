@@ -308,6 +308,39 @@ for(const home of ['index.html','fa/index.html','en/index.html']){
 if(!fs.existsSync(path.join(root,'assets/roznex-studio-editorial.svg')))
   fail('Distinct studio identity graphic is missing');
 
+
+/* Each article type gets its own editorial illustration, not repeated hero/robot or service catalog image. */
+for(const [stem,asset] of [
+ ['3d-web-performance','article-3d-architecture.svg'],
+ ['ai-agent-security','article-ai-security.svg'],
+ ['multilingual-seo-hreflang','article-multilingual.svg'],
+ ['technical-seo-nextjs','article-seo-performance.svg']
+]){
+ for(const locale of ['fa','en']){
+  const filename='insights/'+locale+'/'+stem+'/index.html';
+  const html=fs.readFileSync(path.join(root,filename),'utf8');
+  if(!html.includes('/assets/'+asset))fail(filename+' must use editorial topic artwork');
+ }
+}
+for(const [filename,art] of [
+ ['insights/fa/ai-agent-business/index.html','article-ai-workflow.svg'],
+ ['insights/en/ai-agents-for-business/index.html','article-ai-workflow.svg']
+]){
+ const html=fs.readFileSync(path.join(root,filename),'utf8');
+ if(!html.includes('/assets/'+art))fail(filename+' must use workflow illustration');
+}
+for(const name of [
+ 'article-ai-workflow.svg','article-ai-security.svg','article-seo-performance.svg',
+ 'article-multilingual.svg','article-3d-architecture.svg'
+]){
+ const full=path.join(root,'assets',name);
+ const bytes=fs.statSync(full).size;
+ if(bytes>20000)fail(name+' exceeds 20KB editorial asset budget');
+ const svg=fs.readFileSync(full,'utf8');
+ if(!svg.startsWith('<svg ')||!svg.includes('viewBox="0 0 1200 900"')||!svg.includes('</svg>'))
+  fail(name+' is malformed');
+}
+
 if(failures.length){
   console.error('\nROZNEX audit failed with '+failures.length+' issue(s).');
   process.exit(1);
