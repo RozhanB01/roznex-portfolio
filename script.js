@@ -7,6 +7,31 @@ const mobileNav=document.querySelector('.mobile-nav');
 const hero=document.querySelector('.hero');
 const heroMedia=document.querySelector('.hero-media');
 const cinemaEntry=document.querySelector('[data-cinema-entry]');
+const cinemaJourney=cinemaEntry?.closest('[data-cinema-journey]');
+let cinemaEntryHeight=cinemaEntry?.clientHeight||innerHeight;
+let cinemaJourneyHeight=cinemaJourney?.offsetHeight||cinemaEntryHeight;
+let cinemaDepthRange=Math.max(1,cinemaJourneyHeight-cinemaEntryHeight);
+// Avoid expensive geometry reads during every scroll event.
+const measureCinemaLayout=()=>{
+ if(!cinemaEntry||!cinemaJourney)return;
+ cinemaEntryHeight=cinemaEntry.clientHeight;
+ cinemaJourneyHeight=cinemaJourney.offsetHeight;
+ cinemaDepthRange=Math.max(1,cinemaJourneyHeight-cinemaEntryHeight);
+};
+let measurementScheduled=false;
+const scheduleCinemaMeasurement=()=>{
+ if(measurementScheduled)return;
+ measurementScheduled=true;
+ requestAnimationFrame(()=>{measurementScheduled=false;measureCinemaLayout()});
+};
+if(cinemaEntry&&cinemaJourney){
+ if(typeof ResizeObserver==='function'){
+  const cinemaResize=new ResizeObserver(scheduleCinemaMeasurement);
+  cinemaResize.observe(cinemaEntry);
+  cinemaResize.observe(cinemaJourney);
+ }
+ addEventListener('resize',scheduleCinemaMeasurement,{passive:true});
+}
 const glassCards=[...document.querySelectorAll('.glass-card')];
 const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const finePointer=matchMedia('(pointer:fine)').matches;
@@ -26,10 +51,10 @@ const updateScroll=()=>{
   const progress=Math.min(Math.max(pageY/maxScroll,0),1);
   if(progressBar)progressBar.style.transform=`scaleX(${progress.toFixed(4)})`;
   header.classList.toggle('scrolled',pageY>24);
-  if(pageY<(cinemaEntry?.parentElement?.offsetHeight||0)+100 && typeof window.updateCinemaDepth==='function')window.updateCinemaDepth();
+  if(pageY<cinemaJourneyHeight+100 && typeof window.updateCinemaDepth==='function')window.updateCinemaDepth();
 
   // The old hero starts after the full-screen video; its scroll progress is local.
-  const heroLocalScroll=Math.max(0,pageY-(cinemaEntry?.offsetHeight||0));
+  const heroLocalScroll=Math.max(0,pageY-cinemaJourneyHeight);
   if(heroLocalScroll<innerHeight*1.2||lastHeroProgress<1){
     const heroProgress=Math.min(Math.max(heroLocalScroll/(innerHeight*.9),0),1);
     if(heroProgress!==lastHeroProgress){
@@ -39,7 +64,7 @@ const updateScroll=()=>{
       if(portfolioCuration)portfolioCuration.style.setProperty('--hero-progress',value);
       lastHeroProgress=heroProgress;
     }
-    if(!reduceMotion&&innerWidth>760&&pageY>=(cinemaEntry?.offsetHeight||0)&&heroLocalScroll<innerHeight*1.2){
+    if(!reduceMotion&&innerWidth>760&&pageY>=cinemaJourneyHeight&&heroLocalScroll<innerHeight*1.2){
       heroMedia.style.transform=`translate3d(0,${Math.min(heroLocalScroll*.09,78)}px,0) scale(${1.018+heroProgress*.032})`;
     }
   }
@@ -629,6 +654,8 @@ if(cinemaEntry){
    }else{userEnabledSound=true;}
  };
  document.addEventListener('pointerdown',unlockOnGesture,{capture:true,passive:true});
+ document.addEventListener('touchend',unlockOnGesture,{capture:true,passive:true});
+ document.addEventListener('click',unlockOnGesture,{capture:true,passive:true});
  document.addEventListener('keydown',unlockOnGesture,{capture:true});
  new IntersectionObserver(entries=>{
    inViewport=entries[0].isIntersecting;
@@ -657,8 +684,7 @@ if(cinemaEntry){
  // This uses the existing RAF-throttled document scroll listener.
  window.updateCinemaDepth=()=>{
    if(reduceMotion||!journey)return;
-   const journeyRange=Math.max(1,journey.offsetHeight-cinemaEntry.clientHeight);
-   const progress=Math.min(1,Math.max(0,scrollY/journeyRange));
+   const progress=Math.min(1,Math.max(0,scrollY/cinemaDepthRange));
    cinemaEntry.style.setProperty('--cinema-scroll',progress.toFixed(4));
  };
  if(scrollY>0)requestAnimationFrame(window.updateCinemaDepth);

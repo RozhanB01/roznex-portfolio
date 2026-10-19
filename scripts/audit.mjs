@@ -254,7 +254,7 @@ for(const homepage of ['index.html','fa/index.html','en/index.html']){
      !page.includes('rel="preload" as="image" href="'+prefix+'assets/roznex-cinematic-stream-poster.webp"')){
     fail(homepage+' must retain responsive original hero and preload cinematic poster');
   }
-  if(!page.includes('styles.css?v=cinema-faster-20261019'))
+  if(!page.includes('styles.css?v=cinema-smooth-20261019'))
     fail(homepage+' missing cinematic CSS cache version');
 }
 for(const [name,budget] of [['roznex-hero-960.webp',75000],['roznex-hero-1280.webp',100000]]){
@@ -401,9 +401,17 @@ if(!runtime.includes('unlockOnGesture')||!runtime.includes('const initial=video.
 for(const page of ['index.html','fa/index.html','en/index.html']){
  const html=fs.readFileSync(path.join(root,page),'utf8');
  if(html.includes('data-cinema-audio')||html.includes('data-cinema-pause')||!html.includes('data-cinema-journey')||
-    !html.includes('styles.css?v=cinema-faster-20261019')||
-    !html.includes('script.js?v=cinema-faster-20261019'))fail(page+' has obsolete video buttons or missing 3D assets');
+    !html.includes('styles.css?v=cinema-smooth-20261019')||
+    !html.includes('script.js?v=cinema-smooth-20261019'))fail(page+' has obsolete video buttons or missing 3D assets');
 }
+if(!runtime.includes("document.addEventListener('touchend',unlockOnGesture")||
+   !runtime.includes("document.addEventListener('click',unlockOnGesture"))
+ fail('iOS Safari sound activation events missing');
+if(!runtime.includes('let cinemaDepthRange')||
+   !runtime.includes('heroLocalScroll=Math.max(0,pageY-cinemaJourneyHeight)')||
+   runtime.includes('journey.offsetHeight-cinemaEntry.clientHeight'))
+ fail('Cinema must use cached layout for smooth scroll');
+
 if(failures.length){
   console.error('\nROZNEX audit failed with '+failures.length+' issue(s).');
   process.exit(1);
