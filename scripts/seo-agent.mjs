@@ -17,14 +17,9 @@ const summary={timestamp:new Date().toISOString(),origin:ORIGIN,source:'live HTM
 const plain=(s='')=>String(s).replace(/<[^>]*>/g,' ').replace(/&(?:amp|nbsp|lt|gt|quot|#39);/g,' ').replace(/\s+/g,' ').trim();
 const escapeMd=(s='')=>String(s).replace(/\|/g,'\\|').replace(/[\r\n]/g,' ');
 const tag=(html,name)=>html.match(new RegExp('<'+name+'\\b[^>]*>([\\s\\S]*?)<\\/'+name+'>','i'))?.[1]||'';
-const attr=(html,tagName,key,valueAttr='content')=>{
-  const m=[...html.matchAll(new RegExp('<'+tagName+'\\b[^>]*>','gi'))];
-  const wanted=m.find(x=>new RegExp('\\b'+key+'\\s*=\\s*["\\']','i').test(x[0]));
-  return wanted?.[0].match(new RegExp('\\b'+valueAttr+'\\s*=\\s*["\\']([^"\\']*)["\\']','i'))?.[1]||'';
-};
 const meta=(html,key,mode='name')=>{
  for(const m of html.matchAll(/<meta\b[^>]*>/gi)){
-  const node=m[0],k=node.match(new RegExp('\\b'+mode+'\\s*=\\s*["\\']([^"\\']+)["\\']','i'))?.[1];
+   const node=m[0],k=node.match(new RegExp('\\b'+mode+'\\s*=\\s*"([^"]+)"','i'))?.[1];
   if(k?.toLowerCase()===key.toLowerCase())return node.match(/\bcontent\s*=\s*["']([^"']*)["']/i)?.[1]||'';
  }
  return '';
