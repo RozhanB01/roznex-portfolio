@@ -1,0 +1,40 @@
+name: ROZNEX Four Test Customer Submissions
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/four-test-customers.yml'
+      - 'scripts/qa-four-test-customers.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: roznex-four-test-customers
+  cancel-in-progress: false
+
+jobs:
+  four-browser-submissions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright browser test dependency
+        run: npm install --no-save playwright@1.56.1
+      - name: Verify Chrome browser
+        run: google-chrome --version
+      - name: Simulate four independent user sessions through live project form
+        run: node scripts/qa-four-test-customers.mjs
+      - name: Retain per-request confirmation and email provider status
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: roznex-four-test-customers
+          path: reports/four-user-form-qa.json
+          retention-days: 14
+          if-no-files-found: warn
