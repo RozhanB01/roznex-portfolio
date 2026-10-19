@@ -1,0 +1,68 @@
+name: ROZNEX Enhance Hero Audio and Mobile Quality
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/improve-hero-media.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: roznex-enhanced-hero-media
+  cancel-in-progress: false
+
+jobs:
+  process-original:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Confirm original video contains audible audio
+        shell: bash
+        run: |
+          set -euo pipefail
+          ffprobe -v error -select_streams a:0 -show_entries stream=codec_name,channels -of default=noprint_wrappers=1 assets/roznex-cinematic-hero.mp4
+          test "$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=p=0 assets/roznex-cinematic-hero.mp4)" -eq 764
+      - name: Preserve video quality and normalize soundtrack volume
+        shell: bash
+        run: |
+          set -euo pipefail
+          ffmpeg -hide_banner -nostdin -loglevel error -y \
+            -i assets/roznex-cinematic-hero.mp4 \
+            -map 0:v:0 -map 0:a:0 -c:v copy \
+            -af 'loudnorm=I=-17:TP=-2:LRA=11' -c:a aac -b:a 192k \
+            -movflags +faststart assets/roznex-cinematic-hero-audiofix.mp4
+      - name: Re-encode high-quality mobile at full ORIGINAL source resolution
+        shell: bash
+        run: |
+          set -euo pipefail
+          ffmpeg -hide_banner -nostdin -loglevel error -y \
+            -i assets/roznex-cinematic-hero.mp4 \
+            -map 0:v:0 -map 0:a:0 \
+            -vf 'unsharp=3:3:0.32:3:3:0' \
+            -c:v libx264 -preset medium -crf 18 -pix_fmt yuv420p -profile:v high \
+            -af 'loudnorm=I=-17:TP=-2:LRA=11' -c:a aac -b:a 160k \
+            -movflags +faststart assets/roznex-cinematic-hero-mobile-hq.mp4
+          width="$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=p=0 assets/roznex-cinematic-hero-mobile-hq.mp4)"
+          test "$width" -eq 764
+          bytes="$(stat -c %s assets/roznex-cinematic-hero-mobile-hq.mp4)"
+          test "$bytes" -lt 6500000
+          ls -lh assets/roznex-cinematic-hero*mp4
+      - name: Commit sound-enhanced assets without modifying original master
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add assets/roznex-cinematic-hero-audiofix.mp4 assets/roznex-cinematic-hero-mobile-hq.mp4
+          if git diff --staged --quiet; then
+            echo "Already current"
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'media: normalize cinematic hero sound and restore original mobile resolution'
+          git push origin HEAD:main
