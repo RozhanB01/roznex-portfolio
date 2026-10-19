@@ -1,8 +1,6 @@
 # ROZNEX SEO content and launch plan
 
-Current canonical origin: https://roznex-portfolio.vercel.app. Purchased destination: https://roznexstudio.ir.
-
-Do not switch canonical domain until `.ir` DNS and HTTPS are configured.
+Current canonical origin: https://roznexstudio.ir. Domain and HTTPS are active. Persian: /fa/. English: /en/. Default / redirects to Persian.
 
 | Search intent | Best page | Editorial evidence |
 | --- | --- | --- |
@@ -14,4 +12,4 @@ Do not switch canonical domain until `.ir` DNS and HTTPS are configured.
 | هوش مصنوعی و ایجنت | /services/fa/ai-agents/ | Actual workflows and limitations |
 | سئو و بهینه‌سازی | /services/fa/technical-seo/ | Original technical work |
 
-When DNS and SSL pass, update canonical/OG/JSON-LD/hreflang/robots/sitemap and the CI origin together. Set permanent redirects preserving paths from the old Vercel hostname after validation, avoiding loops. Verify domain ownership in Google Search Console, submit the new sitemap and monitor indexing and search queries. Generic short-name rankings and first-page placement are not guaranteed.
+The canonical public origin and sitemap have been migrated to the .ir domain. Next: verify ownership in Google's free Search Console, submit the new sitemap, measure indexing and search queries, and plan legacy Vercel hostname redirects only after checking API clients and route loops. Generic short-name rankings and first-page placement are not guaranteed.

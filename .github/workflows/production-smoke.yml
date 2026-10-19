@@ -59,6 +59,11 @@ jobs:
           retry_status "$BASE/insights/fa/ai-agent-business/" insight-fa.html 200
           retry_status "$BASE/insights/en/technical-seo-nextjs/" insight-en.html 200
           retry_status "$BASE/sitemap.xml" sitemap.xml 200
+          # The custom domain is the canonical search destination.
+          retry_status "https://roznexstudio.ir/fa/" domain-fa.html 200
+          retry_status "https://roznexstudio.ir/en/" domain-en.html 200
+          retry_status "https://roznexstudio.ir/sitemap.xml" domain-sitemap.xml 200
+          retry_status "https://www.roznexstudio.ir/" www-redirect.html 308 no
           retry_status "$BASE/admin" admin.html 200
           retry_status "$BASE/quote/" quote.html 401 no
           retry_status "$BASE/.well-known/security.txt" security.txt 200
@@ -67,6 +72,18 @@ jobs:
 
           python - <<'PY'
           import json, re, urllib.request
+
+          domain_fa=open('domain-fa.html',encoding='utf-8').read()
+          domain_en=open('domain-en.html',encoding='utf-8').read()
+          domain_sitemap=open('domain-sitemap.xml',encoding='utf-8').read()
+          if 'rel="canonical" href="https://roznexstudio.ir/fa/"' not in domain_fa:
+              raise SystemExit('Persian .ir landing page canonical is incorrect')
+          if 'rel="canonical" href="https://roznexstudio.ir/en/"' not in domain_en:
+              raise SystemExit('English .ir landing page canonical is incorrect')
+          if 'https://roznexstudio.ir/fa/' not in domain_sitemap or 'https://roznexstudio.ir/en/' not in domain_sitemap:
+              raise SystemExit('Live custom-domain sitemap is missing localized homepages')
+          if 'Rozhan Behrouzi' not in domain_en or 'روژان بهروزی' not in domain_fa:
+              raise SystemExit('A localized public homepage is not rendering correctly')
 
           home=open('home.html',encoding='utf-8').read()
           if 'ROZNEX' not in home:

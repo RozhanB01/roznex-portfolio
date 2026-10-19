@@ -1,32 +1,28 @@
-# ROZNEX — Custom domain & Google Search Console launch
-Updated: 2026-10-16
+# ROZNEX — Domain and Google Search Console
 
-## Domain status, verified via Vercel
-- Project: `roznex-portfolio`, source `RozhanB01/roznex-portfolio`
-- Domain purchased from LimooHost: `roznexstudio.ir`
-- `roznexstudio.ir` and `www.roznexstudio.ir` are **associated with the project**.
-- `www.roznexstudio.ir` is configured to redirect (HTTP 308) to `roznexstudio.ir`.
-- Vercel domain configuration reports `misconfigured: true`, empty A/CNAME records, and no confirmed website DNS routing. **It is not yet safe to publish a new canonical host.**
-- The registrar changes were submitted from LimooHost's panel. A registered domain and Vercel's verified project association alone do **not** mean the site resolves publicly.
+Updated: 2026-10-19.
 
-## Finish DNS configuration
-1. Check that LimooHost has accepted the registrar nameserver change and that NIC.ir has completed delegation. Requested Vercel nameservers were `ns1.vercel-dns.com` and `ns2.vercel-dns.com`; don't mix these with LimooHost nameservers.
-2. The Vercel **account-level Domains / DNS** page must also have an authoritative DNS zone for `roznexstudio.ir` if using Vercel nameservers. Check that the domain and zone belong to the correct Vercel scope; do not assume adding it to a project creates all records.
-3. If using **LimooHost's DNS instead**, retain LimooHost nameservers and add the **exact A and CNAME values shown in Vercel project Settings → Domains**, including any domain-specific new target values. Don't change unrelated MX/TXT/email records.
-4. Confirm correct records for the apex and `www`, valid HTTPS, the 308 `www` redirect, and working routes such as `/fa/`, `/about/fa/rozhan-behrouzi/`, and `/sitemap.xml`.
-5. If DNS delegation remains pending beyond the registrar's stated window, contact LimooHost and, for .ir delegation problems, NIC.ir. Include the domain, requested nameservers, saved-change timestamp and observed status without sharing passwords.
+## Verified public domain
+- **Primary:** https://roznexstudio.ir
+- **Persian homepage:** https://roznexstudio.ir/fa/
+- **English homepage:** https://roznexstudio.ir/en/
+- **WWW:** https://www.roznexstudio.ir — Vercel config has HTTP 308 redirect to primary host.
+- Vercel domain configuration on 2026-10-19: `misconfigured:false` for both apex and www, authoritative nameservers `ns1.vercel-dns.com` and `ns2.vercel-dns.com`.
+- HTTPS and real publicly accessible English/Persian pages were verified. Do **not** suggest changing registrar DNS again without a new incident.
+- Canonical, sitemap and robots public URLs use `https://roznexstudio.ir`.
 
-## When the host is confirmed accessible (separate code change)
-- Atomically replace the old site origin `https://roznex-portfolio.vercel.app` with `https://roznexstudio.ir` in canonical/hreflang/og/Twitter/JSON-LD, sitemaps, RSS, robots, smoke tests and API public-origin settings.
-- Update the SEO checker to validate the final domain and all 42 public pages.
-- Redirect old public URLs to matching new URLs after checking routing and API implications. Preserve paths and queries.
-- Test primary Persian and English URLs and re-run Github CI.
+## Deployment safety checks
+- Run the GitHub "ROZNEX quality" job after each commit: it validates domain-specific SEO, image budgets and source integrity.
+- Run "Production Smoke Test": it now validates the public `.ir` pages, 308 www redirect, canonical URL and sitemap in addition to API/admin checks.
+- "ROZNEX Lighthouse Performance" measures **mobile** `/fa/` and **desktop** `/en/` on the actual canonical host (not the legacy Vercel hostname).
+- Never claim a GitHub commit is public until Vercel reports the matching deployed commit SHA and status READY.
 
-## Search Console (free, independent of GSC Wizard)
-1. Open https://search.google.com/search-console and add the verified `roznexstudio.ir` domain property, or choose URL Prefix for `https://roznexstudio.ir/`.
-2. Follow Google's DNS TXT verification instructions in the **active authoritative DNS service**. This step needs the Google-provided verification value; never invent it.
-3. Submit `https://roznexstudio.ir/sitemap.xml` after canonical URLs have been switched and validated.
-4. Use URL Inspection for `/fa/`, `/about/fa/rozhan-behrouzi/` and service pages; monitor index coverage, impressions and clicks.
-5. Review PageSpeed Insights and real mobile rendering before claiming launch completeness.
+## Google Search Console — still requires account action
+1. Open https://search.google.com/search-console using the Google account that should own ROZNEX.
+2. Add a **Domain property** for `roznexstudio.ir` (recommended). Google will show a unique DNS TXT value.
+3. Add that exact TXT record in the domain's active **Vercel DNS** zone. Do not guess a TXT token. Let the record propagate and press Verify in Search Console. A URL-prefix property is an alternative if Domain verification cannot be completed.
+4. Submit sitemap `https://roznexstudio.ir/sitemap.xml`.
+5. Inspect `https://roznexstudio.ir/fa/`, `https://roznexstudio.ir/en/` and `https://roznexstudio.ir/about/fa/rozhan-behrouzi/` for indexing, then monitor actual impressions/queries, including روژان بهروزی and Rozhan Behrouzi.
+6. Search results/first-page rankings are not guaranteed. Do not fabricate performance statistics or credentials.
 
-**SEO goal:** prioritize accurate identity for `روژان بهروزی` / `Rozhan Behrouzi` / ROZNEX and practical service pages. Nobody can guarantee first position for ambiguous words such as `روژان`.
+The GSC Wizard connected tool is not usable until its own subscription is active; Google's Search Console itself can be used for free directly.

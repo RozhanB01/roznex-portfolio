@@ -26,7 +26,7 @@ jobs:
       - name: Measure mobile Persian homepage
         run: |
           for attempt in 1 2 3; do
-            if npx --yes lighthouse@12 https://roznex-portfolio.vercel.app/fa/ \
+            if npx --yes lighthouse@12 https://roznexstudio.ir/fa/ \
               --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" \
               --only-categories=performance --output=json --output-path=lighthouse-mobile-fa.json --quiet; then
               break
@@ -38,7 +38,7 @@ jobs:
       - name: Measure desktop English homepage
         run: |
           for attempt in 1 2 3; do
-            if npx --yes lighthouse@12 https://roznex-portfolio.vercel.app/ \
+            if npx --yes lighthouse@12 https://roznexstudio.ir/en/ \
               --preset=desktop --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" \
               --only-categories=performance --output=json --output-path=lighthouse-desktop-en.json --quiet; then
               break
