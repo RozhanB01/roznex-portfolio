@@ -111,3 +111,10 @@ body[dir="rtl"] .case li{
     font-size:1.42rem!important
   }
 }
+
+/* Explicitly distinguish working demos from in-development concepts in the portfolio. */
+.work-body .work-state{display:inline-flex;align-self:flex-start;align-items:center;border:1px solid var(--line);border-radius:999px;padding:.3rem .7rem;background:rgba(255,255,255,.55);font-size:.7rem;line-height:1.6;letter-spacing:0;font-weight:600;color:#46423d}
+.work-body .work-state.development{background:#eee4d7;color:#594c3a}
+.work-body .work-state.published{background:#e4ede5;color:#315940}
+.work-card:focus-visible{outline:3px solid #756248;outline-offset:4px}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
