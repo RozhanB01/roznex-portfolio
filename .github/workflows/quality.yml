@@ -17,5 +17,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Check SEO Agent JavaScript syntax
+        run: node --check scripts/seo-agent.mjs
       - name: Run repository audit
         run: npm run check
