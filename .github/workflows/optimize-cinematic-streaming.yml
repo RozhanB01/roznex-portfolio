@@ -1,0 +1,69 @@
+name: ROZNEX Optimize Cinematic Streaming
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/optimize-cinematic-streaming.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: roznex-cinematic-stream
+  cancel-in-progress: false
+
+jobs:
+  encode:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+      - name: Create fast-start, high-detail streaming versions
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC=assets/roznex-cinematic-hero-enhanced.mp4
+          test -s "$SRC"
+          ffprobe -v error -show_entries stream=codec_name,width,height,bit_rate -show_entries format=duration,size \
+            -of json "$SRC"
+          # The original enhanced master remains untouched. Scale down oversized
+          # AI-upscaled pixels rather than forcing each viewer to download 14MB.
+          ffmpeg -hide_banner -loglevel error -y -i "$SRC" \
+            -map 0:v:0 -map 0:a:0? -vf "scale='min(1920,iw)':-2:flags=lanczos" \
+            -c:v libx264 -preset slow -crf 19 -maxrate 4300k -bufsize 8600k \
+            -pix_fmt yuv420p -profile:v high -movflags +faststart \
+            -c:a aac -b:a 128k \
+            assets/roznex-cinematic-stream-desktop.mp4
+          ffmpeg -hide_banner -loglevel error -y -i "$SRC" \
+            -map 0:v:0 -map 0:a:0? -vf "scale='min(1050,iw)':-2:flags=lanczos" \
+            -c:v libx264 -preset slow -crf 21 -maxrate 1900k -bufsize 3800k \
+            -pix_fmt yuv420p -profile:v high -movflags +faststart \
+            -c:a aac -b:a 112k \
+            assets/roznex-cinematic-stream-mobile.mp4
+          ffmpeg -hide_banner -loglevel error -y -ss 1.0 -i "$SRC" \
+            -frames:v 1 -vf "scale=1280:-2:flags=lanczos" \
+            -c:v libwebp -q:v 81 assets/roznex-cinematic-stream-poster.webp
+          for file in assets/roznex-cinematic-stream-*.mp4; do
+            ffprobe -v error -show_entries stream=codec_name,width,height -show_entries format=duration,size -of json "$file"
+          done
+          test "$(stat -c %s assets/roznex-cinematic-stream-desktop.mp4)" -lt 11000000
+          test "$(stat -c %s assets/roznex-cinematic-stream-mobile.mp4)" -lt 5000000
+          test "$(stat -c %s assets/roznex-cinematic-stream-poster.webp)" -lt 180000
+          ls -lh assets/roznex-cinematic-stream-*
+      - name: Commit streaming derivatives
+        run: |
+          set -euo pipefail
+          git add assets/roznex-cinematic-stream-*
+          if git diff --staged --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'perf: add fast-start adaptive HD hero derivatives with original audio'
+          git push origin HEAD:main
