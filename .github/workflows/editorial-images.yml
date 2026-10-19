@@ -1,0 +1,69 @@
+name: ROZNEX Premium Editorial Photography
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/editorial-images.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: roznex-premium-images
+  cancel-in-progress: true
+
+jobs:
+  create-assets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install 'Pillow>=11,<12'
+      - name: Download approved Unsplash source photos and optimize
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from urllib.request import Request, urlopen
+          from io import BytesIO
+          from PIL import Image, ImageOps
+
+          images = {
+              'service-industrial-editorial': 'https://images.unsplash.com/photo-1776090188275-72957bae4ed7?auto=format&fit=crop&w=1500&q=85',
+              'service-web-studio-editorial': 'https://images.unsplash.com/photo-1764755932155-dabbee87df7e?auto=format&fit=crop&w=1500&q=85',
+          }
+          for filename, source in images.items():
+              request=Request(source,headers={'User-Agent':'Mozilla/5.0 (compatible; ROZNEXPortfolio/1.0)','Accept':'image/avif,image/webp,image/*'})
+              with urlopen(request,timeout=25) as response:
+                  media=response.headers.get('content-type','')
+                  assert media.startswith('image/'), (filename,media)
+                  data=response.read(7_000_000)
+              with Image.open(BytesIO(data)) as source_image:
+                  image=ImageOps.exif_transpose(source_image).convert('RGB')
+                  image.thumbnail((1200,840),Image.Resampling.LANCZOS)
+                  destination=Path('assets/'+filename+'.webp')
+                  image.save(destination,'WEBP',quality=78,method=6)
+                  size=destination.stat().st_size
+                  assert size<=220000, f'{filename}: {size} bytes exceeds 220KB'
+                  print(f'{destination}: {image.size}, {size} bytes')
+          PY
+      - name: Commit only licensed, optimized editorial images
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add assets/service-industrial-editorial.webp assets/service-web-studio-editorial.webp
+          if git diff --staged --quiet; then
+            echo 'Editorial photography already up-to-date'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'design: add optimized premium editorial service photographs'
+          git push origin HEAD:main
