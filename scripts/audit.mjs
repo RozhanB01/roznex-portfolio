@@ -244,14 +244,18 @@ if(heroBytes>260000)fail('hero image exceeds 260 KB budget');
 else ok('hero image budget ('+Math.round(heroBytes/1024)+' KiB)');
 
 
-/* Responsive hero is non-negotiable: mobile should not download the 1920px hero. */
-for(const homepage of ['index.html','fa/index.html']){
+/* Preserve responsive original artwork below the user-approved cinematic entry. */
+for(const homepage of ['index.html','fa/index.html','en/index.html']){
   const page=fs.readFileSync(path.join(root,homepage),'utf8');
-  const prefix=homepage==='fa/index.html'?'../':'./';
+  const prefix=homepage==='index.html'?'./':'../';
   if(!page.includes(prefix+'assets/roznex-hero-960.webp 960w')||
      !page.includes(prefix+'assets/roznex-hero-1280.webp 1280w')||
-     !page.includes('imagesizes="100vw"')||
-     !page.includes('sizes="100vw"'))fail(homepage+' missing responsive hero image and matching preload');
+     !page.includes('roznex-cinematic-hero-mobile.mp4')||
+     !page.includes('rel="preload" as="image" href="'+prefix+'assets/roznex-cinematic-poster.webp"')){
+    fail(homepage+' must retain responsive original hero and preload cinematic poster');
+  }
+  if(!page.includes('styles.css?v=cinema-20261019'))
+    fail(homepage+' missing cinematic CSS cache version');
 }
 for(const [name,budget] of [['roznex-hero-960.webp',75000],['roznex-hero-1280.webp',100000]]){
   const size=fs.statSync(path.join(root,'assets',name)).size;
