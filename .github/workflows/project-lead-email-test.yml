@@ -1,10 +1,7 @@
 name: ROZNEX Project Form 20-User Email Test
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/project-lead-email-test.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
