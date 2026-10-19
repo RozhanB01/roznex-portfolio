@@ -1,0 +1,35 @@
+name: ROZNEX Project Form 20-User Email Test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/project-lead-email-test.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: roznex-project-lead-email-test
+  cancel-in-progress: false
+
+jobs:
+  twenty-synthetic-leads:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Submit twenty plainly labeled test requests respecting real rate limit
+        shell: bash
+        run: node scripts/qa-project-leads.mjs
+      - name: Save simulated test outcomes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: roznex-20-lead-email-qa
+          path: reports/lead-email-qa.json
+          retention-days: 30
+          if-no-files-found: warn
