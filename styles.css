@@ -1853,3 +1853,42 @@ a:focus-visible,button:focus-visible{outline:3px solid #a77a45;outline-offset:4p
 .about .about-visual .about-visual-overlay strong{max-width:none;font-size:.7rem;line-height:1.6;font-weight:450;text-align:end;color:#6f665c}
 body.fa .about .about-visual .about-visual-overlay strong{text-align:end}
 @media(max-width:760px){.about .about-visual{order:2;width:min(100%,27rem);min-height:0!important;aspect-ratio:auto!important}.about .about-visual .about-visual-overlay{flex-wrap:wrap}.about .about-visual img{aspect-ratio:1/1}}
+
+/* User-approved cinematic entrance — standalone full-screen video BEFORE the old hero. */
+.cinema-entry{position:relative;isolation:isolate;overflow:hidden;width:100%;height:100svh;min-height:0;background:#e9e0d3 url('/assets/roznex-cinematic-poster.webp') center/cover no-repeat;color:#fff;perspective:1400px}
+.cinema-video-layer,.cinema-video-layer video,.cinema-atmosphere,.cinema-depth{position:absolute;inset:0;width:100%;height:100%}
+.cinema-video-layer{z-index:0;overflow:hidden;pointer-events:none}
+.cinema-video-layer video{object-fit:cover;object-position:50% 48%;display:block;background:#ded5ca}
+.cinema-atmosphere{z-index:1;pointer-events:none;background:linear-gradient(180deg,rgba(15,20,24,.04) 0%,transparent 46%,rgba(9,13,17,.12) 63%,rgba(9,13,17,.68) 100%)}
+.cinema-depth{z-index:2;pointer-events:none;transform:perspective(1400px) rotateY(var(--cinema-ry,0deg)) rotateX(var(--cinema-rx,0deg));transform-style:preserve-3d;transition:transform .42s ease-out}
+.cinema-plane{position:absolute;top:19%;height:53%;width:17%;max-width:270px;border:1px solid rgba(255,251,231,.18);border-radius:1.25rem;background:linear-gradient(100deg,rgba(255,255,255,.045),rgba(255,255,255,.008));box-shadow:inset 0 0 50px rgba(255,244,219,.04);transform-style:preserve-3d}
+.cinema-plane-left{left:4%;transform:translateZ(85px) rotateY(21deg)}
+.cinema-plane-right{right:4%;transform:translateZ(100px) rotateY(-21deg)}
+.cinema-orbit{position:absolute;left:50%;top:48%;width:min(67vw,76vh);aspect-ratio:1;border:1px solid rgba(254,238,210,.18);border-radius:50%;transform:translate3d(-50%,-50%,30px) rotateX(75deg);box-shadow:0 0 50px rgba(236,208,165,.08)}
+.cinema-bottom{position:absolute;z-index:4;inset:auto var(--pad) clamp(4.15rem,9vh,6rem);display:flex;justify-content:space-between;align-items:end;gap:1.4rem;pointer-events:none}
+.cinema-intro{max-width:35rem;text-shadow:0 2px 16px rgba(0,0,0,.3)}
+.cinema-eyebrow{font:600 .62rem/1.5 Manrope,sans-serif;letter-spacing:.2em;color:#f3d8ae}
+.cinema-caption{margin:.85rem 0 .3rem;font-size:clamp(1.7rem,3.4vw,3.25rem);line-height:1.35;font-weight:500;letter-spacing:-.035em}
+.cinema-subtitle{font-size:clamp(.72rem,1vw,.98rem);line-height:1.85;color:#f4ecdf}
+.cinema-controls{display:flex;align-items:center;gap:.6rem;direction:ltr;pointer-events:auto}
+.cinema-control{width:2.8rem;height:2.8rem;display:grid;place-items:center;border:1px solid rgba(255,255,255,.62);border-radius:999px;background:rgba(21,28,30,.27);backdrop-filter:blur(7px);color:#fff;font:600 1.13rem Manrope,sans-serif;cursor:pointer}
+.cinema-control:hover{background:rgba(21,27,30,.65)}.cinema-control:focus-visible,.cinema-enter:focus-visible{outline:2px solid #fff;outline-offset:4px}
+.cinema-enter{position:absolute;z-index:4;bottom:1rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.2rem;text-decoration:none;text-shadow:0 2px 12px rgba(0,0,0,.6);color:#fff;text-align:center;font-size:.67rem;line-height:1.45;padding:.3rem .65rem}
+.cinema-enter span:last-child{font-size:1.4rem;animation:cinema-cue 2s ease-in-out infinite}
+@keyframes cinema-cue{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+#studio-experience{scroll-margin-top:0}
+body.fa .cinema-intro{text-align:right}body.fa .cinema-bottom{direction:rtl}
+@media(max-width:760px){
+  .cinema-entry{height:100svh;min-height:0}
+  .cinema-video-layer video{object-position:43% 49%}
+  .cinema-plane{top:25%;height:40%;width:18%;opacity:.52}
+  .cinema-plane-left{left:-9%}.cinema-plane-right{right:-9%}.cinema-orbit{width:115vw;opacity:.42}
+  .cinema-bottom{inset:auto 1.25rem 4.75rem;gap:.6rem}
+  .cinema-intro{max-width:calc(100% - 6rem)}
+  .cinema-eyebrow{font-size:.54rem;letter-spacing:.09em}
+  .cinema-caption{font-size:clamp(1.35rem,5.6vw,2.05rem);line-height:1.55}
+  .cinema-subtitle{font-size:.69rem}
+  .cinema-control{width:2.35rem;height:2.35rem}
+  .cinema-enter{bottom:.85rem;font-size:.61rem}
+}
+@media(prefers-reduced-motion:reduce){.cinema-video-layer video{display:none}.cinema-depth{transform:none!important;transition:none}.cinema-enter span:last-child{animation:none}}

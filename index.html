@@ -31,7 +31,7 @@
   <link rel="alternate" hreflang="x-default" href="https://roznexstudio.ir/">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="alternate" type="application/rss+xml" title="ROZNEX Insights RSS" href="/insights/rss.xml">
-  <link rel="preload" as="image" href="./assets/roznex-hero-reference.webp" imagesrcset="./assets/roznex-hero-960.webp 960w, ./assets/roznex-hero-1280.webp 1280w, ./assets/roznex-hero-reference.webp 1920w" imagesizes="100vw" fetchpriority="high">
+  <link rel="preload" as="image" href="./assets/roznex-cinematic-poster.webp" fetchpriority="high">
   <title>Rozhan Behrouzi | Web Design, AI & SEO — ROZNEX</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23eee6dc'/%3E%3Cpath d='M15 47V17h19c10 0 16 5 16 14 0 7-4 11-10 13l10 3-6 9-19-14h-1v5zm9-21v8h10c4 0 6-1 6-4s-2-4-6-4z' fill='%2311141b'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -73,9 +73,31 @@
   </nav>
 
   <main id="main-content">
-    <section class="hero" aria-labelledby="hero-title">
+    <section class="cinema-entry" data-cinema-entry aria-label="ROZNEX cinematic entrance">
+      <div class="cinema-video-layer" aria-hidden="true">
+        <video data-cinema-video autoplay muted playsinline loop preload="auto" poster="./assets/roznex-cinematic-poster.webp">
+          <source src="./assets/roznex-cinematic-hero-mobile.mp4" media="(max-width:760px)" type="video/mp4">
+          <source src="./assets/roznex-cinematic-hero.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="cinema-atmosphere" aria-hidden="true"></div>
+      <div class="cinema-depth" aria-hidden="true"><span class="cinema-plane cinema-plane-left"></span><span class="cinema-plane cinema-plane-right"></span><span class="cinema-orbit"></span></div>
+      <div class="cinema-bottom">
+        <div class="cinema-intro">
+          <span class="cinema-eyebrow">ROZNEX / DIGITAL DIMENSIONS</span>
+          <p class="cinema-caption">Enter the digital world</p>
+          <span class="cinema-subtitle">Intelligence, design and immersive experiences</span>
+        </div>
+        <div class="cinema-controls" role="group" aria-label="Video controls">
+          <button type="button" class="cinema-control" data-cinema-pause data-play-label="Play video" data-pause-label="Pause video" aria-label="Pause video"><span data-cinema-play-icon aria-hidden="true">Ⅱ</span></button>
+          <button type="button" class="cinema-control" data-cinema-audio data-mute-label="Enable sound" data-unmute-label="Mute sound" aria-label="Enable sound" aria-pressed="false"><span data-cinema-audio-icon aria-hidden="true">♪</span></button>
+        </div>
+      </div>
+      <a class="cinema-enter" href="#studio-experience"><span>Continue into ROZNEX</span><span aria-hidden="true">↓</span></a>
+    </section>
+    <section class="hero" id="studio-experience" aria-labelledby="hero-title">
       <div class="hero-media" aria-hidden="true">
-        <img src="./assets/roznex-hero-reference.webp" srcset="./assets/roznex-hero-960.webp 960w, ./assets/roznex-hero-1280.webp 1280w, ./assets/roznex-hero-reference.webp 1920w" sizes="100vw" alt="" width="1920" height="1080" loading="eager" fetchpriority="high" decoding="async">
+        <img src="./assets/roznex-hero-reference.webp" srcset="./assets/roznex-hero-960.webp 960w, ./assets/roznex-hero-1280.webp 1280w, ./assets/roznex-hero-reference.webp 1920w" sizes="100vw" alt="" width="1920" height="1080" loading="lazy" fetchpriority="low" decoding="async">
         <div class="media-wash"></div>
       </div>
       <div class="hero-spatial-scene" aria-hidden="true">
@@ -330,6 +352,6 @@
     </section>
     </main>
 
-  <script src="./script.js?v=performance-20261016-5"></script>
+  <script src="./script.js?v=cinema-20261019"></script>
 </body>
 </html>

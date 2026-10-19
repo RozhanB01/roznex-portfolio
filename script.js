@@ -6,6 +6,7 @@ const menu=document.querySelector('.menu-toggle');
 const mobileNav=document.querySelector('.mobile-nav');
 const hero=document.querySelector('.hero');
 const heroMedia=document.querySelector('.hero-media');
+const cinemaEntry=document.querySelector('[data-cinema-entry]');
 const glassCards=[...document.querySelectorAll('.glass-card')];
 const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const finePointer=matchMedia('(pointer:fine)').matches;
@@ -26,9 +27,10 @@ const updateScroll=()=>{
   if(progressBar)progressBar.style.transform=`scaleX(${progress.toFixed(4)})`;
   header.classList.toggle('scrolled',pageY>24);
 
-  // Hero work ends once the user is below the first viewport.
-  if(pageY<innerHeight*1.2||lastHeroProgress<1){
-    const heroProgress=Math.min(Math.max(pageY/(innerHeight*.9),0),1);
+  // The old hero starts after the full-screen video; its scroll progress is local.
+  const heroLocalScroll=Math.max(0,pageY-(cinemaEntry?.offsetHeight||0));
+  if(heroLocalScroll<innerHeight*1.2||lastHeroProgress<1){
+    const heroProgress=Math.min(Math.max(heroLocalScroll/(innerHeight*.9),0),1);
     if(heroProgress!==lastHeroProgress){
       const value=heroProgress.toFixed(4);
       hero.style.setProperty('--hero-progress',value);
@@ -36,8 +38,8 @@ const updateScroll=()=>{
       if(portfolioCuration)portfolioCuration.style.setProperty('--hero-progress',value);
       lastHeroProgress=heroProgress;
     }
-    if(!reduceMotion&&innerWidth>760&&pageY<innerHeight*1.2){
-      heroMedia.style.transform=`translate3d(0,${Math.min(pageY*.09,78)}px,0) scale(${1.018+heroProgress*.032})`;
+    if(!reduceMotion&&innerWidth>760&&pageY>=(cinemaEntry?.offsetHeight||0)&&heroLocalScroll<innerHeight*1.2){
+      heroMedia.style.transform=`translate3d(0,${Math.min(heroLocalScroll*.09,78)}px,0) scale(${1.018+heroProgress*.032})`;
     }
   }
   ticking=false;
@@ -569,3 +571,53 @@ const orbitVisibility=new IntersectionObserver(entries=>{
   hero.classList.toggle('hero-offscreen',!entries[0].isIntersecting);
 },{threshold:0});
 orbitVisibility.observe(hero);
+
+/* Full-screen video controls, 3D pointer depth and offscreen power saving. */
+if(cinemaEntry){
+ const video=cinemaEntry.querySelector('[data-cinema-video]');
+ const play=cinemaEntry.querySelector('[data-cinema-pause]');
+ const sound=cinemaEntry.querySelector('[data-cinema-audio]');
+ const playIcon=cinemaEntry.querySelector('[data-cinema-play-icon]');
+ const soundIcon=cinemaEntry.querySelector('[data-cinema-audio-icon]');
+ let manuallyPaused=false;
+ video.muted=true;video.defaultMuted=true;
+ const sync=()=>{
+  play.setAttribute('aria-label',video.paused?play.dataset.playLabel:play.dataset.pauseLabel);
+  play.setAttribute('aria-pressed',String(!video.paused));
+  playIcon.textContent=video.paused?'▶':'Ⅱ';
+  sound.setAttribute('aria-label',video.muted?sound.dataset.muteLabel:sound.dataset.unmuteLabel);
+  sound.setAttribute('aria-pressed',String(!video.muted));
+  soundIcon.textContent=video.muted?'♪':'♫';
+ };
+ play.addEventListener('click',()=>{
+  if(video.paused){manuallyPaused=false;video.play().catch(sync)}
+  else{manuallyPaused=true;video.pause()}sync();
+ });
+ sound.addEventListener('click',()=>{
+  video.muted=!video.muted;
+  if(!video.muted&&video.paused&&!manuallyPaused)video.play().catch(()=>{});
+  sync();
+ });
+ video.addEventListener('play',sync);
+ video.addEventListener('pause',sync);
+ video.addEventListener('volumechange',sync);
+ if(reduceMotion)video.pause();
+ else video.play().catch(sync);
+ sync();
+ new IntersectionObserver(entries=>{
+  if(!entries[0].isIntersecting){video.pause();return}
+  if(!reduceMotion&&!manuallyPaused)video.play().catch(sync);
+ },{threshold:.1}).observe(cinemaEntry);
+ if(interactivePointer){
+  let lastPointer=0;
+  cinemaEntry.addEventListener('pointermove',e=>{
+   if(e.timeStamp-lastPointer<32)return;
+   lastPointer=e.timeStamp;
+   cinemaEntry.style.setProperty('--cinema-ry',((e.clientX/innerWidth-.5)*5).toFixed(2)+'deg');
+   cinemaEntry.style.setProperty('--cinema-rx',((.5-e.clientY/innerHeight)*4).toFixed(2)+'deg');
+  },{passive:true});
+  cinemaEntry.addEventListener('pointerleave',()=>{
+   cinemaEntry.style.setProperty('--cinema-ry','0deg');cinemaEntry.style.setProperty('--cinema-rx','0deg');
+  },{passive:true});
+ }
+}
