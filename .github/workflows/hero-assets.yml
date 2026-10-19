@@ -52,6 +52,13 @@ jobs:
                   assert created<original_bytes, f'{dest}: optimized variant was not smaller than source'
                   print(f'{dest}: {created:,} bytes; dimensions: {target_width} x {target_height}; source: {original_bytes:,} bytes')
           PY
+      - name: Export untouched full-resolution hero artwork
+        uses: actions/upload-artifact@v4
+        with:
+          name: roznex-original-hero-artwork
+          path: assets/roznex-hero-reference.webp
+          if-no-files-found: error
+          retention-days: 14
       - name: Commit optimized variants if different
         shell: bash
         run: |
