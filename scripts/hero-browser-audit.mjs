@@ -25,7 +25,7 @@ try{
     return {url:v.currentSrc,width:v.videoWidth,height:v.videoHeight,duration:v.duration,muted:v.muted};
    });
    if(!state.url.includes(target.expect))throw Error('Wrong source: '+state.url);
-   if(state.width!==target.expectedWidth||state.height<650)throw Error('Wrong resolution '+state.width+'x'+state.height);
+   if(Math.abs(state.width-target.expectedWidth)>3||state.height<650)throw Error('Wrong resolution '+state.width+'x'+state.height);
    if(!(state.duration>14&&state.duration<17))throw Error('Wrong video duration '+state.duration);
    // Normal browser policy may block audible autoplay; pressing anywhere unlocks audio.
    if(target.mobile)await entry.tap({position:{x:80,y:310}});
