@@ -51,6 +51,14 @@ function internalTargets(html){
   return out;
 }
 
+// Keep non-indexed legal and contact pages on the live canonical domain too.
+const privacy=fs.readFileSync(path.join(root,'privacy/index.html'),'utf8');
+if(canonical(privacy)!==origin+'/privacy/')fail('privacy page canonical must use the primary live domain');
+const contact=fs.readFileSync(path.join(root,'start/index.html'),'utf8');
+if(!contact.includes('mailto:rozhanbehrouzi79@gmail.com'))fail('project inquiry must expose a direct-contact fallback');
+const familyCase=fs.readFileSync(path.join(root,'work/fa/familyos/index.html'),'utf8');
+if(!familyCase.includes('<h1>FAMILINK</h1>'))fail('public family project naming not up to date');
+
 const sitemap=fs.readFileSync(path.join(root,'sitemap.xml'),'utf8');
 const urls=[...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>m[1]);
 if(new Set(urls).size!==urls.length)fail('sitemap contains duplicate URLs');
