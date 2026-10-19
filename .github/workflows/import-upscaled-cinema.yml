@@ -1,0 +1,71 @@
+name: ROZNEX Import Upscaled Cinematic Footage
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/import-upscaled-cinema.yml'
+permissions:
+  contents: write
+concurrency:
+  group: roznex-import-upscaled-cinema
+  cancel-in-progress: false
+jobs:
+  encode:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+      - name: Download enhanced original footage and verify source
+        shell: bash
+        env:
+          ENHANCED_VIDEO_URL: 'https://dnznrvs05pmza.cloudfront.net/51a0b33c-809d-42bb-ac18-740d3176103d.mp4?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiZWRkNWNjYjE2ZTMzODFlNyIsImJ1Y2tldCI6InJ1bndheS10YXNrLWFydGlmYWN0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MjU0MTM2MX0.fK8abs205IP6RYbTGGitvAVt9ur2zyrPzxcMme-zJok'
+        run: |
+          set -euo pipefail
+          curl -L -f -sS --retry 3 --connect-timeout 20 --max-time 190 "$ENHANCED_VIDEO_URL" -o /tmp/roznex-enhanced-master.mp4
+          ffprobe -hide_banner -v error -select_streams v:0 -show_entries stream=width,height,duration,codec_name,pix_fmt -of default=noprint_wrappers=1 /tmp/roznex-enhanced-master.mp4
+          width="$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=p=0 /tmp/roznex-enhanced-master.mp4)"
+          test "$width" -ge 3000
+          ffprobe -v error -select_streams a:0 -show_entries stream=codec_name,channels -of default=noprint_wrappers=1 assets/roznex-cinematic-hero-audiofix.mp4
+      - name: Encode high-fidelity desktop MP4 with verified original audio
+        shell: bash
+        run: |
+          set -euo pipefail
+          ffmpeg -hide_banner -nostdin -loglevel error -y \
+            -i /tmp/roznex-enhanced-master.mp4 -i assets/roznex-cinematic-hero-audiofix.mp4 \
+            -map 0:v:0 -map 1:a:0 -t 15.067 -vf 'fps=30,scale=1920:-2:flags=lanczos,format=yuv420p' \
+            -c:v libx264 -preset medium -crf 19 -maxrate 8500k -bufsize 17000k -profile:v high -level:v 4.2 -g 60 \
+            -c:a aac -b:a 192k -ar 48000 -ac 2 -movflags +faststart \
+            assets/roznex-cinematic-hero-enhanced.mp4
+      - name: Encode mobile HD from enhanced master (not low-resolution original)
+        shell: bash
+        run: |
+          set -euo pipefail
+          ffmpeg -hide_banner -nostdin -loglevel error -y \
+            -i /tmp/roznex-enhanced-master.mp4 -i assets/roznex-cinematic-hero-audiofix.mp4 \
+            -map 0:v:0 -map 1:a:0 -t 15.067 -vf 'fps=30,scale=1152:-2:flags=lanczos,format=yuv420p' \
+            -c:v libx264 -preset medium -crf 20 -maxrate 4500k -bufsize 9000k -profile:v high -level:v 4.0 -g 60 \
+            -c:a aac -b:a 160k -ar 48000 -ac 2 -movflags +faststart \
+            assets/roznex-cinematic-hero-enhanced-mobile.mp4
+          for v in assets/roznex-cinematic-hero-enhanced*.mp4; do
+            echo "$v"
+            ffprobe -v error -show_entries format=size,duration:stream=index,codec_name,codec_type,width,height -of json "$v"
+            test "$(ffprobe -v error -select_streams a:0 -show_entries stream=index -of csv=p=0 "$v" | wc -l)" -ge 1
+          done
+          test "$(stat -c %s assets/roznex-cinematic-hero-enhanced.mp4)" -lt 23000000
+          test "$(stat -c %s assets/roznex-cinematic-hero-enhanced-mobile.mp4)" -lt 11000000
+      - name: Commit production-ready enhanced video variants
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add assets/roznex-cinematic-hero-enhanced.mp4 assets/roznex-cinematic-hero-enhanced-mobile.mp4
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'media: import enhanced cinematic hero with preserved audio'
+          git push origin HEAD:main
