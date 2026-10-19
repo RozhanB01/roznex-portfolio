@@ -254,7 +254,7 @@ for(const homepage of ['index.html','fa/index.html','en/index.html']){
      !page.includes('rel="preload" as="image" href="'+prefix+'assets/roznex-cinematic-poster.webp"')){
     fail(homepage+' must retain responsive original hero and preload cinematic poster');
   }
-  if(!page.includes('styles.css?v=cinema-20261019'))
+  if(!page.includes('styles.css?v=cinematic-hq-sound-2'))
     fail(homepage+' missing cinematic CSS cache version');
 }
 for(const [name,budget] of [['roznex-hero-960.webp',75000],['roznex-hero-1280.webp',100000]]){
