@@ -2067,3 +2067,19 @@ body.fa .cinema-intro{text-align:right}body.fa .cinema-bottom{direction:rtl}
  .topbar .menu-toggle:focus-visible{outline:2px solid #a77a45;outline-offset:3px}
  .hero-media,body.fa .hero-media{background:#ebe0d4 url('/assets/roznex-hero-960.webp') center 43% / cover no-repeat}
 }
+
+/* Mobile navigation: keep the header compact and touch targets accessible. */
+@media (max-width:760px){
+ .topbar .main-nav{display:none!important}
+ .topbar .menu-toggle{display:flex!important;flex-direction:column;align-items:center;justify-content:center;flex:0 0 44px}
+ .topbar .top-actions{gap:.5rem!important;min-width:0}
+ .topbar .talk-pill{min-height:44px;padding:.7rem .85rem!important;gap:.4rem!important;white-space:nowrap}
+ .topbar .lang{min-width:44px;min-height:44px;justify-content:center}
+ .topbar .logo{flex-shrink:0}
+ .mobile-nav:not([hidden]){display:flex;flex-direction:column;max-height:calc(100dvh - 4.5rem);overflow-y:auto}
+ .mobile-nav[hidden]{display:none!important}
+}
+@media (max-width:390px){
+ .topbar .talk-pill{font-size:.65rem!important;padding:.65rem!important}
+ .topbar .top-actions{gap:.25rem!important}
+}
