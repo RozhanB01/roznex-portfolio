@@ -50,23 +50,23 @@
     <form id="projectForm">
       <div class="hp" aria-hidden="true"><label>Website<input id="website" tabindex="-1" autocomplete="off"></label></div>
       <fieldset class="form-step" data-step="1"><legend>اطلاعات تماس</legend><div class="fields">
-        <label class="field"><span>نام و نام خانوادگی *</span><input id="name" required autocomplete="name"></label>
-        <label class="field"><span>نام شرکت / برند</span><input id="company" autocomplete="organization"></label>
-        <label class="field"><span>شماره موبایل *</span><input id="mobile" required inputmode="tel" autocomplete="tel"></label>
-        <label class="field"><span>ایمیل *</span><input id="email" required type="email" autocomplete="email"></label>
+        <label class="field"><span>نام و نام خانوادگی *</span><input id="name" required autocomplete="name" maxlength="120"></label>
+        <label class="field"><span>نام شرکت / برند</span><input id="company" autocomplete="organization" maxlength="160"></label>
+        <label class="field"><span>شماره موبایل *</span><input id="mobile" required inputmode="tel" type="tel" autocomplete="tel" maxlength="24"></label>
+        <label class="field"><span>ایمیل *</span><input id="email" required type="email" autocomplete="email" maxlength="254"></label>
       </div><p class="privacy-note">اطلاعات تماس و پروژه فقط برای بررسی درخواست و پاسخ به شما استفاده می‌شود. <a href="/privacy/" target="_blank" rel="noreferrer">حریم خصوصی</a></p></fieldset>
       <fieldset class="form-step" data-step="2" hidden><legend>جزئیات پروژه</legend><div class="fields">
         <label class="field"><span>نوع پروژه *</span><select id="type" required>
           <option value="">انتخاب کنید</option><option>سایت شخصی / رزومه</option><option>سایت شرکتی</option><option>سایت فروشگاهی</option><option>سایت صنعتی</option><option>لندینگ‌پیج</option><option>سایت اختصاصی / پریمیوم</option><option>پلتفرم / پنل تحت وب</option><option>هوش مصنوعی / اتوماسیون</option><option>سئو / رشد</option><option>هنوز مطمئن نیستم</option>
         </select></label>
-        <label class="field"><span>عنوان پروژه *</span><input id="project" required placeholder="مثلاً طراحی سایت جدید شرکت"></label>
-        <label class="field full"><span>هدف اصلی پروژه *</span><textarea id="goal" required placeholder="می‌خواهید این پروژه چه مشکلی را حل کند یا چه نتیجه‌ای ایجاد کند؟"></textarea></label>
-        <label class="field full"><span>امکانات یا نیازهای مهم</span><textarea id="features" placeholder="مثلاً فروشگاه، چندزبانه، پنل مدیریت، رزرو، سه‌بعدی، اتصال به API و ..."></textarea></label>
+        <label class="field"><span>عنوان پروژه *</span><input id="project" required maxlength="180" placeholder="مثلاً طراحی سایت جدید شرکت"></label>
+        <label class="field full"><span>هدف اصلی پروژه *</span><textarea id="goal" required maxlength="4000" placeholder="می‌خواهید این پروژه چه مشکلی را حل کند یا چه نتیجه‌ای ایجاد کند؟"></textarea></label>
+        <label class="field full"><span>امکانات یا نیازهای مهم</span><textarea id="features" maxlength="4000" placeholder="مثلاً فروشگاه، چندزبانه، پنل مدیریت، رزرو، سه‌بعدی، اتصال به API و ..."></textarea></label>
       </div></fieldset>
       <fieldset class="form-step" data-step="3" hidden><legend>زمان‌بندی و ارسال</legend><div class="fields">
         <label class="field"><span>زمان موردنظر برای شروع</span><select id="timeline"><option>در اولین زمان ممکن</option><option>کمتر از ۱ ماه</option><option>۱ تا ۲ ماه آینده</option><option>۲ تا ۳ ماه آینده</option><option>فعلاً در مرحله بررسی هستم</option></select></label>
         <label class="field"><span>بودجه تقریبی (اختیاری)</span><select id="budget"><option value="">ترجیح می‌دهم بعداً مشخص شود</option><option>کمتر از ۵۰ میلیون تومان</option><option>۵۰ تا ۱۰۰ میلیون تومان</option><option>۱۰۰ تا ۲۰۰ میلیون تومان</option><option>۲۰۰ تا ۴۰۰ میلیون تومان</option><option>بیش از ۴۰۰ میلیون تومان</option></select></label>
-        <label class="field full"><span>توضیحات تکمیلی</span><textarea id="notes" placeholder="لینک سایت فعلی، نمونه‌های موردعلاقه، محدودیت‌ها یا هر نکته مهم دیگر"></textarea></label>
+        <label class="field full"><span>توضیحات تکمیلی</span><textarea id="notes" maxlength="4000" placeholder="لینک سایت فعلی، نمونه‌های موردعلاقه، محدودیت‌ها یا هر نکته مهم دیگر"></textarea></label>
       </div><div class="review" id="review" aria-label="خلاصه درخواست"></div><div class="notice">ثبت این فرم به معنی تأیید پروژه یا اعلام قیمت نیست. ROZNEX ابتدا محدوده و نیاز پروژه را بررسی می‌کند و سپس در صورت تأیید، دسترسی خصوصی قیمت‌گذاری و پیش‌فاکتور صادر می‌شود.</div></fieldset>
       <div class="actions"><span class="save-state" id="saveState">پیش‌نویس به‌صورت خودکار ذخیره می‌شود.</span><div class="action-group"><button class="secondary" id="prevStep" type="button" disabled>مرحله قبل</button><button class="primary" id="nextStep" type="button">مرحله بعد</button><button class="primary" id="submitRequest" type="submit" hidden>ارسال درخواست بررسی</button></div></div>
       <div class="status" id="status" role="status" aria-live="polite"></div>
@@ -152,7 +152,7 @@ $('clearDraft').addEventListener('click',()=>{
 
 form.addEventListener('submit',async e=>{
   e.preventDefault();
-  if(!form.reportValidity())return;
+  if(!form.reportValidity()){setStatus('لطفاً فیلدهای ضروری را کامل و صحیح وارد کنید.',true);return;}
 
   const button=$('submitRequest');
   if(button.disabled)return;
