@@ -118,3 +118,9 @@ body[dir="rtl"] .case li{
 .work-body .work-state.published{background:#e4ede5;color:#315940}
 .work-card:focus-visible{outline:3px solid #756248;outline-offset:4px}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* Stable project imagery and legible focus without changing the brand palette. */
+.work-card img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover}
+.work-card{min-width:0;overflow:hidden}
+.work-card:focus-visible{outline:3px solid #756248;outline-offset:4px}
+@media(max-width:640px){.work-grid{grid-template-columns:minmax(0,1fr)}.hub-hero h1{overflow-wrap:break-word}.work-card img{aspect-ratio:4/3}}
