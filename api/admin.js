@@ -722,6 +722,11 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
             if(h1===0)problems.push('تیتر H1 وجود ندارد');
             if(h1>1)problems.push('بیش از یک H1 وجود دارد');
             if(!doc.querySelector('html')?.getAttribute('lang'))problems.push('زبان صفحه مشخص نشده');
+            if(!doc.querySelector('meta[name="viewport"]'))problems.push('تنظیمات نمایش موبایل موجود نیست');
+            const directives=(doc.querySelector('meta[name="robots"]')?.content||'').toLowerCase();
+            if(directives.includes('noindex'))problems.push('صفحه برای ایندکس شدن بسته شده است');
+            const jsonScripts=doc.querySelectorAll('script[type="application/ld+json"]');
+            jsonScripts.forEach(function(el){try{JSON.parse(el.textContent)}catch{problems.push('ساختار JSON-LD نامعتبر است')}});
           }catch(error){problems.push('دریافت صفحه ناموفق: '+error.message)}
           rows.push({path,status,title,description,problems});
           $('seo-status').textContent='بررسی '+rows.length+' از '+pages.length+' صفحه انجام شد';
