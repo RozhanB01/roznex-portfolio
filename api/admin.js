@@ -222,7 +222,7 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
           </div>
           <div id="seo-results" style="display:grid;gap:12px"></div>
         </div>
-        <div class="note"><h3>مرحله بعد: اتصال Google Search Console</h3><p>برای نمایش کلیک، نمایش، CTR، رتبه و فرصت‌های کلمات کلیدی باید دسترسی مجاز Search Console متصل شود. تغییرات خودکار سایت نیز فقط پس از تأیید مدیر منتشر می‌شوند.</p></div>
+        <div class="note"><h3>اتصال Google Search Console</h3><p>برای دریافت کلیک، نمایش، CTR و رتبه واقعی، ابتدا مالکیت دامنه را در Search Console تأیید کن. اتصال داده‌ها هنوز فعال نشده است و این پنل هیچ عدد ساختگی نمایش نمی‌دهد.</p><p><a href="https://search.google.com/search-console" target="_blank" rel="noopener noreferrer">بازکردن Search Console ↗</a></p><p>پس از تأیید مالکیت، مرحله بعد اتصال امن API با مجوز فقط خواندن خواهد بود. هیچ کلید خصوصی یا رمز عبوری را در این پنل وارد نکن.</p></div>
       </section>
 
       <section class="view" id="sections">
