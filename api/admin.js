@@ -220,7 +220,7 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
             <div class="stat"><span>صفحات بدون توضیحات</span><strong id="seo-descriptions">۰</strong></div>
             <div class="stat"><span>صفحات بدون canonical</span><strong id="seo-canonical">۰</strong></div>
           </div>
-          <div id="seo-results" style="display:grid;gap:12px"></div>
+          <div class="note"><h3>پیشنهادهای اولویت‌بندی‌شده</h3><p>این توصیه‌ها از بررسی واقعی صفحات تولید می‌شوند؛ تغییر خودکار یا انتشار بدون تأیید انجام نمی‌شود.</p></div><div id="seo-advice" style="display:grid;gap:12px"></div><div id="seo-results" style="display:grid;gap:12px"></div>
         </div>
         <div class="card"><div class="toolbar"><h2>آمار واقعی Google Search Console</h2><button type="button" class="btn primary" id="gsc-refresh">دریافت آمار ۲۸ روز اخیر</button></div><p id="gsc-status" role="status">هنوز داده‌ای دریافت نشده است.</p><div class="stats"><div class="stat"><span>کلیک</span><strong id="gsc-clicks">—</strong></div><div class="stat"><span>نمایش</span><strong id="gsc-impressions">—</strong></div><div class="stat"><span>CTR</span><strong id="gsc-ctr">—</strong></div><div class="stat"><span>جایگاه متوسط</span><strong id="gsc-position">—</strong></div></div><div class="section-grid" style="margin-top:1rem"><article class="section-card"><h3>عبارت‌های جست‌وجو</h3><div id="gsc-keywords">—</div></article><article class="section-card"><h3>صفحات برتر</h3><div id="gsc-pages">—</div></article></div></div>
         <div class="note"><h3>اتصال Google Search Console</h3><p>برای دریافت کلیک، نمایش، CTR و رتبه واقعی، ابتدا مالکیت دامنه را در Search Console تأیید کن. اتصال داده‌ها هنوز فعال نشده است و این پنل هیچ عدد ساختگی نمایش نمی‌دهد.</p><p><a href="https://search.google.com/search-console" target="_blank" rel="noopener noreferrer">بازکردن Search Console ↗</a></p><p>پس از تأیید مالکیت، مرحله بعد اتصال امن API با مجوز فقط خواندن خواهد بود. هیچ کلید خصوصی یا رمز عبوری را در این پنل وارد نکن.</p></div>
@@ -761,7 +761,24 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
           rows.push({path,status,title,description,problems});
           $('seo-status').textContent='بررسی '+rows.length+' از '+pages.length+' صفحه انجام شد';
         }
-        latest={generatedAt:new Date().toISOString(),site:location.origin,pages:rows};
+        const recommendations=[];
+        for(const row of rows){
+          for(const issue of row.problems){
+            let priority='کم', action='این مورد را به صورت دستی بررسی و در صورت نیاز اصلاح کن.';
+            if(issue.includes('دریافت صفحه ناموفق')||issue.includes('فایل در دسترس نیست')||issue.includes('noindex')||issue.includes('ایندکس شدن بسته')){priority='بحرانی';action='دسترسی و وضعیت ایندکس صفحه را بررسی کن؛ اگر صفحه باید در گوگل باشد، مانع را رفع کن.'}
+            else if(issue.includes('canonical')){priority='زیاد';action='آدرس canonical صحیح و قابل ایندکس را برای این صفحه تعریف کن.'}
+            else if(issue.includes('متادیسکریپشن')||issue.includes('توضیحات')){priority='متوسط';action='یک توضیح منحصربه‌فرد و مرتبط با نیت جست‌وجوی مخاطب بنویس.'}
+            else if(issue.includes('عنوان صفحه')||issue.includes('H1')){priority='زیاد';action='عنوان و تیتر اصلی را دقیق، مرتبط و منحصربه‌فرد تنظیم کن.'}
+            else if(issue.includes('موبایل')){priority='زیاد';action='تنظیم viewport و نمایش صحیح در موبایل را اصلاح کن.'}
+            else if(issue.includes('JSON-LD نامعتبر')){priority='متوسط';action='ساختار JSON-LD را با ابزار Rich Results Test اعتبارسنجی کن.'}
+            recommendations.push({path:row.path,issue,priority,action});
+          }
+        }
+        const order={'بحرانی':0,'زیاد':1,'متوسط':2,'کم':3};
+        recommendations.sort((a,b)=>order[a.priority]-order[b.priority]);
+        const escapeAdvice=value=>String(value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+        document.getElementById('seo-advice').innerHTML=recommendations.length?recommendations.map(item=>'<article class="section-card" style="padding:14px"><header><h3>'+escapeAdvice(item.priority)+' · '+escapeAdvice(item.issue)+'</h3><span class="status" style="direction:ltr">'+escapeAdvice(item.path)+'</span></header><p>'+escapeAdvice(item.action)+'</p></article>').join(''):'<p>در بررسی پایه، موردی برای پیشنهاد اصلاح پیدا نشد.</p>';
+        latest={generatedAt:new Date().toISOString(),site:location.origin,pages:rows,recommendations};
         $('seo-pages').textContent=pages.length.toLocaleString('fa-IR');
         $('seo-issues').textContent=rows.reduce((n,r)=>n+r.problems.length,0).toLocaleString('fa-IR');
         $('seo-descriptions').textContent=rows.filter(r=>pages.includes(r.path)&&!r.description).length.toLocaleString('fa-IR');
