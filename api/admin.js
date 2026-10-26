@@ -699,6 +699,12 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
       $('seo-run').addEventListener('click',async function(){
         const button=this;button.disabled=true;$('seo-export').disabled=true;$('seo-results').textContent='';$('seo-status').textContent='در حال بررسی '+pages.length+' صفحه...';
         const rows=[];
+        for(const resource of ['/robots.txt','/sitemap.xml','/favicon.svg']){
+          try{
+            const check=await fetch(resource,{credentials:'same-origin',cache:'no-store'});
+            if(!check.ok)rows.push({path:resource,status:check.status,title:'فایل فنی',description:'',problems:['فایل در دسترس نیست: HTTP '+check.status]});
+          }catch(error){rows.push({path:resource,status:0,title:'فایل فنی',description:'',problems:['خطای دریافت فایل']})}
+        }
         for(const path of pages){
           const problems=[];let title='',description='',status=0;
           try{
@@ -732,9 +738,9 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
           $('seo-status').textContent='بررسی '+rows.length+' از '+pages.length+' صفحه انجام شد';
         }
         latest={generatedAt:new Date().toISOString(),site:location.origin,pages:rows};
-        $('seo-pages').textContent=rows.length.toLocaleString('fa-IR');
+        $('seo-pages').textContent=pages.length.toLocaleString('fa-IR');
         $('seo-issues').textContent=rows.reduce((n,r)=>n+r.problems.length,0).toLocaleString('fa-IR');
-        $('seo-descriptions').textContent=rows.filter(r=>!r.description).length.toLocaleString('fa-IR');
+        $('seo-descriptions').textContent=rows.filter(r=>pages.includes(r.path)&&!r.description).length.toLocaleString('fa-IR');
         $('seo-canonical').textContent=rows.filter(r=>r.problems.some(p=>p.includes('canonical'))).length.toLocaleString('fa-IR');
         $('seo-results').innerHTML=rows.map(r=>'<article class="section-card" style="padding:16px"><header><h3 style="direction:ltr;text-align:left">'+escapeHtml(r.path)+'</h3><span class="status">'+(r.problems.length?escapeHtml(r.problems.length+' مورد'):'بدون ایراد در بررسی پایه')+'</span></header><p style="margin:8px 0">'+escapeHtml(r.title||'بدون عنوان')+'</p>'+(r.problems.length?'<ul style="padding-right:20px">'+r.problems.map(p=>'<li>'+escapeHtml(p)+'</li>').join('')+'</ul>':'<p>بررسی‌های پایه با موفقیت گذشت.</p>')+'</article>').join('');
         $('seo-status').textContent='بررسی پایان یافت. نتیجه‌ها صرفاً ممیزی اولیه‌اند و جایگزین Search Console یا تحلیل محتوایی نیستند.';
