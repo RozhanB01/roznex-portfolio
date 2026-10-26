@@ -220,7 +220,7 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
             <div class="stat"><span>صفحات بدون توضیحات</span><strong id="seo-descriptions">۰</strong></div>
             <div class="stat"><span>صفحات بدون canonical</span><strong id="seo-canonical">۰</strong></div>
           </div>
-          <div class="note"><h3>پیشنهادهای اولویت‌بندی‌شده</h3><p>این توصیه‌ها از بررسی واقعی صفحات تولید می‌شوند؛ تغییر خودکار یا انتشار بدون تأیید انجام نمی‌شود.</p></div><div id="seo-advice" style="display:grid;gap:12px"></div><div class="note"><h3>مقایسه با بررسی قبلی</h3><p>دو گزارش آخر فقط در همین مرورگر ذخیره می‌شوند؛ برای آرشیو دائمی از خروجی JSON استفاده کن.</p><p id="seo-comparison">هنوز دو بررسی برای مقایسه ثبت نشده است.</p><button class="btn" id="seo-clear-history" type="button">پاک‌کردن تاریخچه این مرورگر</button></div><div id="seo-results" style="display:grid;gap:12px"></div>
+          <div class="note"><h3>پیشنهادهای اولویت‌بندی‌شده</h3><p>این توصیه‌ها از بررسی واقعی صفحات تولید می‌شوند؛ تغییر خودکار یا انتشار بدون تأیید انجام نمی‌شود.</p></div><p id="seo-task-counts" role="status"></p><div id="seo-advice" style="display:grid;gap:12px"></div><div class="note"><h3>مقایسه با بررسی قبلی</h3><p>دو گزارش آخر فقط در همین مرورگر ذخیره می‌شوند؛ برای آرشیو دائمی از خروجی JSON استفاده کن.</p><p id="seo-comparison">هنوز دو بررسی برای مقایسه ثبت نشده است.</p><button class="btn" id="seo-clear-history" type="button">پاک‌کردن تاریخچه این مرورگر</button></div><div id="seo-results" style="display:grid;gap:12px"></div>
         </div>
         <div class="card"><div class="toolbar"><h2>آمار واقعی Google Search Console</h2><button type="button" class="btn primary" id="gsc-refresh">دریافت آمار ۲۸ روز اخیر</button></div><p id="gsc-status" role="status">هنوز داده‌ای دریافت نشده است.</p><div class="stats"><div class="stat"><span>کلیک</span><strong id="gsc-clicks">—</strong></div><div class="stat"><span>نمایش</span><strong id="gsc-impressions">—</strong></div><div class="stat"><span>CTR</span><strong id="gsc-ctr">—</strong></div><div class="stat"><span>جایگاه متوسط</span><strong id="gsc-position">—</strong></div></div><div class="section-grid" style="margin-top:1rem"><article class="section-card"><h3>عبارت‌های جست‌وجو</h3><div id="gsc-keywords">—</div></article><article class="section-card"><h3>صفحات برتر</h3><div id="gsc-pages">—</div></article></div></div>
         <div class="note"><h3>اتصال Google Search Console</h3><p>برای دریافت کلیک، نمایش، CTR و رتبه واقعی، ابتدا مالکیت دامنه را در Search Console تأیید کن. اتصال داده‌ها هنوز فعال نشده است و این پنل هیچ عدد ساختگی نمایش نمی‌دهد.</p><p><a href="https://search.google.com/search-console" target="_blank" rel="noopener noreferrer">بازکردن Search Console ↗</a></p><p>پس از تأیید مالکیت، مرحله بعد اتصال امن API با مجوز فقط خواندن خواهد بود. هیچ کلید خصوصی یا رمز عبوری را در این پنل وارد نکن.</p></div>
@@ -720,6 +720,22 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
       let latest=null;
       const $=id=>document.getElementById(id);
       const escapeHtml=value=>String(value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+      const taskKey='roznex-seo-task-status-v1';
+      function taskId(item){return item.path+'|'+item.issue}
+      function readTasks(){try{const data=JSON.parse(localStorage.getItem(taskKey)||'{}');return data&&typeof data==='object'&&!Array.isArray(data)?data:{}}catch{return {}}}
+      function showTaskCounts(){
+        const values=Object.values(readTasks());
+        $('seo-task-counts').textContent='در حال انجام: '+values.filter(x=>x==='doing').length.toLocaleString('fa-IR')+' · تکمیل‌شده: '+values.filter(x=>x==='done').length.toLocaleString('fa-IR')+' (ذخیره در همین مرورگر)';
+      }
+      $('seo-advice').addEventListener('change',function(event){
+        const select=event.target.closest('select[data-seo-task]');
+        if(!select)return;
+        const data=readTasks(),key=select.getAttribute('data-seo-task');
+        if(select.value==='todo')delete data[key];else data[key]=select.value;
+        try{localStorage.setItem(taskKey,JSON.stringify(data))}catch{}
+        showTaskCounts();
+      });
+      showTaskCounts();
       const historyKey='roznex-seo-audit-history-v1';
       function getHistory(){try{const h=JSON.parse(localStorage.getItem(historyKey)||'[]');return Array.isArray(h)?h.slice(-2):[]}catch{return []}}
       function showComparison(){
@@ -792,7 +808,7 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
         const order={'بحرانی':0,'زیاد':1,'متوسط':2,'کم':3};
         recommendations.sort((a,b)=>order[a.priority]-order[b.priority]);
         const escapeAdvice=value=>String(value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-        document.getElementById('seo-advice').innerHTML=recommendations.length?recommendations.map(item=>'<article class="section-card" style="padding:14px"><header><h3>'+escapeAdvice(item.priority)+' · '+escapeAdvice(item.issue)+'</h3><span class="status" style="direction:ltr">'+escapeAdvice(item.path)+'</span></header><p>'+escapeAdvice(item.action)+'</p></article>').join(''):'<p>در بررسی پایه، موردی برای پیشنهاد اصلاح پیدا نشد.</p>';
+        document.getElementById('seo-advice').innerHTML=recommendations.length?recommendations.map(item=>'<article class="section-card" style="padding:14px"><header><h3>'+escapeAdvice(item.priority)+' · '+escapeAdvice(item.issue)+'</h3><span class="status" style="direction:ltr">'+escapeAdvice(item.path)+'</span></header><p>'+escapeAdvice(item.action)+'</p><label>وضعیت: <select data-seo-task="'+escapeAdvice(taskId(item))+'"><option value="todo" '+(!readTasks()[taskId(item)]?'selected':'')+'>انجام‌نشده</option><option value="doing" '+(readTasks()[taskId(item)]==='doing'?'selected':'')+'>در حال انجام</option><option value="done" '+(readTasks()[taskId(item)]==='done'?'selected':'')+'>تکمیل‌شده</option></select></label></article>').join(''):'<p>در بررسی پایه، موردی برای پیشنهاد اصلاح پیدا نشد.</p>';
         latest={generatedAt:new Date().toISOString(),site:location.origin,pages:rows,recommendations};
         try{
           const history=getHistory();
