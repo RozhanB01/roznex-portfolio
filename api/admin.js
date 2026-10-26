@@ -220,7 +220,7 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
             <div class="stat"><span>صفحات بدون توضیحات</span><strong id="seo-descriptions">۰</strong></div>
             <div class="stat"><span>صفحات بدون canonical</span><strong id="seo-canonical">۰</strong></div>
           </div>
-          <div class="note"><h3>پیشنهادهای اولویت‌بندی‌شده</h3><p>این توصیه‌ها از بررسی واقعی صفحات تولید می‌شوند؛ تغییر خودکار یا انتشار بدون تأیید انجام نمی‌شود.</p></div><p id="seo-task-counts" role="status"></p><div id="seo-advice" style="display:grid;gap:12px"></div><div class="note"><h3>مقایسه با بررسی قبلی</h3><p>دو گزارش آخر فقط در همین مرورگر ذخیره می‌شوند؛ برای آرشیو دائمی از خروجی JSON استفاده کن.</p><p id="seo-comparison">هنوز دو بررسی برای مقایسه ثبت نشده است.</p><button class="btn" id="seo-clear-history" type="button">پاک‌کردن تاریخچه این مرورگر</button></div><div id="seo-results" style="display:grid;gap:12px"></div>
+          <div class="note"><h3>پیشنهادهای اولویت‌بندی‌شده</h3><p>این توصیه‌ها از بررسی واقعی صفحات تولید می‌شوند؛ تغییر خودکار یا انتشار بدون تأیید انجام نمی‌شود.</p></div><p id="seo-task-counts" role="status"></p><div id="seo-advice" style="display:grid;gap:12px"></div><p id="seo-storage-status" role="status">گزارش‌ها پس از اجرای ممیزی در فضای خصوصی سایت ذخیره می‌شوند (در صورت فعال‌بودن Blob).</p><div class="note"><h3>مقایسه با بررسی قبلی</h3><p>دو گزارش آخر فقط در همین مرورگر ذخیره می‌شوند؛ برای آرشیو دائمی از خروجی JSON استفاده کن.</p><p id="seo-comparison">هنوز دو بررسی برای مقایسه ثبت نشده است.</p><button class="btn" id="seo-clear-history" type="button">پاک‌کردن تاریخچه این مرورگر</button></div><div id="seo-results" style="display:grid;gap:12px"></div>
         </div>
         <div class="card"><div class="toolbar"><h2>آمار واقعی Google Search Console</h2><button type="button" class="btn primary" id="gsc-refresh">دریافت آمار ۲۸ روز اخیر</button></div><p id="gsc-status" role="status">هنوز داده‌ای دریافت نشده است.</p><div class="stats"><div class="stat"><span>کلیک</span><strong id="gsc-clicks">—</strong></div><div class="stat"><span>نمایش</span><strong id="gsc-impressions">—</strong></div><div class="stat"><span>CTR</span><strong id="gsc-ctr">—</strong></div><div class="stat"><span>جایگاه متوسط</span><strong id="gsc-position">—</strong></div></div><div class="section-grid" style="margin-top:1rem"><article class="section-card"><h3>عبارت‌های جست‌وجو</h3><div id="gsc-keywords">—</div></article><article class="section-card"><h3>صفحات برتر</h3><div id="gsc-pages">—</div></article></div></div>
         <div class="note"><h3>اتصال Google Search Console</h3><p>برای دریافت کلیک، نمایش، CTR و رتبه واقعی، ابتدا مالکیت دامنه را در Search Console تأیید کن. اتصال داده‌ها هنوز فعال نشده است و این پنل هیچ عدد ساختگی نمایش نمی‌دهد.</p><p><a href="https://search.google.com/search-console" target="_blank" rel="noopener noreferrer">بازکردن Search Console ↗</a></p><p>پس از تأیید مالکیت، مرحله بعد اتصال امن API با مجوز فقط خواندن خواهد بود. هیچ کلید خصوصی یا رمز عبوری را در این پنل وارد نکن.</p></div>
@@ -816,6 +816,16 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
           localStorage.setItem(historyKey,JSON.stringify(history.slice(-2)));
         }catch(error){console.warn('SEO history unavailable',error)}
         showComparison();
+        fetch('/api/seo-history',{
+          method:'POST',credentials:'same-origin',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({pages:rows,recommendations})
+        }).then(async response=>{
+          if(!response.ok)throw Error('storage_unavailable');
+          $('seo-storage-status').textContent='گزارش در فضای خصوصی سایت ذخیره شد.';
+        }).catch(()=>{
+          $('seo-storage-status').textContent='ذخیره دائمی انجام نشد؛ گزارش همچنان در مرورگر موجود است.';
+        });
         $('seo-pages').textContent=pages.length.toLocaleString('fa-IR');
         $('seo-issues').textContent=rows.reduce((n,r)=>n+r.problems.length,0).toLocaleString('fa-IR');
         $('seo-descriptions').textContent=rows.filter(r=>pages.includes(r.path)&&!r.description).length.toLocaleString('fa-IR');
