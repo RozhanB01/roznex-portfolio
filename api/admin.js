@@ -181,6 +181,7 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
         <button data-view="projects"><i>◇</i> پروژه‌ها</button>
         <button data-view="requests"><i>✦</i> درخواست‌ها</button>
         <button data-view="sections"><i>▦</i> بخش‌های سایت</button>
+        <button data-view="seo"><i>◎</i> سئوی سایت</button>
       </nav>
       <div class="side-foot"><a href="/" target="_blank">مشاهده سایت ↗</a><br><a href="/admin/invite/">ساخت دعوت‌نامه SmartQuote ↗</a><br><a href="/admin?logout=1">خروج امن از مدیریت</a><p>این پنل خصوصی برای بررسی و آماده‌سازی محتوای سایت ROZNEX است.</p></div>
     </aside>
@@ -206,6 +207,22 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
       <section class="view" id="requests">
         <div class="note"><h3>Inbox درخواست‌های مشتری</h3><p>درخواست‌هایی که از فرم «شروع پروژه» ثبت می‌شوند اینجا نگه‌داری می‌شوند. وضعیت هر درخواست را بعد از بررسی تغییر بده.</p></div>
         <div class="card"><div class="toolbar"><h2>درخواست‌های ورودی <span id="request-count" style="color:var(--gold);font-size:.8rem"></span></h2><div class="actions"><a class="btn" href="/admin/invite/">ساخت دعوت‌نامه SmartQuote</a><button class="btn" id="refresh-requests" type="button">تازه‌سازی</button></div></div><div id="requests-list"></div></div>
+      </section>
+
+      <section class="view" id="seo">
+        <div class="note"><h3>ROZNEX SEO · مرکز بررسی فنی</h3><p>نسخه اولیه: بررسی زنده صفحات عمومی سایت، متادیتا، عنوان، canonical، فاوآیکون و داده‌های ساختاریافته. این بخش فعلاً ابزار ممیزی است، نه ایجنت خودکار یا داده واقعی رتبه گوگل.</p></div>
+        <div class="card">
+          <div class="toolbar"><h2>ممیزی سئوی ROZNEX</h2><div class="actions"><button class="btn primary" id="seo-run" type="button">شروع بررسی</button><button class="btn" id="seo-export" type="button" disabled>دانلود گزارش JSON</button></div></div>
+          <p id="seo-status" role="status" aria-live="polite">برای بررسی صفحات روی «شروع بررسی» بزن.</p>
+          <div class="stats" style="margin:1rem 0">
+            <div class="stat"><span>صفحات بررسی‌شده</span><strong id="seo-pages">۰</strong></div>
+            <div class="stat"><span>موارد نیازمند اصلاح</span><strong id="seo-issues">۰</strong></div>
+            <div class="stat"><span>صفحات بدون توضیحات</span><strong id="seo-descriptions">۰</strong></div>
+            <div class="stat"><span>صفحات بدون canonical</span><strong id="seo-canonical">۰</strong></div>
+          </div>
+          <div id="seo-results" style="display:grid;gap:12px"></div>
+        </div>
+        <div class="note"><h3>مرحله بعد: اتصال Google Search Console</h3><p>برای نمایش کلیک، نمایش، CTR، رتبه و فرصت‌های کلمات کلیدی باید دسترسی مجاز Search Console متصل شود. تغییرات خودکار سایت نیز فقط پس از تأیید مدیر منتشر می‌شوند.</p></div>
       </section>
 
       <section class="view" id="sections">
@@ -644,7 +661,7 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
       button.addEventListener('click',function(){
         document.querySelectorAll('.nav button,.view').forEach(function(el){el.classList.remove('active')});
         button.classList.add('active');document.getElementById(button.dataset.view).classList.add('active');
-        const copy={overview:['داشبورد مدیریت','همه چیز برای بررسی منظم پروژه‌ها، قبل از انتشار.'],projects:['مدیریت پروژه‌ها','ثبت، تصویر، ویرایش و تأیید نمونه‌کارهای واقعی.'],requests:['درخواست‌های مشتری','Inbox فرم شروع پروژه و وضعیت بررسی لیدها.'],sections:['بخش‌های سایت','وضعیت محتوای اصلی ROZNEX.']}[button.dataset.view];
+        const copy={overview:['داشبورد مدیریت','همه چیز برای بررسی منظم پروژه‌ها، قبل از انتشار.'],projects:['مدیریت پروژه‌ها','ثبت، تصویر، ویرایش و تأیید نمونه‌کارهای واقعی.'],requests:['درخواست‌های مشتری','Inbox فرم شروع پروژه و وضعیت بررسی لیدها.'],sections:['بخش‌های سایت','وضعیت محتوای اصلی ROZNEX.'],seo:['مرکز سئوی ROZNEX','بررسی زنده مشکلات فنی و اولویت‌بندی اصلاحات.']}[button.dataset.view];
         document.getElementById('page-title').textContent=copy[0];document.getElementById('page-subtitle').textContent=copy[1];
       });
     });
@@ -671,6 +688,59 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
       if(!id||!confirm('این درخواست حذف شود؟'))return;
       try{await requestAction('delete',{id:id});showToast('درخواست حذف شد')}catch(err){showToast(err.message||'حذف انجام نشد')}
     });
+
+
+    // Read-only SEO audit. Public same-origin pages only; no privileged endpoints or automatic edits.
+    (function(){
+      const pages=['/','/fa/','/en/','/work/','/work/fa/','/services/','/services/fa/','/start/'];
+      let latest=null;
+      const $=id=>document.getElementById(id);
+      const escapeHtml=value=>String(value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+      $('seo-run').addEventListener('click',async function(){
+        const button=this;button.disabled=true;$('seo-export').disabled=true;$('seo-results').textContent='';$('seo-status').textContent='در حال بررسی '+pages.length+' صفحه...';
+        const rows=[];
+        for(const path of pages){
+          const problems=[];let title='',description='',status=0;
+          try{
+            const response=await fetch(path,{credentials:'same-origin',cache:'no-store',headers:{Accept:'text/html'}});
+            status=response.status;
+            if(!response.ok)throw Error('HTTP '+response.status);
+            const html=await response.text();
+            const doc=new DOMParser().parseFromString(html,'text/html');
+            title=(doc.querySelector('title')?.textContent||'').trim();
+            description=(doc.querySelector('meta[name="description"]')?.getAttribute('content')||'').trim();
+            const canonical=doc.querySelector('link[rel="canonical"]')?.getAttribute('href');
+            const icon=doc.querySelector('link[rel~="icon"]')?.getAttribute('href');
+            const h1=doc.querySelectorAll('h1').length;
+            if(!title)problems.push('عنوان صفحه وجود ندارد');
+            else if(title.length<20||title.length>65)problems.push('طول عنوان نیاز به بازبینی دارد ('+title.length+' نویسه)');
+            if(!description)problems.push('متادیسکریپشن وجود ندارد');
+            else if(description.length<70||description.length>170)problems.push('طول متادیسکریپشن نیاز به بازبینی دارد');
+            if(!canonical)problems.push('canonical وجود ندارد');
+            else {try{const u=new URL(canonical,location.origin);if(u.origin!==location.origin)problems.push('canonical به دامنه دیگری اشاره می‌کند')}catch{problems.push('canonical نامعتبر است')}}
+            if(!icon)problems.push('فاوآیکون در صفحه تعریف نشده');
+            if(h1===0)problems.push('تیتر H1 وجود ندارد');
+            if(h1>1)problems.push('بیش از یک H1 وجود دارد');
+            if(!doc.querySelector('html')?.getAttribute('lang'))problems.push('زبان صفحه مشخص نشده');
+          }catch(error){problems.push('دریافت صفحه ناموفق: '+error.message)}
+          rows.push({path,status,title,description,problems});
+          $('seo-status').textContent='بررسی '+rows.length+' از '+pages.length+' صفحه انجام شد';
+        }
+        latest={generatedAt:new Date().toISOString(),site:location.origin,pages:rows};
+        $('seo-pages').textContent=rows.length.toLocaleString('fa-IR');
+        $('seo-issues').textContent=rows.reduce((n,r)=>n+r.problems.length,0).toLocaleString('fa-IR');
+        $('seo-descriptions').textContent=rows.filter(r=>!r.description).length.toLocaleString('fa-IR');
+        $('seo-canonical').textContent=rows.filter(r=>r.problems.some(p=>p.includes('canonical'))).length.toLocaleString('fa-IR');
+        $('seo-results').innerHTML=rows.map(r=>'<article class="section-card" style="padding:16px"><header><h3 style="direction:ltr;text-align:left">'+escapeHtml(r.path)+'</h3><span class="status">'+(r.problems.length?escapeHtml(r.problems.length+' مورد'):'بدون ایراد در بررسی پایه')+'</span></header><p style="margin:8px 0">'+escapeHtml(r.title||'بدون عنوان')+'</p>'+(r.problems.length?'<ul style="padding-right:20px">'+r.problems.map(p=>'<li>'+escapeHtml(p)+'</li>').join('')+'</ul>':'<p>بررسی‌های پایه با موفقیت گذشت.</p>')+'</article>').join('');
+        $('seo-status').textContent='بررسی پایان یافت. نتیجه‌ها صرفاً ممیزی اولیه‌اند و جایگزین Search Console یا تحلیل محتوایی نیستند.';
+        $('seo-export').disabled=false;button.disabled=false;
+      });
+      $('seo-export').addEventListener('click',function(){
+        if(!latest)return;
+        const url=URL.createObjectURL(new Blob([JSON.stringify(latest,null,2)],{type:'application/json'}));
+        const link=document.createElement('a');link.href=url;link.download='roznex-seo-audit.json';link.click();URL.revokeObjectURL(url);
+      });
+    })();
 
     addEventListener('keydown',function(e){if(e.key==='Escape')closeForm()});
     loadProjects();
