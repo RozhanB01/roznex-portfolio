@@ -222,6 +222,7 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
           </div>
           <div id="seo-results" style="display:grid;gap:12px"></div>
         </div>
+        <div class="card"><div class="toolbar"><h2>آمار واقعی Google Search Console</h2><button type="button" class="btn primary" id="gsc-refresh">دریافت آمار ۲۸ روز اخیر</button></div><p id="gsc-status" role="status">هنوز داده‌ای دریافت نشده است.</p><div class="stats"><div class="stat"><span>کلیک</span><strong id="gsc-clicks">—</strong></div><div class="stat"><span>نمایش</span><strong id="gsc-impressions">—</strong></div><div class="stat"><span>CTR</span><strong id="gsc-ctr">—</strong></div><div class="stat"><span>جایگاه متوسط</span><strong id="gsc-position">—</strong></div></div><div class="section-grid" style="margin-top:1rem"><article class="section-card"><h3>عبارت‌های جست‌وجو</h3><div id="gsc-keywords">—</div></article><article class="section-card"><h3>صفحات برتر</h3><div id="gsc-pages">—</div></article></div></div>
         <div class="note"><h3>اتصال Google Search Console</h3><p>برای دریافت کلیک، نمایش، CTR و رتبه واقعی، ابتدا مالکیت دامنه را در Search Console تأیید کن. اتصال داده‌ها هنوز فعال نشده است و این پنل هیچ عدد ساختگی نمایش نمی‌دهد.</p><p><a href="https://search.google.com/search-console" target="_blank" rel="noopener noreferrer">بازکردن Search Console ↗</a></p><p>پس از تأیید مالکیت، مرحله بعد اتصال امن API با مجوز فقط خواندن خواهد بود. هیچ کلید خصوصی یا رمز عبوری را در این پنل وارد نکن.</p></div>
       </section>
 
@@ -690,6 +691,29 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
     });
 
 
+    (function(){
+      const button=document.getElementById('gsc-refresh');
+      const status=document.getElementById('gsc-status');
+      const format=n=>Number(n).toLocaleString('fa-IR',{maximumFractionDigits:1});
+      const escape=s=>String(s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+      button.addEventListener('click',async function(){
+        button.disabled=true;status.textContent='در حال دریافت آمار از گوگل...';
+        try{
+          const response=await fetch('/api/seo-gsc',{credentials:'same-origin',cache:'no-store'});
+          const data=await response.json();
+          if(!response.ok)throw Error(data.error==='property_access_denied'?'به حساب سرویس دسترسی Search Console داده نشده است.':data.error==='authorization_failed'?'احراز هویت گوگل ناموفق بود.':'دریافت آمار ناموفق بود.');
+          if(!data.configured){status.textContent='اتصال فعال نیست. تنظیمات GSC_SERVICE_ACCOUNT_EMAIL و GSC_SERVICE_ACCOUNT_PRIVATE_KEY در Vercel لازم است.';return}
+          document.getElementById('gsc-clicks').textContent=format(data.totals.clicks);
+          document.getElementById('gsc-impressions').textContent=format(data.totals.impressions);
+          document.getElementById('gsc-ctr').textContent=(data.totals.ctr*100).toLocaleString('fa-IR',{maximumFractionDigits:2})+'٪';
+          document.getElementById('gsc-position').textContent=data.totals.position===null?'—':format(data.totals.position);
+          const list=rows=>rows.length?'<ol style="padding-right:20px">'+rows.map(r=>'<li style="margin:8px 0;overflow-wrap:anywhere">'+escape(r.label)+' <small>('+format(r.clicks)+' کلیک)</small></li>').join('')+'</ol>':'داده‌ای در این بازه وجود ندارد.';
+          document.getElementById('gsc-keywords').innerHTML=list(data.keywords);
+          document.getElementById('gsc-pages').innerHTML=list(data.pages);
+          status.textContent='آمار واقعی بازه '+data.startDate+' تا '+data.endDate+' از Search Console دریافت شد.';
+        }catch(error){status.textContent=error.message||'خطا در اتصال به گوگل'}finally{button.disabled=false}
+      });
+    })();
     // Read-only SEO audit. Public same-origin pages only; no privileged endpoints or automatic edits.
     (function(){
       const pages=['/','/fa/','/en/','/work/','/work/fa/','/services/','/services/fa/','/start/'];
