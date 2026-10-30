@@ -222,7 +222,7 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
           </div>
           <div class="note"><h3>پیشنهادهای اولویت‌بندی‌شده</h3><p>این توصیه‌ها از بررسی واقعی صفحات تولید می‌شوند؛ تغییر خودکار یا انتشار بدون تأیید انجام نمی‌شود.</p></div><p id="seo-task-counts" role="status"></p><div id="seo-advice" style="display:grid;gap:12px"></div><div class="note"><h3>آرشیو گزارش‌های سئو</h3><p>گزارش‌های ذخیره‌شده در فضای خصوصی سایت را ببین و دو گزارش را برای مقایسه انتخاب کن.</p><button class="btn" type="button" id="seo-archive-refresh">بارگذاری آرشیو</button><p id="seo-archive-status" role="status">هنوز آرشیو بارگذاری نشده است.</p><div id="seo-archive-chart" style="margin:12px 0;overflow-x:auto" role="img" aria-label="نمودار روند تعداد مشکلات سئو"></div><div id="seo-archive-list" style="display:grid;gap:8px"></div><p id="seo-archive-diff" role="status"></p></div><p id="seo-storage-status" role="status">گزارش‌ها پس از اجرای ممیزی در فضای خصوصی سایت ذخیره می‌شوند (در صورت فعال‌بودن Blob).</p><div class="note"><h3>مقایسه با بررسی قبلی</h3><p>دو گزارش آخر فقط در همین مرورگر ذخیره می‌شوند؛ برای آرشیو دائمی از خروجی JSON استفاده کن.</p><p id="seo-comparison">هنوز دو بررسی برای مقایسه ثبت نشده است.</p><button class="btn" id="seo-clear-history" type="button">پاک‌کردن تاریخچه این مرورگر</button></div><div id="seo-results" style="display:grid;gap:12px"></div>
         </div>
-        <div class="card"><div class="toolbar"><h2>آمار واقعی Google Search Console</h2><button type="button" class="btn primary" id="gsc-refresh">دریافت آمار ۲۸ روز اخیر</button></div><p id="gsc-status" role="status">هنوز داده‌ای دریافت نشده است.</p><div class="stats"><div class="stat"><span>کلیک</span><strong id="gsc-clicks">—</strong></div><div class="stat"><span>نمایش</span><strong id="gsc-impressions">—</strong></div><div class="stat"><span>CTR</span><strong id="gsc-ctr">—</strong></div><div class="stat"><span>جایگاه متوسط</span><strong id="gsc-position">—</strong></div></div><div class="section-grid" style="margin-top:1rem"><article class="section-card"><h3>عبارت‌های جست‌وجو</h3><div id="gsc-keywords">—</div></article><article class="section-card"><h3>صفحات برتر</h3><div id="gsc-pages">—</div></article></div></div>
+        <div class="card"><div class="toolbar"><h2>آمار واقعی Google Search Console</h2><button type="button" class="btn primary" id="gsc-refresh">دریافت آمار ۲۸ روز اخیر</button></div><p id="gsc-status" role="status">هنوز داده‌ای دریافت نشده است.</p><div id="gsc-trend" role="img" aria-label="روند کلیک و نمایش روزانه در سرچ کنسول" style="overflow-x:auto;margin:12px 0"></div><div class="stats"><div class="stat"><span>کلیک</span><strong id="gsc-clicks">—</strong></div><div class="stat"><span>نمایش</span><strong id="gsc-impressions">—</strong></div><div class="stat"><span>CTR</span><strong id="gsc-ctr">—</strong></div><div class="stat"><span>جایگاه متوسط</span><strong id="gsc-position">—</strong></div></div><div class="section-grid" style="margin-top:1rem"><article class="section-card"><h3>عبارت‌های جست‌وجو</h3><div id="gsc-keywords">—</div></article><article class="section-card"><h3>صفحات برتر</h3><div id="gsc-pages">—</div></article></div></div>
         <div class="note"><h3>اتصال Google Search Console</h3><p>برای دریافت کلیک، نمایش، CTR و رتبه واقعی، ابتدا مالکیت دامنه را در Search Console تأیید کن. اتصال داده‌ها هنوز فعال نشده است و این پنل هیچ عدد ساختگی نمایش نمی‌دهد.</p><p><a href="https://search.google.com/search-console" target="_blank" rel="noopener noreferrer">بازکردن Search Console ↗</a></p><p>پس از تأیید مالکیت، مرحله بعد اتصال امن API با مجوز فقط خواندن خواهد بود. هیچ کلید خصوصی یا رمز عبوری را در این پنل وارد نکن.</p></div>
       </section>
 
@@ -696,6 +696,23 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
       const status=document.getElementById('gsc-status');
       const format=n=>Number(n).toLocaleString('fa-IR',{maximumFractionDigits:1});
       const escape=s=>String(s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+      function drawGscTrend(rows){
+        const root=document.getElementById('gsc-trend');
+        if(!Array.isArray(rows)||!rows.length){root.textContent='داده روزانه‌ای برای رسم نمودار وجود ندارد.';return}
+        const ordered=rows.slice().sort((a,b)=>String(a.label).localeCompare(String(b.label)));
+        const width=700,height=200,left=46,right=18,top=18,bottom=36;
+        const w=width-left-right,h=height-top-bottom;
+        const maxClicks=Math.max(1,...ordered.map(r=>Number(r.clicks)||0));
+        const maxImpressions=Math.max(1,...ordered.map(r=>Number(r.impressions)||0));
+        function line(key,max){
+          return ordered.map((r,i)=>{
+            const x=left+(ordered.length===1?w/2:i*w/(ordered.length-1));
+            const y=top+h-(Number(r[key])||0)/max*h;
+            return (i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1);
+          }).join(' ');
+        }
+        root.innerHTML='<svg viewBox="0 0 '+width+' '+height+'" style="width:100%;max-width:780px;height:auto" role="img" aria-label="نمودار دو روند کلیک و نمایش روزانه، هرکدام با مقیاس مستقل"><line x1="'+left+'" y1="'+(top+h)+'" x2="'+(width-right)+'" y2="'+(top+h)+'" stroke="currentColor" opacity=".3"/><path d="'+line('clicks',maxClicks)+'" fill="none" stroke="#b58a58" stroke-width="3"/><path d="'+line('impressions',maxImpressions)+'" fill="none" stroke="#568cb2" stroke-width="3"/><text x="'+left+'" y="'+(height-9)+'" fill="currentColor" font-size="13">قدیمی‌تر</text><text x="'+(width-right)+'" y="'+(height-9)+'" text-anchor="end" fill="currentColor" font-size="13">جدیدتر</text></svg><p><span style="color:#b58a58">●</span> کلیک (بیشینه '+format(maxClicks)+') · <span style="color:#568cb2">●</span> نمایش (بیشینه '+format(maxImpressions)+')</p><small>هر خط مقیاس جداگانه دارد؛ ارتفاع خطوط را با هم مقایسه نکن.</small>';
+      }
       button.addEventListener('click',async function(){
         button.disabled=true;status.textContent='در حال دریافت آمار از گوگل...';
         try{
@@ -710,6 +727,7 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
           const list=rows=>rows.length?'<ol style="padding-right:20px">'+rows.map(r=>'<li style="margin:8px 0;overflow-wrap:anywhere">'+escape(r.label)+' <small>('+format(r.clicks)+' کلیک)</small></li>').join('')+'</ol>':'داده‌ای در این بازه وجود ندارد.';
           document.getElementById('gsc-keywords').innerHTML=list(data.keywords);
           document.getElementById('gsc-pages').innerHTML=list(data.pages);
+          drawGscTrend(data.daily);
           status.textContent='آمار واقعی بازه '+data.startDate+' تا '+data.endDate+' از Search Console دریافت شد.';
         }catch(error){status.textContent=error.message||'خطا در اتصال به گوگل'}finally{button.disabled=false}
       });
