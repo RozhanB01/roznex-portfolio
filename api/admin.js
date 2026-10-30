@@ -220,7 +220,7 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
             <div class="stat"><span>صفحات بدون توضیحات</span><strong id="seo-descriptions">۰</strong></div>
             <div class="stat"><span>صفحات بدون canonical</span><strong id="seo-canonical">۰</strong></div>
           </div>
-          <div class="note"><h3>پیشنهادهای اولویت‌بندی‌شده</h3><p>این توصیه‌ها از بررسی واقعی صفحات تولید می‌شوند؛ تغییر خودکار یا انتشار بدون تأیید انجام نمی‌شود.</p></div><p id="seo-task-counts" role="status"></p><div id="seo-advice" style="display:grid;gap:12px"></div><div class="note"><h3>آرشیو گزارش‌های سئو</h3><p>گزارش‌های ذخیره‌شده در فضای خصوصی سایت را ببین و دو گزارش را برای مقایسه انتخاب کن.</p><button class="btn" type="button" id="seo-archive-refresh">بارگذاری آرشیو</button><p id="seo-archive-status" role="status">هنوز آرشیو بارگذاری نشده است.</p><div id="seo-archive-list" style="display:grid;gap:8px"></div><p id="seo-archive-diff" role="status"></p></div><p id="seo-storage-status" role="status">گزارش‌ها پس از اجرای ممیزی در فضای خصوصی سایت ذخیره می‌شوند (در صورت فعال‌بودن Blob).</p><div class="note"><h3>مقایسه با بررسی قبلی</h3><p>دو گزارش آخر فقط در همین مرورگر ذخیره می‌شوند؛ برای آرشیو دائمی از خروجی JSON استفاده کن.</p><p id="seo-comparison">هنوز دو بررسی برای مقایسه ثبت نشده است.</p><button class="btn" id="seo-clear-history" type="button">پاک‌کردن تاریخچه این مرورگر</button></div><div id="seo-results" style="display:grid;gap:12px"></div>
+          <div class="note"><h3>پیشنهادهای اولویت‌بندی‌شده</h3><p>این توصیه‌ها از بررسی واقعی صفحات تولید می‌شوند؛ تغییر خودکار یا انتشار بدون تأیید انجام نمی‌شود.</p></div><p id="seo-task-counts" role="status"></p><div id="seo-advice" style="display:grid;gap:12px"></div><div class="note"><h3>آرشیو گزارش‌های سئو</h3><p>گزارش‌های ذخیره‌شده در فضای خصوصی سایت را ببین و دو گزارش را برای مقایسه انتخاب کن.</p><button class="btn" type="button" id="seo-archive-refresh">بارگذاری آرشیو</button><p id="seo-archive-status" role="status">هنوز آرشیو بارگذاری نشده است.</p><div id="seo-archive-chart" style="margin:12px 0;overflow-x:auto" role="img" aria-label="نمودار روند تعداد مشکلات سئو"></div><div id="seo-archive-list" style="display:grid;gap:8px"></div><p id="seo-archive-diff" role="status"></p></div><p id="seo-storage-status" role="status">گزارش‌ها پس از اجرای ممیزی در فضای خصوصی سایت ذخیره می‌شوند (در صورت فعال‌بودن Blob).</p><div class="note"><h3>مقایسه با بررسی قبلی</h3><p>دو گزارش آخر فقط در همین مرورگر ذخیره می‌شوند؛ برای آرشیو دائمی از خروجی JSON استفاده کن.</p><p id="seo-comparison">هنوز دو بررسی برای مقایسه ثبت نشده است.</p><button class="btn" id="seo-clear-history" type="button">پاک‌کردن تاریخچه این مرورگر</button></div><div id="seo-results" style="display:grid;gap:12px"></div>
         </div>
         <div class="card"><div class="toolbar"><h2>آمار واقعی Google Search Console</h2><button type="button" class="btn primary" id="gsc-refresh">دریافت آمار ۲۸ روز اخیر</button></div><p id="gsc-status" role="status">هنوز داده‌ای دریافت نشده است.</p><div class="stats"><div class="stat"><span>کلیک</span><strong id="gsc-clicks">—</strong></div><div class="stat"><span>نمایش</span><strong id="gsc-impressions">—</strong></div><div class="stat"><span>CTR</span><strong id="gsc-ctr">—</strong></div><div class="stat"><span>جایگاه متوسط</span><strong id="gsc-position">—</strong></div></div><div class="section-grid" style="margin-top:1rem"><article class="section-card"><h3>عبارت‌های جست‌وجو</h3><div id="gsc-keywords">—</div></article><article class="section-card"><h3>صفحات برتر</h3><div id="gsc-pages">—</div></article></div></div>
         <div class="note"><h3>اتصال Google Search Console</h3><p>برای دریافت کلیک، نمایش، CTR و رتبه واقعی، ابتدا مالکیت دامنه را در Search Console تأیید کن. اتصال داده‌ها هنوز فعال نشده است و این پنل هیچ عدد ساختگی نمایش نمی‌دهد.</p><p><a href="https://search.google.com/search-console" target="_blank" rel="noopener noreferrer">بازکردن Search Console ↗</a></p><p>پس از تأیید مالکیت، مرحله بعد اتصال امن API با مجوز فقط خواندن خواهد بود. هیچ کلید خصوصی یا رمز عبوری را در این پنل وارد نکن.</p></div>
@@ -742,6 +742,22 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
       const archiveDiff=$('seo-archive-diff');
       let archiveSnapshots=[];
       function safeArchiveText(value){return String(value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
+      function renderSeoTrend(){
+        const root=$('seo-archive-chart');
+        if(!archiveSnapshots.length){root.textContent='برای نمایش روند، ابتدا گزارش سئو ذخیره کن.';return}
+        const recent=archiveSnapshots.slice(-12);
+        const counts=recent.map(s=>(s.recommendations||[]).length);
+        const max=Math.max(1,...counts);
+        const width=680,height=210,left=45,right=15,top=20,bottom=42;
+        const w=width-left-right,h=height-top-bottom;
+        const points=counts.map((n,i)=>({
+          x:left+(counts.length===1?w/2:i*w/(counts.length-1)),
+          y:top+h-n/max*h,n
+        }));
+        const path=points.map((p,i)=>(i?'L':'M')+p.x.toFixed(1)+' '+p.y.toFixed(1)).join(' ');
+        const circles=points.map((p,i)=>'<circle cx="'+p.x+'" cy="'+p.y+'" r="5" fill="#b58a58"><title>'+safeArchiveText(new Date(recent[i].generatedAt).toLocaleDateString('fa-IR'))+': '+p.n+' مورد</title></circle>').join('');
+        root.innerHTML='<svg viewBox="0 0 '+width+' '+height+'" style="width:100%;max-width:760px;height:auto" role="img" aria-label="روند تعداد مشکلات شناسایی‌شده در '+recent.length+' گزارش"><line x1="'+left+'" y1="'+(top+h)+'" x2="'+(width-right)+'" y2="'+(top+h)+'" stroke="currentColor" opacity=".3"/><path d="'+path+'" fill="none" stroke="#b58a58" stroke-width="3" stroke-linecap="round"/>'+circles+'<text x="'+left+'" y="'+(height-8)+'" font-size="13" fill="currentColor">قدیمی‌تر</text><text x="'+(width-right)+'" y="'+(height-8)+'" font-size="13" text-anchor="end" fill="currentColor">جدیدتر</text><text x="'+left+'" y="14" font-size="13" fill="currentColor">تعداد مشکلات</text></svg><p>روند '+recent.length.toLocaleString('fa-IR')+' گزارش اخیر؛ کاهش تعداد مشکلات به‌تنهایی به معنای بهبود رتبه گوگل نیست.</p>';
+      }
       function compareArchive(){
         const chosen=[...archiveList.querySelectorAll('input[data-archive-index]:checked')].map(el=>Number(el.value)).sort((a,b)=>a-b);
         if(chosen.length!==2){archiveDiff.textContent='برای مقایسه دقیقاً دو گزارش را انتخاب کن.';return}
@@ -763,6 +779,7 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
           const data=await response.json();
           if(!response.ok)throw Error(data.error==='storage_not_configured'?'فضای ذخیره‌سازی Vercel Blob فعال نیست.':'دریافت آرشیو ناموفق بود.');
           archiveSnapshots=Array.isArray(data.snapshots)?data.snapshots:[];
+          renderSeoTrend();
           archiveStatus.textContent=archiveSnapshots.length+' گزارش در آرشیو وجود دارد.';
           archiveList.innerHTML=archiveSnapshots.map((item,index)=>'<label class="section-card" style="display:flex;gap:12px;align-items:center;padding:10px"><input type="checkbox" data-archive-index value="'+index+'"><span>'+safeArchiveText(new Date(item.generatedAt).toLocaleString('fa-IR'))+' · '+Number(item.pageCount||0).toLocaleString('fa-IR')+' صفحه · '+(item.recommendations||[]).length.toLocaleString('fa-IR')+' مورد</span></label>').join('')||'<p>هنوز گزارشی ذخیره نشده است.</p>';
         }catch(error){archiveStatus.textContent=error.message;archiveList.textContent='';}
