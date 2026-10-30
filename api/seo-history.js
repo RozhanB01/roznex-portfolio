@@ -9,8 +9,15 @@ function reply(res,status,value){
  res.end(JSON.stringify(value));
 }
 async function read(blob){
- const item=await blob.get(FILE,blobOptions({access:'private',useCache:false}));
- if(!item||item.statusCode!==200)return [];
+ let item;
+ try {
+  item=await blob.get(FILE,blobOptions({access:'private',useCache:false}));
+ } catch(error) {
+  if(error?.name==='BlobNotFoundError'||error?.statusCode===404)return [];
+  throw error;
+ }
+ if(!item||item.statusCode===404)return [];
+ if(item.statusCode!==200)throw new Error('unexpected_blob_status');
  const data=JSON.parse(await new Response(item.stream).text());
  return Array.isArray(data.snapshots)?data.snapshots.slice(-20):[];
 }
@@ -42,7 +49,6 @@ module.exports=async function handler(req,res){
   }));
   return reply(res,200,{saved:true,snapshotCount:snapshots.length});
  }catch(e){
-  if(e?.name==='BlobNotFoundError')return reply(res,200,{snapshots:[]});
   console.error('SEO history error',e?.message);
   return reply(res,500,{error:'storage_failed'});
  }
