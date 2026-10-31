@@ -717,7 +717,7 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
       let gscData=null;
       function csvCell(value){
         let text=String(value==null?'':value);
-        if(/^[\\s]*[=+@-]/.test(text))text="'"+text;
+        if(/^\s*[=+@-]/.test(text))text="'"+text;
         return '"'+text.replace(/"/g,'""')+'"';
       }
       exportButton.addEventListener('click',function(){
@@ -728,7 +728,7 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
             lines.push([section,row.label,row.clicks,row.impressions,row.ctr,row.position].map(csvCell).join(','));
           }
         }
-        const blob=new Blob(['\\uFEFF'+lines.join('\\r\\n')],{type:'text/csv;charset=utf-8'});
+        const blob=new Blob([String.fromCharCode(0xFEFF)+lines.join(String.fromCharCode(13,10))],{type:'text/csv;charset=utf-8'});
         const url=URL.createObjectURL(blob);
         const anchor=document.createElement('a');
         anchor.href=url;
