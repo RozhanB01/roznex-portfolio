@@ -738,8 +738,16 @@ const DASHBOARD_HTML = String.raw`<!doctype html>
         anchor.remove();
         setTimeout(()=>URL.revokeObjectURL(url),1000);
       });
+      function resetGscDisplay(){
+        gscData=null;
+        exportButton.disabled=true;
+        for(const id of ['gsc-clicks','gsc-impressions','gsc-ctr','gsc-position','gsc-keywords','gsc-pages']){
+          document.getElementById(id).textContent='—';
+        }
+        document.getElementById('gsc-trend').textContent='';
+      }
       button.addEventListener('click',async function(){
-        gscData=null;exportButton.disabled=true;
+        resetGscDisplay();
         button.disabled=true;status.textContent='در حال دریافت آمار از گوگل...';
         try{
           const response=await fetch('/api/seo-gsc',{credentials:'same-origin',cache:'no-store'});
