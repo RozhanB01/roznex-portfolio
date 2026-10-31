@@ -74,7 +74,14 @@ module.exports = async function handler(req, res) {
       label: Array.isArray(row.keys) ? String(row.keys[0] || '') : '', clicks: row.clicks, impressions: row.impressions,
       ctr: row.ctr, position: row.position
     }));
+    const opportunities = rows(keywords).filter(row =>
+      Number(row.impressions) >= 20 &&
+      Number(row.position) >= 5 &&
+      Number(row.position) <= 20 &&
+      Number(row.ctr) < 0.05
+    ).sort((a,b) => Number(b.impressions) - Number(a.impressions)).slice(0, 10);
     return respond(res, 200, {
+      opportunities, opportunityRule: { minImpressions: 20, minPosition: 5, maxPosition: 20, maxCtr: 0.05 },
       configured: true, site, startDate: date(start), endDate: date(end),
       note: 'Finalized Search Console data; the latest three UTC calendar days are excluded to reduce incomplete reporting.',
       totals: { clicks, impressions, ctr: impressions ? clicks / impressions : 0, position },
