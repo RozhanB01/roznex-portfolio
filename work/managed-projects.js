@@ -5,6 +5,17 @@
   if (!container || !section) return;
   const fa = document.documentElement.lang === 'fa';
   const fallback = '/assets/roznex-studio-editorial.svg';
+  const hiddenProjectNames = new Set([
+    'roznex studio', 'roznexstudio', 'روژنکس استودیو', 'روزنکس استودیو',
+    'familink', 'family link', 'فمیلی لینک', 'فمیلی‌لینک', 'familyos',
+    'industrial intelligence', 'هوشمندی صنعتی'
+  ]);
+  const hiddenProjectSlugs = ['industrial-intelligence', 'familyos', 'roznex-studio'];
+  function isHiddenProject(project) {
+    const title = String(project.title || '').toLocaleLowerCase().trim().replace(/\\s+/g, ' ');
+    const url = String(project.url || '').toLocaleLowerCase();
+    return hiddenProjectNames.has(title) || hiddenProjectSlugs.some(slug => url.includes('/' + slug + '/'));
+  }
   const staticTitles = new Set(Array.from(document.querySelectorAll('.work-grid h2')).map(el => el.textContent.trim().toLocaleLowerCase()));
   function safeUrl(value) {
     try {
@@ -51,7 +62,7 @@
     .then(data => {
       if (!data.storageReady || !Array.isArray(data.projects)) return;
       const projects = data.projects.filter(p => p && typeof p.title === 'string' && p.title.trim() &&
-        !staticTitles.has(p.title.trim().toLocaleLowerCase()));
+        !staticTitles.has(p.title.trim().toLocaleLowerCase()) && !isHiddenProject(p));
       if (!projects.length) return;
       const fragment = document.createDocumentFragment();
       projects.forEach(p => fragment.append(card(p)));
